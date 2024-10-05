@@ -5,18 +5,18 @@ import QRCode from 'qrcode'
 
 export default function Profile() {
   const { address } = useAccount()
-  const [ensName, setEnsName] = useState('')
+  // const [ensName, setEnsName] = useState('')
   const { disconnect } = useDisconnect()
 
-  useEffect(() => {
-    if (address) {
-      fetch(`https://ensdata.net/${address}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setEnsName(data.ens)
-        })
-    }
-  }, [address])
+  // useEffect(() => {
+  //   if (address) {
+  //     fetch(`https://ensdata.net/${address}`)
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         setEnsName(data.ens)
+  //       })
+  //   }
+  // }, [address])
 
   const [qrCodeDataURL, setQrCodeDataURL] = useState('')
 
@@ -45,7 +45,14 @@ export default function Profile() {
   else {
     return (
       <Box>
-        <Heading as="h1">Profile: {ensName}</Heading>
+        <Heading as="h1">
+          Username: <br />
+          didier
+          <Text as="span" color="gray.500">
+            .onchainquest.fun
+          </Text>
+          {/* {ensName && ` | ${ensName}`} */}
+        </Heading>
         <Box>
           <Image src={`https://ensdata.net/media/avatar/${address}`} />
           <Heading as="h2">Address:</Heading>

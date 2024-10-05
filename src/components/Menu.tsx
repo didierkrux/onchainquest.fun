@@ -46,6 +46,7 @@ const Menu = () => {
       right={0}
       bg="#3c1e1e"
       boxShadow={isMobile ? '0 -1px 2px rgba(0, 0, 0, 0.1)' : 'none'}
+      zIndex={10}
     >
       <Flex justify="space-around" align="center" py={3} px={4} maxW="container.lg" mx="auto">
         {MENU_ITEMS.map((item) => {
@@ -60,8 +61,6 @@ const Menu = () => {
         })}
         <NextLink href="/profile">
           <Button
-            as="a"
-            href="/profile"
             leftIcon={
               address ? (
                 <Image
