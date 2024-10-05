@@ -6,7 +6,7 @@ import { State, WagmiProvider } from 'wagmi'
 
 import { cookieStorage, createStorage } from '@wagmi/core'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { mainnet, arbitrum } from '@reown/appkit/networks'
+import { base } from '@reown/appkit/networks'
 import { createAppKit } from '@reown/appkit/react'
 
 // Setup queryClient
@@ -16,15 +16,15 @@ const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
 
 if (!projectId) throw new Error('Project ID is not defined')
 
-export const networks = [mainnet, arbitrum]
+export const networks = [base]
 
 export const wagmiAdapter = new WagmiAdapter({
   storage: createStorage({
-    storage: cookieStorage
+    storage: cookieStorage,
   }),
   ssr: true,
   projectId,
-  networks
+  networks,
 })
 
 // Create modal
@@ -34,17 +34,22 @@ export const modal = createAppKit({
   allowUnsupportedChain: true,
   themeMode: 'light',
   allWallets: 'SHOW',
-  includeWalletIds: [
-    'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
-    '971e689d0a5be527bac79629b4ee9b925e82208e5168b733496a09c0faed0709', // OKX
-    '18388be9ac2d02726dbac9777c96efaac06d744b2f6d580fccdd4127a6d01fd1', // Rabby
-    'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase
-    '225affb176778569276e484e1b92637ad061b01e13a048b35a9d280c3b58970f' // Safe
+  featuredWalletIds: [
+    // Zerion
+    'ecc4036f814562b41a5268adc86270fba1365471402006302e70169465b7ac18',
+    // 1inch
+    'c286eebc742a537cd1d6818363e9dc53b21759a1e8e5d9b263d0c03ec7703576',
+    // Rainbow
+    '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369',
+    // MetaMask
+    'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
   ],
-  excludeWalletIds: [
-    'a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393' // Phantom
-  ],
-  networks
+  features: {
+    email: false,
+    socials: [],
+    swaps: true,
+  },
+  networks,
 })
 
 export default function Web3ModalProvider({
