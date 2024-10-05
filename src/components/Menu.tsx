@@ -1,15 +1,14 @@
 import { Box, Button, Flex, Image, useMediaQuery } from '@chakra-ui/react'
 import NextLink from 'next/link'
-import { useAccount, useEnsName } from 'wagmi'
+import { useAccount } from 'wagmi'
 import { CalendarCheck, ListChecks, MapTrifold, Ranking, UserCircle } from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
-import { mainnet } from 'wagmi/chains'
+import { useAppKit } from '@reown/appkit/react'
 
 const Menu = () => {
   const [isMobile] = useMediaQuery('(max-width: 48em)')
   const { address, isConnected } = useAccount()
-  const result = useEnsName({ address, chainId: mainnet.id })
-  console.log(result)
+  const { open } = useAppKit()
 
   const { asPath } = useRouter()
 
@@ -50,8 +49,6 @@ const Menu = () => {
     >
       <Flex justify="space-around" align="center" py={3} px={4} maxW="container.lg" mx="auto">
         {MENU_ITEMS.map((item) => {
-          console.log(asPath)
-
           const isActive = asPath === item.href
           return (
             <NextLink key={item.href} href={item.href}>
@@ -61,30 +58,31 @@ const Menu = () => {
             </NextLink>
           )
         })}
-        {isConnected ? (
-          <NextLink href="/profile">
-            <Button
-              as="a"
-              href="/profile"
-              leftIcon={
-                address ? (
-                  <Image
-                    h="20px"
-                    borderRadius="full"
-                    src={`https://ensdata.net/media/avatar/${address}`}
-                  />
-                ) : (
-                  <UserCircle />
-                )
+        <NextLink href="/profile">
+          <Button
+            as="a"
+            href="/profile"
+            leftIcon={
+              address ? (
+                <Image
+                  h="20px"
+                  borderRadius="full"
+                  src={`https://ensdata.net/media/avatar/${address}`}
+                />
+              ) : (
+                <UserCircle />
+              )
+            }
+            onClick={() => {
+              if (!isConnected) {
+                open({ view: 'Connect' })
               }
-              iconSpacing={iconSpacing}
-            >
-              {!isMobile && 'Profile'}
-            </Button>
-          </NextLink>
-        ) : (
-          <w3m-button label="Connect Wallet" />
-        )}
+            }}
+            iconSpacing={iconSpacing}
+          >
+            {isMobile ? '' : isConnected ? 'Profile' : 'Connect'}
+          </Button>
+        </NextLink>
         <Button
           variant="solid"
           isActive={false}

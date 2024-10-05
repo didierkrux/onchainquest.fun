@@ -1,4 +1,4 @@
-import { Box, Button, Heading, Image } from '@chakra-ui/react'
+import { Box, Button, Heading, Image, Text } from '@chakra-ui/react'
 import { useAccount, useDisconnect } from 'wagmi'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
@@ -13,7 +13,6 @@ export default function Profile() {
       fetch(`https://ensdata.net/${address}`)
         .then((res) => res.json())
         .then((data) => {
-          console.log(data)
           setEnsName(data.ens)
         })
     }
@@ -49,14 +48,15 @@ export default function Profile() {
         <Heading as="h1">Profile: {ensName}</Heading>
         <Box>
           <Image src={`https://ensdata.net/media/avatar/${address}`} />
-          <Box>Address: {address}</Box>
+          <Heading as="h2">Address:</Heading>
+          <Text as="h3">{address}</Text>
+          <Image src={qrCodeDataURL} alt="QR" />
         </Box>
         <Box>
-          <h2>Points:</h2>
-          <h3>100</h3>
+          <Heading as="h2">Points:</Heading>
+          <Text as="h3">100</Text>
         </Box>
-        <Image src={qrCodeDataURL} alt="QR" />
-        <Box>
+        <Box mt={4}>
           <Button onClick={() => disconnect()}>Disconnect</Button>
         </Box>
       </Box>
