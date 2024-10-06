@@ -1,4 +1,6 @@
-import { extendTheme, ThemeConfig, withDefaultColorScheme } from "@chakra-ui/react"
+import { extendTheme, localStorageManager, ThemeConfig, withDefaultColorScheme } from "@chakra-ui/react"
+
+localStorageManager.set('dark')
 
 const config: ThemeConfig = {
   initialColorMode: "dark",
