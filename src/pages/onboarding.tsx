@@ -2,20 +2,16 @@ import { Box, Card, CardBody, Heading, Text, Link, Button } from '@chakra-ui/rea
 import { useAppKit } from '@reown/appkit/react'
 import { useAccount } from 'wagmi'
 
-export default function Quests() {
+export default function Onboarding() {
   const { open } = useAppKit()
   const { address } = useAccount()
 
   const QUESTS = [
     {
-      title: 'Create a crypto wallet & connect it to the app',
+      title: 'Create a crypto wallet & connect it to this app',
       instructions: (
         <>
-          <Link
-            isExternal
-            color="blue.500"
-            href="https://app.banklessacademy.com/lessons/creating-a-crypto-wallet"
-          >
+          <Link isExternal href="https://app.banklessacademy.com/lessons/creating-a-crypto-wallet">
             How to create a crypto wallet
           </Link>
         </>
@@ -121,6 +117,21 @@ export default function Quests() {
       isCompleted: false,
     },
     {
+      title: 'Share your event pictures.',
+      instructions: (
+        <>
+          Go to the{' '}
+          <Link isExternal href="https://moments.poap.xyz/upload?drop=178066">
+            POAP event page
+          </Link>
+          <br />- Connect your wallet
+          <br />- Share your event pictures
+        </>
+      ),
+      points: '5 x number of pictures shared',
+      isCompleted: false,
+    },
+    {
       title: 'Attest people you meet by scanning their qrcode',
       instructions: (
         <>
@@ -147,15 +158,15 @@ export default function Quests() {
   ]
   return (
     <Box>
-      <Heading as="h1">Quests</Heading>
+      <Heading as="h1">Onboarding tasks</Heading>
       {QUESTS.map((quest, index) => (
-        <Card mt={4}>
+        <Card mt={4} key={index}>
           <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
             <Box>
               <Heading size="md">
                 {index + 1}. {quest.title}
               </Heading>
-              <Text pt="2">⭐️ Points: {quest.points}</Text>
+              <Text pt="2">Points: {quest.points} ⭐️</Text>
               <Box pt="2">
                 <Box>👉 Instructions:</Box>
                 {quest.instructions}

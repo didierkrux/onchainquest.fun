@@ -26,9 +26,9 @@ const Menu = () => {
       href: '/venue',
     },
     {
-      label: 'Quests',
+      label: 'Onboarding',
       icon: ListChecks,
-      href: '/quests',
+      href: '/onboarding',
     },
     {
       label: 'Leaderboard',

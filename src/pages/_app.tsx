@@ -1,14 +1,15 @@
 import Web3ModalProvider from 'context'
 import type { AppProps } from 'next/app'
-import { ChakraProvider } from '@chakra-ui/react'
+import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 
-import 'globals.css'
 import Layout from 'components/Layout'
+import theme from 'theme'
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <Web3ModalProvider>
-      <ChakraProvider>
+      <ChakraProvider theme={theme}>
+        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
         <Layout>
           <Component {...pageProps} />
         </Layout>

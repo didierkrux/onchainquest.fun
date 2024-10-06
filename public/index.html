@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- ... existing head content ... -->
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <!-- ... other scripts ... -->
+  <script>
+    (function () {
+      const colorMode = localStorage.getItem("chakra-ui-color-mode");
+      if (colorMode === "dark") {
+        document.documentElement.style.setProperty("color-scheme", "dark");
+      }
+    })();
+  </script>
+</body>
+
+</html>
