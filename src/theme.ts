@@ -30,7 +30,7 @@ const theme = extendTheme({
     },
   },
 },
-  withDefaultColorScheme({ colorScheme: 'red' })
+  withDefaultColorScheme({ colorScheme: 'orange' })
 )
 
 export default theme

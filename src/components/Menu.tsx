@@ -1,18 +1,52 @@
-import { Box, Button, Flex, Image, useMediaQuery } from '@chakra-ui/react'
+import { Box, Flex, Image, useMediaQuery } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useAccount } from 'wagmi'
-import { CalendarCheck, ListChecks, MapTrifold, Ranking, UserCircle } from '@phosphor-icons/react'
+import {
+  CalendarCheck,
+  ListChecks,
+  MapTrifold,
+  Ranking,
+  Plugs,
+  Translate,
+} from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
 import { useAppKit } from '@reown/appkit/react'
+import { useState } from 'react'
+
+type MenuItemProps = {
+  label: string
+  isActive: boolean
+  children: React.ReactNode
+} & React.ComponentPropsWithoutRef<'div'>
+
+const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
+  const [isMobile] = useMediaQuery('(max-width: 48em)', { ssr: true })
+
+  return (
+    <Box
+      color={isActive ? 'orange' : 'white'}
+      _hover={!isActive ? { color: 'orange.200' } : { color: 'orange' }}
+      {...props}
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      w="100%"
+      h="100%"
+      borderBottom={isActive && !isMobile ? '1px solid orange' : '1px solid black'}
+    >
+      {children}
+      <Box fontSize={['10px', '16px']}>{label}</Box>
+    </Box>
+  )
+}
 
 const Menu = () => {
-  const [isMobile] = useMediaQuery('(max-width: 48em)')
+  const [isMobile] = useMediaQuery('(max-width: 48em)', { ssr: true })
   const { address, isConnected } = useAccount()
   const { open } = useAppKit()
 
   const { asPath } = useRouter()
-
-  const iconSpacing = isMobile ? 0 : '1'
 
   const MENU_ITEMS = [
     {
@@ -37,6 +71,8 @@ const Menu = () => {
     },
   ]
 
+  const isProfileActive = asPath === '/profile'
+
   return (
     <Box
       as="nav"
@@ -44,54 +80,88 @@ const Menu = () => {
       bottom={isMobile ? 0 : 'auto'}
       left={0}
       right={0}
-      bg="#3c1e1e"
+      bg="black"
       boxShadow={isMobile ? '0 -1px 2px rgba(0, 0, 0, 0.1)' : 'none'}
       zIndex={10}
     >
-      <Flex justify="space-around" align="center" py={3} px={4} maxW="container.lg" mx="auto">
+      <Flex
+        justify="space-around"
+        align="center"
+        h="60px"
+        maxW="container.md"
+        mx="auto"
+        _hover={{ textDecoration: 'none !important' }}
+        textDecoration="center"
+      >
         {MENU_ITEMS.map((item) => {
           const isActive = asPath === item.href
           return (
-            <NextLink key={item.href} href={item.href}>
-              <Button isActive={isActive} leftIcon={<item.icon />} iconSpacing={iconSpacing}>
-                {!isMobile && item.label}
-              </Button>
-            </NextLink>
+            <Box
+              key={item.href}
+              w="100%"
+              h="100%"
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <NextLink
+                href={item.href}
+                style={{ textDecoration: 'none !important', width: '100%', height: '100%' }}
+              >
+                <MenuItem label={item.label} isActive={isActive}>
+                  <item.icon size={24} />
+                </MenuItem>
+              </NextLink>
+            </Box>
           )
         })}
-        <NextLink href="/profile">
-          <Button
-            leftIcon={
-              address ? (
+        <Box
+          w="100%"
+          h="100%"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          _hover={{ textDecoration: 'none !important' }}
+          textDecoration="center"
+        >
+          <NextLink
+            href="/profile"
+            style={{ textDecoration: 'none !important', width: '100%', height: '100%' }}
+          >
+            <MenuItem
+              label={isConnected ? 'Profile' : 'Connect'}
+              isActive={isProfileActive}
+              onClick={() => {
+                if (!isConnected) {
+                  open({ view: 'Connect' })
+                }
+              }}
+            >
+              {address ? (
                 <Image
-                  h="20px"
+                  h="24px"
                   borderRadius="full"
                   src={`https://ensdata.net/media/avatar/${address}`}
+                  border={isProfileActive ? '1px solid orange' : '1px solid black'}
                 />
               ) : (
-                <UserCircle />
-              )
-            }
+                <Plugs size={24} />
+              )}
+            </MenuItem>
+          </NextLink>
+        </Box>
+        {/* TODO: move language to profile page */}
+        {/* <Box w="100%" h="100%" display="flex" justifyContent="center" alignItems="center">
+          <MenuItem
+            label="Language"
+            isActive={isLanguageModalOpen}
             onClick={() => {
-              if (!isConnected) {
-                open({ view: 'Connect' })
-              }
+              setIsLanguageModalOpen(true)
             }}
-            iconSpacing={iconSpacing}
           >
-            {isMobile ? '' : isConnected ? 'Profile' : 'Connect'}
-          </Button>
-        </NextLink>
-        <Button
-          variant="solid"
-          isActive={false}
-          onClick={() => {
-            // TODO: implement language toggle
-            alert('Language toggle')
-          }}
-        >
-          🇹🇭
-        </Button>
+            <Translate />
+          </MenuItem>
+        </Box> */}
       </Flex>
     </Box>
   )
