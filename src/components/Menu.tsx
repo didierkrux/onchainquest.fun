@@ -34,6 +34,7 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
       w="100%"
       h="100%"
       borderBottom={isActive && !isMobile ? '1px solid orange' : '1px solid black'}
+      cursor={isActive ? 'default' : 'pointer'}
     >
       {children}
       <Box fontSize={['10px', '16px']}>{label}</Box>
@@ -142,7 +143,7 @@ const Menu = () => {
                   h="24px"
                   borderRadius="full"
                   src={`https://ensdata.net/media/avatar/${address}`}
-                  border={isProfileActive ? '1px solid orange' : '1px solid black'}
+                  border={isProfileActive ? '1px solid orange' : '1px solid white'}
                 />
               ) : (
                 <Plugs size={24} />
