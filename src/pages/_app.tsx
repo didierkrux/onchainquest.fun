@@ -4,6 +4,7 @@ import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 
 import Layout from 'components/Layout'
 import theme from 'theme'
+import 'utils/translation'
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (

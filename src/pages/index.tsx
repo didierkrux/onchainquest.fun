@@ -1,53 +1,34 @@
 import { Box, Heading, Text, Image, CardBody, Card } from '@chakra-ui/react'
+import LanguageSwitch from 'components/LanguageSwitch'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import data_en from 'translation/en/data.json'
+import data_th from 'translation/th/data.json'
 
 export default function Agenda() {
-  const AGENDA = [
-    {
-      time: '12:00 - 13:00',
-      title: 'Lunch',
-    },
-    {
-      time: '13:00 - 13:40',
-      title: 'Opening Remarks: Welcome to the New Internet',
-    },
-    {
-      time: '13:45 - 14:15',
-      title: 'Keynote: Become a web3 explorer TODAY!',
-    },
-    {
-      time: '14:15 - 15:15',
-      title: 'Workshop & Breakout Groups',
-    },
-    {
-      time: '15:00 - 18:00',
-      title: 'Onchain Fun 🎉',
-    },
-    {
-      time: '18:00 - 20:00',
-      title: 'Music & drinks',
-    },
-  ]
+  const { t, i18n } = useTranslation()
+  const [mounted, setMounted] = useState(false)
 
-  const SPONSORS = [
-    {
-      name: 'Harpie',
-      description:
-        'The most advanced wallet security tool to protect your crypto from hacks and scams. Harpie monitors for risks, blocks detected threats, and recovers your stolen assets—all in real time.',
-      image: 'https://harpie.io/images/icons/harpie/Harpie-Aeonik-Logo.svg',
-      link: 'https://harpie.io',
-    },
-    {
-      name: 'Bankless Academy',
-      description:
-        'Free courses to kickstart your Web3 journey. Learn the essentials of Bitcoin, Ethereum, Blockchain, Layer 2s, setting up your first wallet, and more.',
-      image: 'https://app.banklessacademy.com/images/BanklessAcademy.svg',
-      link: 'https://app.banklessacademy.com',
-    },
-  ]
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const data = mounted ? (i18n.language === 'en' ? data_en : data_th) : { agenda: [], sponsors: [] }
+
+  const AGENDA = data.agenda || []
+  const SPONSORS = data.sponsors || []
+
+  if (!mounted) {
+    return null // Return null or a loading indicator while not mounted
+  }
 
   return (
     <Box>
-      <Heading as="h1">Agenda</Heading>
+      <Box display="flex" alignItems="center" gap={4}>
+        <Text>Select language:</Text>
+        <LanguageSwitch />
+      </Box>
+      <Heading as="h1">{t('Agenda')}</Heading>
       {AGENDA.map((item, index) => (
         <Card mt={4} key={index}>
           <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
@@ -57,23 +38,22 @@ export default function Agenda() {
               </Text>
               <Text as="h3">{item.title}</Text>
               <Text as="h3" mb={4}>
-                📍 TBD
+                📍 {item.location}
               </Text>
             </Box>
           </CardBody>
         </Card>
       ))}
       <Heading as="h1" mt={4}>
-        Sponsors
+        {t('Sponsors')}
       </Heading>
       {SPONSORS.map((sponsor, index) => (
         <Card mt={4} key={index}>
           <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
             <Box>
               <a href={sponsor.link}>
-                <Image h="60px" src={sponsor.image} />
+                <Image h="60px" src={sponsor.image} alt={sponsor.name} />
               </a>
-              {/* <Text as="h3">{sponsor.name}</Text> */}
               <Text as="h3">{sponsor.description}</Text>
             </Box>
           </CardBody>

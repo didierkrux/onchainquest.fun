@@ -1,8 +1,9 @@
 import { Box, Card, CardBody, Heading, Text, Link, Button } from '@chakra-ui/react'
 import { useAppKit } from '@reown/appkit/react'
 import { useAccount } from 'wagmi'
-
+import { useTranslation } from 'react-i18next'
 export default function Onboarding() {
+  const { t } = useTranslation()
   const { open } = useAppKit()
   const { address } = useAccount()
 
@@ -107,7 +108,7 @@ export default function Onboarding() {
       instructions: (
         <>
           Go to{' '}
-          <Link isExternal href="https://harpie.io/app/dashboard/address/?chainId=8453">
+          <Link isExternal href={`https://harpie.io/app/dashboard/${address}/?chainId=8453`}>
             Harpie
           </Link>{' '}
           and revoke the permission for USDC
@@ -158,7 +159,7 @@ export default function Onboarding() {
   ]
   return (
     <Box>
-      <Heading as="h1">Onboarding tasks</Heading>
+      <Heading as="h1">{t('Onboarding tasks')}</Heading>
       {QUESTS.map((quest, index) => (
         <Card mt={4} key={index}>
           <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
@@ -168,7 +169,7 @@ export default function Onboarding() {
               </Heading>
               <Text pt="2">Points: {quest.points} ⭐️</Text>
               <Box pt="2">
-                <Box>👉 Instructions:</Box>
+                <Box>👉 {t('Instructions')}:</Box>
                 {quest.instructions}
               </Box>
             </Box>

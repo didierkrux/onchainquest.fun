@@ -2,8 +2,9 @@ import { Box, Button, Card, CardBody, Heading, Image, Text } from '@chakra-ui/re
 import { useAccount, useDisconnect } from 'wagmi'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
-
+import { useTranslation } from 'react-i18next'
 export default function Profile() {
+  const { t } = useTranslation()
   const { address } = useAccount()
   // const [ensName, setEnsName] = useState('')
   const { disconnect } = useDisconnect()
@@ -39,7 +40,7 @@ export default function Profile() {
   if (!address)
     return (
       <Box display="flex" flexDirection="column" alignItems="center">
-        <Text>Click the "Connect" button to connect your wallet</Text>
+        <Text>{t('Click the "Connect" button to connect your wallet.')}</Text>
       </Box>
     )
   else {
@@ -72,17 +73,17 @@ export default function Profile() {
             </Box>
             <Box display="flex" justifyContent="space-around" alignItems="center">
               <Text fontSize="3xl" color="gray.300">
-                [mentor]
+                [{t('mentor')}]
               </Text>
               <Box display="flex" alignItems="center">
-                <Heading fontSize="3xl">Score:</Heading>
+                <Heading fontSize="3xl">{t('Score')}:</Heading>
                 <Text fontSize="3xl">100 ⭐️</Text>
               </Box>
             </Box>
           </CardBody>
         </Card>
         <Box mt={4}>
-          <Button onClick={() => disconnect()}>Disconnect</Button>
+          <Button onClick={() => disconnect()}>{t('Disconnect')}</Button>
         </Box>
       </Box>
     )

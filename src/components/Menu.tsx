@@ -11,7 +11,8 @@ import {
 } from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
 import { useAppKit } from '@reown/appkit/react'
-import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useEffect, useState } from 'react'
 
 type MenuItemProps = {
   label: string
@@ -21,6 +22,11 @@ type MenuItemProps = {
 
 const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
   const [isMobile] = useMediaQuery('(max-width: 48em)', { ssr: true })
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <Box
@@ -37,12 +43,13 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
       cursor={isActive ? 'default' : 'pointer'}
     >
       {children}
-      <Box fontSize={['10px', '16px']}>{label}</Box>
+      <Box fontSize={['10px', '16px']}>{mounted ? label : ''}</Box>
     </Box>
   )
 }
 
 const Menu = () => {
+  const { t } = useTranslation()
   const [isMobile] = useMediaQuery('(max-width: 48em)', { ssr: true })
   const { address, isConnected } = useAccount()
   const { open } = useAppKit()
@@ -51,22 +58,22 @@ const Menu = () => {
 
   const MENU_ITEMS = [
     {
-      label: 'Agenda',
+      label: t('Agenda'),
       icon: CalendarCheck,
       href: '/',
     },
     {
-      label: 'Venue',
+      label: t('Venue'),
       icon: MapTrifold,
       href: '/venue',
     },
     {
-      label: 'Onboarding',
+      label: t('Onboarding'),
       icon: ListChecks,
       href: '/onboarding',
     },
     {
-      label: 'Leaderboard',
+      label: t('Leaderboard'),
       icon: Ranking,
       href: '/leaderboard',
     },
@@ -130,7 +137,7 @@ const Menu = () => {
             style={{ textDecoration: 'none !important', width: '100%', height: '100%' }}
           >
             <MenuItem
-              label={isConnected ? 'Profile' : 'Connect'}
+              label={isConnected ? t('Profile') : t('Connect')}
               isActive={isProfileActive}
               onClick={() => {
                 if (!isConnected) {
@@ -151,18 +158,6 @@ const Menu = () => {
             </MenuItem>
           </NextLink>
         </Box>
-        {/* TODO: move language to profile page */}
-        {/* <Box w="100%" h="100%" display="flex" justifyContent="center" alignItems="center">
-          <MenuItem
-            label="Language"
-            isActive={isLanguageModalOpen}
-            onClick={() => {
-              setIsLanguageModalOpen(true)
-            }}
-          >
-            <Translate />
-          </MenuItem>
-        </Box> */}
       </Flex>
     </Box>
   )

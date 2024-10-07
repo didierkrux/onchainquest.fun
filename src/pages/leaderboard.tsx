@@ -1,6 +1,22 @@
 import { Box, Card, CardBody, Heading, Stack, StackDivider, Text } from '@chakra-ui/react'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import data_en from 'translation/en/data.json'
+import data_th from 'translation/th/data.json'
 
 export default function Leaderboard() {
+  const { t, i18n } = useTranslation()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const data = mounted ? (i18n.language === 'en' ? data_en : data_th) : { prizes: [] }
+
+  if (!mounted) {
+    return null
+  }
   const LEADERBOARD = [
     {
       username: 'ornella',
@@ -24,21 +40,15 @@ export default function Leaderboard() {
     },
   ]
 
-  const PRICES = [
-    {
-      description: 'A free 5+ letter ENS domain.',
-    },
-    {
-      description: 'POAP Merchandise.',
-    },
-    {
-      description: '...',
-    },
-  ]
+  const PRIZES = data.prizes || []
+
+  if (!mounted) {
+    return null
+  }
 
   return (
     <Box>
-      <Heading as="h1">Leaderboard</Heading>
+      <Heading as="h1">{t('Leaderboard')}</Heading>
       <Card mt={4}>
         <CardBody>
           <Stack divider={<StackDivider />} spacing="4">
@@ -63,13 +73,13 @@ export default function Leaderboard() {
         </CardBody>
       </Card>
       <Heading as="h1" mt={4}>
-        Prices
+        {t('Prizes')}
       </Heading>
-      {PRICES.map((price, index) => (
+      {PRIZES.map((prize, index) => (
         <Card mt={4} key={index}>
           <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
             <Box>
-              <Text as="h3">{price.description}</Text>
+              <Text as="h3">{prize.description}</Text>
             </Box>
           </CardBody>
         </Card>

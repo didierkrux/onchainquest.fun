@@ -1,0 +1,89 @@
+{
+  "agenda": [
+    {
+      "time": "12:00 - 13:00",
+      "title": "Lunch",
+      "location": "TBD"
+    },
+    {
+      "time": "13:00 - 13:40",
+      "title": "Opening Remarks: Welcome to the New Internet",
+      "location": "TBD"
+    },
+    {
+      "time": "13:45 - 14:15",
+      "title": "Keynote: Become a web3 explorer TODAY!",
+      "location": "TBD"
+    },
+    {
+      "time": "14:15 - 15:15",
+      "title": "Workshop & Breakout Groups",
+      "location": "TBD"
+    },
+    {
+      "time": "15:00 - 18:00",
+      "title": "Onchain Fun 🎉",
+      "location": "TBD"
+    },
+    {
+      "time": "18:00 - 20:00",
+      "title": "Music & drinks",
+      "location": "TBD"
+    }
+  ],
+  "sponsors": [
+    {
+      "name": "Harpie",
+      "description": "The most advanced wallet security tool to protect your crypto from hacks and scams. Harpie monitors for risks, blocks detected threats, and recovers your stolen assets—all in real time.",
+      "image": "https://harpie.io/images/icons/harpie/Harpie-Aeonik-Logo.svg",
+      "link": "https://harpie.io"
+    },
+    {
+      "name": "Bankless Academy",
+      "description": "Free courses to kickstart your Web3 journey. Learn the essentials of Bitcoin, Ethereum, Blockchain, Layer 2s, setting up your first wallet, and more.",
+      "image": "https://app.banklessacademy.com/images/BanklessAcademy.svg",
+      "link": "https://app.banklessacademy.com"
+    }
+  ],
+  "booths": [
+    {
+      "name": "BOOTH #1",
+      "description": "..."
+    },
+    {
+      "name": "BOOTH #2",
+      "description": "..."
+    },
+    {
+      "name": "BOOTH #3",
+      "description": "..."
+    },
+    {
+      "name": "BOOTH #4",
+      "description": "..."
+    },
+    {
+      "name": "BOOTH #5",
+      "description": "..."
+    },
+    {
+      "name": "BOOTH #6",
+      "description": "..."
+    },
+    {
+      "name": "BOOTH #7",
+      "description": "..."
+    }
+  ],
+  "prizes": [
+    {
+      "description": "A free 5+ letter ENS domain."
+    },
+    {
+      "description": "POAP merchandise."
+    },
+    {
+      "description": "..."
+    }
+  ]
+}
