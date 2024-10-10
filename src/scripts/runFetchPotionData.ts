@@ -33,8 +33,8 @@ async function main() {
         name: item.fields.Label,
         points: item.fields.Points,
         description: item.fields.Description,
-        type: item.fields['Task Type'],
-        details: item.fields['Task Details'],
+        action: item.fields.Action,
+        condition: item.fields.Condition,
       })),
       prizes: data.filter((item: any) => item.fields.Type === 'Prize').map((item: any) => ({
         name: item.fields.Label,
@@ -46,6 +46,9 @@ async function main() {
     const dataPath = path.join(__dirname, '..', '..', 'src', 'translation', 'en', 'data.json');
     fs.mkdirSync(path.dirname(dataPath), { recursive: true });
     fs.writeFileSync(dataPath, JSON.stringify(transformedData, null, 2));
+
+    // TODO: translate to thai w/ GPT-4
+    // prompt: translate to thai except the following fields: time, image, link, action, condition
 
     console.log('Data saved to data.json');
   } catch (error) {
