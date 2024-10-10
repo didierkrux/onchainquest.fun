@@ -1,33 +1,33 @@
 {
   "agenda": [
     {
-      "time": "12:00 - 13:00",
       "title": "Lunch",
+      "time": "12:00 - 13:00",
       "location": "TBD"
     },
     {
-      "time": "13:00 - 13:40",
       "title": "Opening Remarks: Welcome to the New Internet",
+      "time": "13:00 - 13:40",
       "location": "TBD"
     },
     {
-      "time": "13:45 - 14:15",
       "title": "Keynote: Become a web3 explorer TODAY!",
+      "time": "13:45 - 14:15",
       "location": "TBD"
     },
     {
-      "time": "14:15 - 15:15",
       "title": "Workshop & Breakout Groups",
+      "time": "14:15 - 15:15",
       "location": "TBD"
     },
     {
-      "time": "15:00 - 18:00",
       "title": "Onchain Fun 🎉",
+      "time": "15:00 - 18:00",
       "location": "TBD"
     },
     {
-      "time": "18:00 - 20:00",
       "title": "Music & drinks",
+      "time": "18:00 - 20:00",
       "location": "TBD"
     }
   ],
@@ -36,54 +36,105 @@
       "name": "Harpie",
       "description": "The most advanced wallet security tool to protect your crypto from hacks and scams. Harpie monitors for risks, blocks detected threats, and recovers your stolen assets—all in real time.",
       "image": "https://harpie.io/images/icons/harpie/Harpie-Aeonik-Logo.svg",
-      "link": "https://harpie.io"
+      "link": "https://harpie.io/"
     },
     {
       "name": "Bankless Academy",
       "description": "Free courses to kickstart your Web3 journey. Learn the essentials of Bitcoin, Ethereum, Blockchain, Layer 2s, setting up your first wallet, and more.",
       "image": "https://app.banklessacademy.com/images/BanklessAcademy.svg",
-      "link": "https://app.banklessacademy.com"
+      "link": "https://app.banklessacademy.com/"
+    }
+  ],
+  "venue": [
+    {
+      "name": "Venue map example",
+      "image": "https://app.devcon.org/_ipx/w_3840,q_75/%2F_next%2Fstatic%2Fmedia%2FFloor3.f2b8d17f.png?url=%2F_next%2Fstatic%2Fmedia%2FFloor3.f2b8d17f.png&w=3840&q=75"
     }
   ],
   "booths": [
     {
       "name": "BOOTH #1",
-      "description": "..."
+      "description": "Booth description 1"
     },
     {
       "name": "BOOTH #2",
-      "description": "..."
+      "description": "Booth description 2"
     },
     {
       "name": "BOOTH #3",
-      "description": "..."
+      "description": "Booth description 3"
     },
     {
       "name": "BOOTH #4",
-      "description": "..."
+      "description": "Booth description 4"
     },
     {
       "name": "BOOTH #5",
-      "description": "..."
+      "description": "Booth description 5"
     },
     {
       "name": "BOOTH #6",
-      "description": "..."
+      "description": "Booth description 6"
     },
     {
       "name": "BOOTH #7",
-      "description": "..."
+      "description": "Booth description 7"
+    }
+  ],
+  "tasks": [
+    {
+      "name": "Create a crypto wallet & connect it to this app",
+      "points": 5,
+      "description": "- Install the Zerion mobile app.\n- Create a wallet.\n- Connect your wallet to this app."
+    },
+    {
+      "name": "Setup your profile",
+      "points": 5,
+      "description": "- Go to your profile\n- Choose a username\n- Upload your avatar"
+    },
+    {
+      "name": "Claim the event POAP (Proof of Attendance Protocol)",
+      "points": 5,
+      "description": "📍 Location: Booth #XX"
+    },
+    {
+      "name": "Join the private Line or Telegram group for this event",
+      "points": 5,
+      "description": "- Line invite link\n- Telegram invite link"
+    },
+    {
+      "name": "Claim the Harpie POAP (Proof of Attendance Protocol)",
+      "points": 5,
+      "description": "📍 Location: Booth #XX"
+    },
+    {
+      "name": "Claim free tokens on Base",
+      "points": 10,
+      "description": "Click the “Claim” button to receive ~1$ worth of ETH and 1 USDC on Base.\nRequirement: complete task #3 (Claim the event POAP)"
+    },
+    {
+      "name": "Swap 1 USDC for 1 USDGLO on Base",
+      "points": 10,
+      "description": "- Click the “Swap” button\n- Swap 1 USDC for ETH"
+    },
+    {
+      "name": "Share your event pictures",
+      "points": 10,
+      "description": "- Go to the POAP event page\n- Connect your wallet\n- Share your event pictures"
     }
   ],
   "prizes": [
     {
-      "description": "A free 5+ letter ENS domain."
+      "name": "Prize #1",
+      "description": "Prize description 1"
     },
     {
-      "description": "POAP merchandise."
+      "name": "Prize #2",
+      "description": "Prize description 2"
     },
     {
-      "description": "..."
+      "name": "Prize #3",
+      "description": "Prize description 3"
     }
   ]
 }

@@ -39,5 +39,8 @@
     "eslint": "8.56.0",
     "eslint-config-next": "14.1.0",
     "typescript": "5.3.3"
+  },
+  "resolutions": {
+    "@types/react": "18.2.0"
   }
 }
