@@ -12,9 +12,9 @@ export default function Venue() {
     setMounted(true)
   }, [])
 
-  const data = mounted ? (i18n.language === 'en' ? data_en : data_th) : { booths: [] }
+  const data = mounted ? (i18n.language === 'en' ? data_en : data_th) : { booths: [], venue: [] }
+  const VENUE_MAP = data.venue?.[0]?.image || ''
   const BOOTH_INFO = data.booths || []
-
   if (!mounted) {
     return null
   }
@@ -22,7 +22,7 @@ export default function Venue() {
   return (
     <Box>
       <Heading as="h1">{t('Venue map')}</Heading>
-      <Image src="https://app.devcon.org/_ipx/w_3840,q_75/%2F_next%2Fstatic%2Fmedia%2FFloor3.f2b8d17f.png?url=%2F_next%2Fstatic%2Fmedia%2FFloor3.f2b8d17f.png&w=3840&q=75" />
+      {VENUE_MAP && <Image src={VENUE_MAP} />}
       <Heading as="h1" mt={4}>
         {t('Booths')}
       </Heading>

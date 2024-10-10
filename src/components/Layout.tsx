@@ -14,7 +14,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Menu />
       </header>
       <main>
-        <Box p="4" mb={isMobile ? '64px' : 0}>
+        <Box p="4" mb={isMobile ? '64px' : 0} maxW="container.lg" mx="auto">
           {children}
         </Box>
       </main>

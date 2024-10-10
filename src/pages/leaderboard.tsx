@@ -48,7 +48,21 @@ export default function Leaderboard() {
 
   return (
     <Box>
-      <Heading as="h1">{t('Leaderboard')}</Heading>
+      <Heading as="h1">{t('Prizes')}</Heading>
+      <Box>
+        {PRIZES.map((prize, index) => (
+          <Card mt={4} key={index}>
+            <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
+              <Box>
+                <Text as="h3">{prize.description}</Text>
+              </Box>
+            </CardBody>
+          </Card>
+        ))}
+      </Box>
+      <Heading as="h1" mt={4}>
+        {t('Leaderboard')}
+      </Heading>
       <Card mt={4}>
         <CardBody>
           <Stack divider={<StackDivider />} spacing="4">
@@ -72,18 +86,6 @@ export default function Leaderboard() {
           </Stack>
         </CardBody>
       </Card>
-      <Heading as="h1" mt={4}>
-        {t('Prizes')}
-      </Heading>
-      {PRIZES.map((prize, index) => (
-        <Card mt={4} key={index}>
-          <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
-            <Box>
-              <Text as="h3">{prize.description}</Text>
-            </Box>
-          </CardBody>
-        </Card>
-      ))}
     </Box>
   )
 }
