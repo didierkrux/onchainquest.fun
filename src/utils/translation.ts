@@ -4,10 +4,8 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 
 // EN = English
 import common from 'translation/en/common.json'
-import data_en from 'translation/en/data.json'
 // TH = Thai
 import commonTH from 'translation/th/common.json'
-import data_th from 'translation/th/data.json'
 
 export const defaultNS = 'common'
 
@@ -20,11 +18,9 @@ i18next
     resources: {
       en: {
         common,
-        data: data_en,
       },
       th: {
         common: commonTH,
-        data: data_th,
       },
     },
     defaultNS,
