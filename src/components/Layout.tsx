@@ -1,6 +1,7 @@
 import React from 'react'
 import { Box, useMediaQuery } from '@chakra-ui/react'
 import Menu from './Menu'
+import { useEventData } from '../hooks/useEventData'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -8,6 +9,8 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMobile] = useMediaQuery('(max-width: 48em)', { ssr: true })
+  const { event, error } = useEventData()
+
   return (
     <Box>
       <header>
@@ -15,7 +18,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </header>
       <main>
         <Box p="4" mb={isMobile ? '64px' : 0} maxW="container.lg" mx="auto">
-          {children}
+          {!event ? (
+            <Box>Loading...</Box>
+          ) : error ? (
+            <Box>Error: {error.message}</Box>
+          ) : (
+            React.Children.map(children, (child) => {
+              if (React.isValidElement(child)) {
+                return React.cloneElement(child as React.ReactElement<any>, { event })
+              }
+              return child
+            })
+          )}
         </Box>
       </main>
     </Box>
