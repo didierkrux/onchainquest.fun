@@ -3,32 +3,47 @@ import { useAppKit } from '@reown/appkit/react'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
-import data_en from 'translation/en/data.json'
-import data_th from 'translation/th/data.json'
 import React from 'react'
+
+import { Event, EventData, Quest } from 'entities/data'
 
 export default function Onboarding() {
   const { t, i18n } = useTranslation()
+  const [event, setEvent] = useState<Event | null>(null)
+  const [eventData, setEventData] = useState<EventData | null>(null)
   const { open } = useAppKit()
   const { address } = useAccount()
 
-  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    const fetchData = async () => {
+      // TODO: check why api is called twice
+      console.log('fetching event data')
+      try {
+        const response = await fetch('/api/data')
+        const data = await response.json()
+        setEventData(data)
+      } catch (error) {
+        console.error('Error fetching event data:', error)
+      }
+    }
+
+    if (!eventData) {
+      fetchData()
+    }
+  }, [i18n.language, eventData])
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    if (i18n.language && eventData) {
+      console.log('setting event data')
+      setEvent(i18n.language === 'en' ? eventData.data_en : eventData.data_tr)
+    }
+  }, [i18n.language, eventData])
 
-  interface Quest {
-    name: string
-    points: number
-    description: string
-    action: string
-    condition?: string
-    actionField?: React.ReactNode // Add this line
+  if (!event) {
+    return <Box>Loading...</Box>
   }
 
-  const data = mounted ? (i18n.language === 'en' ? data_en : data_th) : { tasks: [] }
-  const QUESTS: Quest[] = data.tasks || []
+  const QUESTS: Quest[] = event.tasks || []
 
   for (const quest of QUESTS) {
     if (quest.action === 'secret-word') {

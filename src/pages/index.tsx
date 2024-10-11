@@ -1,25 +1,42 @@
 import { Box, Heading, Text, Image, CardBody, Card } from '@chakra-ui/react'
-import LanguageSwitch from 'components/LanguageSwitch'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import data_en from 'translation/en/data.json'
-import data_th from 'translation/th/data.json'
+
+import LanguageSwitch from 'components/LanguageSwitch'
+import { Event, EventData } from 'entities/data'
 
 export default function Agenda() {
   const { t, i18n } = useTranslation()
-  const [mounted, setMounted] = useState(false)
+  const [event, setEvent] = useState<Event | null>(null)
+  const [eventData, setEventData] = useState<EventData | null>(null)
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    const fetchData = async () => {
+      // TODO: check why api is called twice
+      console.log('fetching event data')
+      try {
+        const response = await fetch('/api/data')
+        const data = await response.json()
+        setEventData(data)
+      } catch (error) {
+        console.error('Error fetching event data:', error)
+      }
+    }
 
-  const data = mounted ? (i18n.language === 'en' ? data_en : data_th) : { agenda: [], sponsors: [] }
+    if (!eventData) {
+      fetchData()
+    }
+  }, [i18n.language, eventData])
 
-  const AGENDA = data.agenda || []
-  const SPONSORS = data.sponsors || []
+  useEffect(() => {
+    if (i18n.language && eventData) {
+      console.log('setting event data')
+      setEvent(i18n.language === 'en' ? eventData.data_en : eventData.data_tr)
+    }
+  }, [i18n.language, eventData])
 
-  if (!mounted) {
-    return null // Return null or a loading indicator while not mounted
+  if (!event) {
+    return <Box>Loading...</Box>
   }
 
   return (
@@ -29,7 +46,7 @@ export default function Agenda() {
         <LanguageSwitch />
       </Box>
       <Heading as="h1">{t('Agenda')}</Heading>
-      {AGENDA.map((item, index) => (
+      {event.agenda.map((item, index) => (
         <Card mt={4} key={index}>
           <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
             <Box>
@@ -47,7 +64,7 @@ export default function Agenda() {
       <Heading as="h1" mt={4}>
         {t('Sponsors')}
       </Heading>
-      {SPONSORS.map((sponsor, index) => (
+      {event.sponsors.map((sponsor, index) => (
         <Card mt={4} key={index}>
           <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
             <Box>
