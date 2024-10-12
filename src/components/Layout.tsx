@@ -1,7 +1,9 @@
 import React from 'react'
 import { Box, useMediaQuery } from '@chakra-ui/react'
-import Menu from './Menu'
-import { useEventData } from '../hooks/useEventData'
+import NextHead from 'next/head'
+
+import Menu from 'components/Menu'
+import { useEventData } from 'hooks/useEventData'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -13,6 +15,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <Box>
+      <NextHead>
+        <title>Start here</title>
+        {/* Progressive Web App */}
+        <link rel="apple-touch-icon" href="/app-icon.png" />
+        <meta name="apple-mobile-web-app-title" content="Start here" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <link rel="manifest" crossOrigin="use-credentials" href="/manifest.json" />
+      </NextHead>
       <header>
         <Menu />
       </header>
