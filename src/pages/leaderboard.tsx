@@ -1,33 +1,20 @@
 import { Box, Card, CardBody, Heading, Stack, StackDivider, Text } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
+import { useEffect, useState } from 'react'
 
 import { Event } from 'entities/data'
-
-const LEADERBOARD = [
-  {
-    username: 'ornella',
-    points: 100,
-  },
-  {
-    username: 'didier',
-    points: 90,
-  },
-  {
-    username: '0x1234...',
-    points: 80,
-  },
-  {
-    username: '0x5678...',
-    points: 70,
-  },
-  {
-    username: '...',
-    points: 60,
-  },
-]
+import { Profile } from 'entities/profile'
 
 export default function Leaderboard({ event }: { event: Event }) {
   const { t } = useTranslation()
+
+  const [leaderboard, setLeaderboard] = useState<Profile[]>([])
+
+  useEffect(() => {
+    fetch('/api/leaderboard')
+      .then((res) => res.json())
+      .then((data) => setLeaderboard(data))
+  }, [])
 
   return (
     <Box>
@@ -49,7 +36,7 @@ export default function Leaderboard({ event }: { event: Event }) {
       <Card mt={4}>
         <CardBody>
           <Stack divider={<StackDivider />} spacing="4">
-            {LEADERBOARD.map((user, index) => (
+            {leaderboard.map((user, index) => (
               <Box
                 key={user.username}
                 display="flex"
@@ -63,7 +50,7 @@ export default function Leaderboard({ event }: { event: Event }) {
                   </Box>
                   <Text>@{user.username}</Text>
                 </Box>
-                <Text>{user.points} ⭐️</Text>
+                <Text>{user.score} ⭐️</Text>
               </Box>
             ))}
           </Stack>
