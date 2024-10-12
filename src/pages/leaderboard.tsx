@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 import { Event } from 'entities/data'
 import { Profile } from 'entities/profile'
+import { displayName } from 'utils/index'
 
 export default function Leaderboard({ event }: { event: Event }) {
   const { t } = useTranslation()
@@ -30,32 +31,42 @@ export default function Leaderboard({ event }: { event: Event }) {
           </Card>
         ))}
       </Box>
-      <Heading as="h1" mt={4}>
-        {t('Leaderboard')}
-      </Heading>
-      <Card mt={4}>
-        <CardBody>
-          <Stack divider={<StackDivider />} spacing="4">
-            {leaderboard.map((user, index) => (
-              <Box
-                key={user.username}
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                m={4}
-              >
-                <Box display="flex" alignItems="center" gap={2}>
-                  <Box>
-                    {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+      {leaderboard.length > 0 && (
+        <>
+          <Heading as="h1" mt={4}>
+            {t('Leaderboard')}
+          </Heading>
+          <Card mt={4}>
+            <CardBody>
+              <Stack divider={<StackDivider />} spacing="4">
+                {leaderboard.map((user, index) => (
+                  <Box
+                    key={index}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    m={4}
+                  >
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <Box>
+                        {index === 0
+                          ? '🥇'
+                          : index === 1
+                          ? '🥈'
+                          : index === 2
+                          ? '🥉'
+                          : `#${index + 1}`}
+                      </Box>
+                      <Text>{displayName(user)}</Text>
+                    </Box>
+                    <Text>{user.score} ⭐️</Text>
                   </Box>
-                  <Text>@{user.username}</Text>
-                </Box>
-                <Text>{user.score} ⭐️</Text>
-              </Box>
-            ))}
-          </Stack>
-        </CardBody>
-      </Card>
+                ))}
+              </Stack>
+            </CardBody>
+          </Card>
+        </>
+      )}
     </Box>
   )
 }

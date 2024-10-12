@@ -15,6 +15,7 @@ export default function Agenda({ event }: { event: Event }) {
   const [adminSignature, setAdminSignature] = useLocalStorage('admin-signature', '')
   const { signMessageAsync } = useSignMessage()
   const [isSyncing, setIsSyncing] = useState(false)
+  const [isResetting, setIsResetting] = useState(false)
   const toast = useToast()
 
   const handleAdminSignature = async () => {
@@ -32,6 +33,52 @@ export default function Agenda({ event }: { event: Event }) {
       }
     } catch (error) {
       console.error('Error signing message:', error)
+    }
+  }
+
+  const handleResetProfile = async () => {
+    if (!address || !adminSignature) return
+
+    setIsResetting(true)
+    try {
+      const isValid = await verifyMessage({
+        address,
+        message: adminSignatureMessage,
+        signature: adminSignature as `0x${string}`,
+      })
+
+      if (isValid) {
+        const response = await fetch(
+          `/api/admin/reset-my-profile?address=${address}&signature=${adminSignature}`
+        )
+        if (response.ok) {
+          toast({
+            title: 'Success',
+            description: 'Profile reset successfully.',
+            status: 'success',
+            duration: 5000,
+            isClosable: true,
+          })
+        } else {
+          const data = await response.json()
+          throw new Error(`Failed to reset profile: ${data.message}`)
+        }
+      } else {
+        // reset admin signature
+        setAdminSignature('')
+        throw new Error('Invalid signature')
+      }
+    } catch (error) {
+      console.error('Error resetting profile:', error)
+      toast({
+        title: 'Error',
+        description: ` ${(error as Error).message}`,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    } finally {
+      setIsResetting(false)
     }
   }
 
@@ -103,14 +150,24 @@ export default function Agenda({ event }: { event: Event }) {
             Notion CMS
           </a>
           {adminSignature ? (
-            <Button
-              onClick={handleSyncData}
-              isLoading={isSyncing}
-              loadingText="Syncing... (~30sec)"
-              colorScheme="red"
-            >
-              Sync data from Notion
-            </Button>
+            <Box display="flex" gap={4}>
+              <Button
+                onClick={handleSyncData}
+                isLoading={isSyncing}
+                loadingText="Syncing... (~30sec)"
+                colorScheme="red"
+              >
+                Sync data from Notion
+              </Button>
+              <Button
+                onClick={handleResetProfile}
+                isLoading={isResetting}
+                loadingText="Resetting..."
+                colorScheme="red"
+              >
+                Reset my profile
+              </Button>
+            </Box>
           ) : (
             <Button onClick={handleAdminSignature} colorScheme="red">
               Verify admin signature

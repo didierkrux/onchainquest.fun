@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardBody, Heading, Image, Text } from '@chakra-ui/react'
+import { Box, Button, Card, CardBody, Heading, Image, Input, Text } from '@chakra-ui/react'
 import { useAccount, useDisconnect } from 'wagmi'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
@@ -12,6 +12,25 @@ export default function Profile() {
   const { address } = useAccount()
   const [profile, setProfile] = useState<Profile | null>(null)
   const { disconnect } = useDisconnect()
+
+  const [username, setUsername] = useState('')
+
+  const saveProfile = () => {
+    fetch(`/api/profile?address=${address}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setProfile(data)
+      })
+      .catch((error) => {
+        console.error('Error saving profile:', error)
+      })
+  }
 
   useEffect(() => {
     if (address) {
@@ -50,8 +69,18 @@ export default function Profile() {
   else {
     return (
       <Box display="flex" flexDirection="column" alignItems="center">
-        <Card maxW="600px">
-          {profile && (
+        {profile && !profile?.username && (
+          <Box display="flex" gap={4}>
+            <Input
+              placeholder="Choose a username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <Button onClick={saveProfile}>Save</Button>
+          </Box>
+        )}
+        {profile && profile?.address && (
+          <Card maxW="600px">
             <CardBody>
               <Box
                 display="flex"
@@ -84,8 +113,8 @@ export default function Profile() {
                 </Box>
               </Box>
             </CardBody>
-          )}
-        </Card>
+          </Card>
+        )}
         <Box mt={4}>
           <Button onClick={() => disconnect()}>{t('Disconnect')}</Button>
         </Box>
