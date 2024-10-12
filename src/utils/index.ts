@@ -1,8 +1,21 @@
-import { Event } from 'entities/data'
-import { potionUrl } from 'config'
 import OpenAI from 'openai'
 
+import { Event } from 'entities/data'
+import { Profile } from 'entities/profile'
+import { potionUrl } from 'config'
+
+export function shortAddress(address: string) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
+
+export function displayName(profile: Profile) {
+  return profile.username ? `@${profile.username}` : shortAddress(profile.address)
+}
+
 export async function fetchPotionData(): Promise<Event> {
+  // force all links in new tab
+  const replaceLinks = (string: string) => string?.replaceAll('<a ', '<a target="_blank" ')
+
   try {
     const response = await fetch(potionUrl)
     if (!response.ok) {
@@ -22,7 +35,7 @@ export async function fetchPotionData(): Promise<Event> {
         .filter((item: any) => item.fields.Type === 'Sponsor')
         .map((item: any) => ({
           name: item.fields.Label,
-          description: item.fields.Description,
+          description: replaceLinks(item.fields.Description),
           image: item.fields.Image || '',
           link: item.fields.Link || '',
         })),
@@ -36,14 +49,14 @@ export async function fetchPotionData(): Promise<Event> {
         .filter((item: any) => item.fields.Type === 'Booth')
         .map((item: any) => ({
           name: item.fields.Label,
-          description: item.fields.Description,
+          description: replaceLinks(item.fields.Description),
         })),
       tasks: data
         .filter((item: any) => item.fields.Type === 'Task')
         .map((item: any) => ({
           name: item.fields.Label,
           points: item.fields.Points,
-          description: item.fields.Description,
+          description: replaceLinks(item.fields.Description),
           action: item.fields.Action,
           condition: item.fields.Condition,
         })),
@@ -51,7 +64,7 @@ export async function fetchPotionData(): Promise<Event> {
         .filter((item: any) => item.fields.Type === 'Prize')
         .map((item: any) => ({
           name: item.fields.Label,
-          description: item.fields.Description,
+          description: replaceLinks(item.fields.Description),
         })),
     }
 
