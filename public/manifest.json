@@ -1,0 +1,16 @@
+{
+  "name": "Start Here",
+  "short_name": "Start Here",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "scope": "/",
+  "display": "standalone"
+}
