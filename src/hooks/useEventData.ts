@@ -30,6 +30,10 @@ export function useEventData() {
     if (router.isReady && !isLoading) {
       fetchData()
     }
+    if (router.route === '/404') {
+      console.log('404 detected: redirecting to /')
+      router.push('/')
+    }
   }, [router.asPath])
 
   useEffect(() => {
