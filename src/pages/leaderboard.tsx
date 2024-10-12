@@ -8,7 +8,6 @@ import { displayName } from 'utils/index'
 
 export default function Leaderboard({ event }: { event: Event }) {
   const { t } = useTranslation()
-
   const [leaderboard, setLeaderboard] = useState<Profile[]>([])
 
   useEffect(() => {

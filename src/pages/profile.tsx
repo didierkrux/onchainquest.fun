@@ -1,19 +1,36 @@
-import { Box, Button, Card, CardBody, Heading, Image, Input, Text } from '@chakra-ui/react'
-import { useAccount, useDisconnect } from 'wagmi'
+import {
+  Box,
+  Button,
+  Card,
+  CardBody,
+  Heading,
+  Image,
+  Input,
+  Text,
+  useToast,
+} from '@chakra-ui/react'
+import { useAccount, useDisconnect, useSignMessage } from 'wagmi'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { useTranslation } from 'react-i18next'
+import { useLocalStorage } from 'usehooks-ts'
+import { verifyMessage } from 'viem'
 
 import { Profile } from 'entities/profile'
 import { displayName } from 'utils/index'
+import { adminSignatureMessage, adminWallets } from 'config'
 
 export default function Profile() {
   const { t } = useTranslation()
   const { address } = useAccount()
   const [profile, setProfile] = useState<Profile | null>(null)
   const { disconnect } = useDisconnect()
-
   const [username, setUsername] = useState('')
+  const [isResetting, setIsResetting] = useState(false)
+  const toast = useToast()
+  const [adminSignature, setAdminSignature] = useLocalStorage('admin-signature', '')
+  const { signMessageAsync } = useSignMessage()
+  const [isSyncing, setIsSyncing] = useState(false)
 
   const saveProfile = () => {
     fetch(`/api/profile?address=${address}`, {
@@ -32,7 +49,7 @@ export default function Profile() {
       })
   }
 
-  useEffect(() => {
+  const fetchProfile = () => {
     if (address) {
       fetch(`/api/profile?address=${address}`)
         .then((res) => res.json())
@@ -40,6 +57,10 @@ export default function Profile() {
           setProfile(data)
         })
     }
+  }
+
+  useEffect(() => {
+    fetchProfile()
   }, [address])
 
   const [qrCodeDataURL, setQrCodeDataURL] = useState('')
@@ -59,7 +80,104 @@ export default function Profile() {
       })
   }, [address])
 
-  // redirect to /
+  const handleResetProfile = async () => {
+    if (!address) return
+
+    setIsResetting(true)
+    try {
+      const response = await fetch(`/api/admin/reset-my-profile?address=${address}`)
+      if (response.ok) {
+        toast({
+          title: 'Success',
+          description: 'Profile reset successfully.',
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        })
+        // Refresh the profile after resetting
+        disconnect()
+      } else {
+        const data = await response.json()
+        throw new Error(`Failed to reset profile: ${data.message}`)
+      }
+    } catch (error) {
+      console.error('Error resetting profile:', error)
+      toast({
+        title: 'Error',
+        description: ` ${(error as Error).message}`,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    } finally {
+      setIsResetting(false)
+    }
+  }
+
+  const handleAdminSignature = async () => {
+    try {
+      const signature = await signMessageAsync({ message: adminSignatureMessage })
+      if (address) {
+        const isValid = await verifyMessage({
+          address,
+          message: adminSignatureMessage,
+          signature,
+        })
+        if (isValid) {
+          setAdminSignature(signature)
+        }
+      }
+    } catch (error) {
+      console.error('Error signing message:', error)
+    }
+  }
+
+  const handleSyncData = async () => {
+    if (!address || !adminSignature) return
+
+    setIsSyncing(true)
+    try {
+      const isValid = await verifyMessage({
+        address,
+        message: adminSignatureMessage,
+        signature: adminSignature as `0x${string}`,
+      })
+
+      if (isValid) {
+        const response = await fetch(
+          `/api/admin/sync-data?signature=${adminSignature}&address=${address}`
+        )
+        if (response.ok) {
+          toast({
+            title: 'Success',
+            description: 'Data synced successfully.',
+            status: 'success',
+            duration: 5000,
+            isClosable: true,
+          })
+        } else {
+          const data = await response.json()
+          throw new Error(`Failed to sync data: ${data.message}`)
+        }
+      } else {
+        // reset admin signature
+        setAdminSignature('')
+        throw new Error('Invalid signature')
+      }
+    } catch (error) {
+      console.error('Error syncing data:', error)
+      toast({
+        title: 'Error',
+        description: ` ${(error as Error).message}`,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
   if (!address)
     return (
       <Box display="flex" flexDirection="column" alignItems="center">
@@ -70,7 +188,8 @@ export default function Profile() {
     return (
       <Box display="flex" flexDirection="column" alignItems="center">
         {profile && !profile?.username && (
-          <Box display="flex" gap={4}>
+          <Box display="flex" gap={4} mb={4} alignItems="center">
+            <Text>Username: </Text>
             <Input
               placeholder="Choose a username"
               value={username}
@@ -115,9 +234,54 @@ export default function Profile() {
             </CardBody>
           </Card>
         )}
-        <Box mt={4}>
+        <Box mt={4} display="flex" gap={4} mb={4}>
           <Button onClick={() => disconnect()}>{t('Disconnect')}</Button>
+          <Button
+            onClick={handleResetProfile}
+            isLoading={isResetting}
+            loadingText="Resetting..."
+            colorScheme="red"
+          >
+            Reset my profile & disconnect
+          </Button>
         </Box>
+        {address && adminWallets.includes(address.toLowerCase()) && (
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={4}
+            border="1px solid red"
+            p={4}
+            borderRadius="md"
+            justifyContent="center"
+            mb={4}
+          >
+            <Text>Admin functions:</Text>
+            <a
+              target="_blank"
+              rel="noreferrer"
+              href="https://www.notion.so/banklessacademy/37a9e401c55747d29af74e5d4d9f5c5b?v=6ab88582bf3e4b0d9b6a11cc9a70df36"
+            >
+              Notion CMS
+            </a>
+            {adminSignature ? (
+              <Box display="flex" gap={4}>
+                <Button
+                  onClick={handleSyncData}
+                  isLoading={isSyncing}
+                  loadingText="Syncing... (~30sec)"
+                  colorScheme="red"
+                >
+                  Sync data from Notion
+                </Button>
+              </Box>
+            ) : (
+              <Button onClick={handleAdminSignature} colorScheme="red">
+                Verify admin signature
+              </Button>
+            )}
+          </Box>
+        )}
       </Box>
     )
   }

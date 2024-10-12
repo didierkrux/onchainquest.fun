@@ -2,16 +2,28 @@ import { Box, Card, CardBody, Heading, Text, Link, Button, Input } from '@chakra
 import { useAppKit } from '@reown/appkit/react'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
+import { useState, useEffect } from 'react'
 import React from 'react'
 
 import { Event, Quest } from 'entities/data'
-
+import { Profile } from 'entities/profile'
 export default function Onboarding({ event }: { event: Event }) {
   const { t } = useTranslation()
   const { open } = useAppKit()
   const { address } = useAccount()
+  const [profile, setProfile] = useState<Profile | null>(null)
 
-  console.log(address)
+  useEffect(() => {
+    if (address) {
+      fetch(`/api/profile?address=${address}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setProfile(data)
+        })
+    }
+  }, [address])
+
+  console.log('profile', profile)
 
   const QUESTS: Quest[] = event.tasks || []
 
@@ -110,7 +122,7 @@ export default function Onboarding({ event }: { event: Event }) {
                 </Box>
               )}
             </Box>
-            <Box>{/* {quest.isCompleted ? '✅' : '❌'} */}✅</Box>
+            <Box>{profile?.tasks?.[(index + 1).toString()]?.isCompleted ? '✅' : '❌'}</Box>
           </CardBody>
         </Card>
       ))}

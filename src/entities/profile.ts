@@ -10,5 +10,5 @@ export type Profile = {
   avatar: string
   role: string
   score: number
-  quests: Task[]
+  tasks: Record<string, Task>
 }

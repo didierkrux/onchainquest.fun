@@ -21,7 +21,7 @@ export default async function handler(
   }
 
   if (req.method === 'POST' && username?.length > 0) {
-    const profileToSave = { username, score: 10, tasks: { 1: { completed: true, score: 5 }, 2: { completed: true, score: 5 } } }
+    const profileToSave = { username, score: 10, tasks: { 1: { isCompleted: true, score: 5 }, 2: { isCompleted: true, score: 5 } } }
     console.log('Saving profile', profileToSave)
 
     const [profile] = await db('users')
@@ -39,7 +39,7 @@ export default async function handler(
       .first()
 
     if (!profile) {
-      const profileToSave = { event_id: eventId, address, score: 5, tasks: { 1: { completed: true, score: 5 } } }
+      const profileToSave = { event_id: eventId, address, score: 5, tasks: { 1: { isCompleted: true, score: 5 } } }
       console.log('Saving profile', profileToSave)
 
       const [profile] = await db('users')
