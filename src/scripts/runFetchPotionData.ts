@@ -1,4 +1,4 @@
-import fetchPotionData from '../utils/fetchPotionData';
+import { fetchPotionData } from '../utils/index';
 
 async function main() {
   try {

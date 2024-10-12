@@ -96,7 +96,7 @@ export default function Onboarding({ event }: { event: Event }) {
                 </Box>
                 {quest.description?.split('\n').map((line, index) => (
                   <React.Fragment key={index}>
-                    {line}
+                    <span dangerouslySetInnerHTML={{ __html: line }} />
                     <br />
                   </React.Fragment>
                 ))}
