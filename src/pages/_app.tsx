@@ -25,6 +25,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <ColorModeScript initialColorMode={theme.config.initialColorMode} />
         <NextHead>
           <title>{title ? `${title} | Start here` : 'Start here'}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
           {/* Progressive Web App */}
           <link rel="apple-touch-icon" href="/app-icon.png" />
           <meta name="apple-mobile-web-app-title" content="Start here" />

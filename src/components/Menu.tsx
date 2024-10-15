@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import styled from '@emotion/styled'
 
 import { MENU } from 'config'
+import { useLocalStorage } from 'usehooks-ts'
 
 type MenuItemProps = {
   label: string
@@ -57,8 +58,9 @@ const Menu = () => {
   const [isMobile] = useMediaQuery('(max-width: 48em)')
   const { address, isConnected } = useAccount()
   const { open } = useAppKit()
+  const [pwa] = useLocalStorage('pwa', false)
 
-  const { asPath } = useRouter()
+  const { pathname } = useRouter()
 
   const MENU_ITEMS = [
     {
@@ -83,7 +85,7 @@ const Menu = () => {
     },
   ]
 
-  const isProfileActive = asPath === MENU[4].href
+  const isProfileActive = pathname === MENU[4].href
 
   return (
     <Box
@@ -95,11 +97,12 @@ const Menu = () => {
       bg="black"
       boxShadow={isMobile ? '0 -1px 2px rgba(0, 0, 0, 0.1)' : 'none'}
       zIndex={10}
+      pb={pwa ? 'env(safe-area-inset-bottom)' : '0'}
     >
       <NoHoverDecoration>
         <Flex justify="space-around" align="center" h="60px" maxW="container.md" mx="auto">
           {MENU_ITEMS.map((item) => {
-            const isActive = asPath === item.href
+            const isActive = pathname === item.href
             return (
               <Box
                 key={item.href}
