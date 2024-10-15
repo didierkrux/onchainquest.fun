@@ -260,7 +260,7 @@ export default function Profile() {
             loadingText="Resetting..."
             colorScheme="red"
           >
-            Reset my profile & disconnect
+            Reset my profile
           </Button>
         </Box>
         {address && adminWallets.includes(address.toLowerCase()) && (
@@ -274,7 +274,7 @@ export default function Profile() {
             justifyContent="center"
             mb={4}
           >
-            <Text>Admin functions:</Text>
+            <Text>Admin:</Text>
             <a
               target="_blank"
               rel="noreferrer"
@@ -290,12 +290,12 @@ export default function Profile() {
                   loadingText="Syncing... (~30sec)"
                   colorScheme="red"
                 >
-                  Sync data from Notion
+                  Sync Notion data
                 </Button>
               </Box>
             ) : (
               <Button onClick={handleAdminSignature} colorScheme="red">
-                Verify admin signature
+                Verify signature
               </Button>
             )}
           </Box>
