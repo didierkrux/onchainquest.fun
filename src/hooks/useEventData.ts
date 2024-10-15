@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
+import { useLocalStorage } from 'usehooks-ts'
+
 import { Event, EventData } from 'entities/data'
 
 export function useEventData() {
   const { i18n } = useTranslation()
   const router = useRouter()
-  const [event, setEvent] = useState<Event | null>(null)
+  const [event, setEvent] = useLocalStorage<Event | null>('event', null)
   const [eventData, setEventData] = useState<EventData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
@@ -15,7 +17,7 @@ export function useEventData() {
     const fetchData = async () => {
       setIsLoading(true)
       try {
-        const response = await fetch('/api/data')
+        const response = await fetch('/api/event')
         const data = await response.json()
         setEventData(data)
         setError(null)
@@ -37,7 +39,7 @@ export function useEventData() {
   }, [router.asPath])
 
   useEffect(() => {
-    if (i18n.language && eventData) {
+    if (i18n.language && eventData && eventData?.data_en) {
       setEvent(i18n.language === 'en' ? eventData.data_en : eventData.data_tr)
     }
   }, [i18n.language, eventData])

@@ -53,7 +53,8 @@ export async function fetchPotionData(): Promise<Event> {
         })),
       tasks: data
         .filter((item: any) => item.fields.Type === 'Task')
-        .map((item: any) => ({
+        .map((item: any, index: number) => ({
+          id: index,
           name: item.fields.Label,
           points: item.fields.Points,
           description: replaceLinks(item.fields.Description),

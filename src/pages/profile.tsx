@@ -23,7 +23,7 @@ import { adminSignatureMessage, adminWallets } from 'config'
 export default function Profile() {
   const { t } = useTranslation()
   const { address } = useAccount()
-  const [profile, setProfile] = useState<Profile | null>(null)
+  const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
   const { disconnect } = useDisconnect()
   const [username, setUsername] = useState('')
   const [isResetting, setIsResetting] = useState(false)
@@ -38,14 +38,32 @@ export default function Profile() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username }),
+      body: JSON.stringify({ username, taskId: 2 }),
     })
       .then((res) => res.json())
       .then((data) => {
-        setProfile(data)
+        console.log('data', data)
+        if (data?.message) {
+          toast({
+            title: 'Error',
+            description: ` ${data?.message}`,
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          })
+        } else {
+          setProfile(data)
+        }
       })
       .catch((error) => {
         console.error('Error saving profile:', error)
+        toast({
+          title: 'Error',
+          description: ` ${(error as Error).message}`,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        })
       })
   }
 

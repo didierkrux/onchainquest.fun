@@ -2,16 +2,18 @@ import { Box, Card, CardBody, Heading, Text, Link, Button, Input } from '@chakra
 import { useAppKit } from '@reown/appkit/react'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import React from 'react'
+import { useLocalStorage } from 'usehooks-ts'
 
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
+
 export default function Onboarding({ event }: { event: Event }) {
   const { t } = useTranslation()
   const { open } = useAppKit()
   const { address } = useAccount()
-  const [profile, setProfile] = useState<Profile | null>(null)
+  const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
 
   useEffect(() => {
     if (address) {
@@ -22,8 +24,6 @@ export default function Onboarding({ event }: { event: Event }) {
         })
     }
   }, [address])
-
-  console.log('profile', profile)
 
   const QUESTS: Quest[] = event.tasks || []
 

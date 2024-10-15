@@ -1,6 +1,7 @@
 import { Box, Card, CardBody, Heading, Stack, StackDivider, Text } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useLocalStorage } from 'usehooks-ts'
 
 import { Event } from 'entities/data'
 import { Profile } from 'entities/profile'
@@ -8,12 +9,15 @@ import { displayName } from 'utils/index'
 
 export default function Leaderboard({ event }: { event: Event }) {
   const { t } = useTranslation()
-  const [leaderboard, setLeaderboard] = useState<Profile[]>([])
+  const [leaderboard, setLeaderboard] = useLocalStorage<Profile[] | null>('leaderboard', null)
 
   useEffect(() => {
     fetch('/api/leaderboard')
       .then((res) => res.json())
       .then((data) => setLeaderboard(data))
+      .catch((error) => {
+        console.error('Error fetching leaderboard:', error)
+      })
   }, [])
 
   return (
@@ -30,7 +34,9 @@ export default function Leaderboard({ event }: { event: Event }) {
           </Card>
         ))}
       </Box>
-      {leaderboard.length > 0 && (
+      {!leaderboard ? (
+        <Text>Loading...</Text>
+      ) : leaderboard.length > 0 ? (
         <>
           <Heading as="h1" mt={4}>
             {t('Leaderboard')}
@@ -65,6 +71,8 @@ export default function Leaderboard({ event }: { event: Event }) {
             </CardBody>
           </Card>
         </>
+      ) : (
+        <Text>No users yet</Text>
       )}
     </Box>
   )
