@@ -38,7 +38,7 @@ export default function Profile() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username, taskId: 2 }),
+      body: JSON.stringify({ username, taskId: 1 }),
     })
       .then((res) => res.json())
       .then((data) => {

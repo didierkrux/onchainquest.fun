@@ -2,7 +2,9 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import db from 'utils/db'
-import { eventId } from 'config'
+import { eventId } from 'config/index'
+import { userHasPoap } from 'utils/index'
+import { TaskAction } from 'entities/data'
 
 export default async function handler(
   req: NextApiRequest,
@@ -44,8 +46,16 @@ export default async function handler(
     if (!(taskId in eventTasksArray)) {
       return res.status(400).json({ message: 'Invalid task' })
     }
-    // update profile: username + avatar
-    if (taskId === 2 && username?.length > 0) {
+    const taskAction: TaskAction = eventTasks[taskId].action
+    console.log('taskAction', taskAction)
+    const taskCondition = eventTasks[taskId].condition
+    console.log('taskCondition', taskCondition)
+
+    const taskToSave = eventTasks[taskId]
+    console.log('taskToSave', taskToSave)
+
+    // update profile (username + avatar)
+    if (taskAction === 'setup-profile' && username?.length > 0) {
       // check if username already exists
       const userWithUsername = await db('users')
         .select('*')
@@ -55,11 +65,26 @@ export default async function handler(
       if (userWithUsername) {
         return res.status(400).json({ message: 'Username already exists' })
       }
-      const taskToSave = eventTasks[taskId]
-      console.log('taskToSave', taskToSave)
       userTasks[taskId.toString()] = { isCompleted: true, points: taskToSave.points }
       console.log('userTasks', userTasks)
+    } else if (taskAction === 'claim-poap') {
+      const poapId = taskCondition
+      console.log('poapId', poapId)
+      const hasPoap = await userHasPoap(address, poapId)
+      console.log('hasPoap', hasPoap)
+      if (hasPoap) {
+        userTasks[taskId.toString()] = { isCompleted: true, points: taskToSave.points }
+        console.log('userTasks', userTasks)
+      } else {
+        return res.status(400).json({ message: 'You do not have a POAP for this event' })
+      }
+    } else if (taskAction === 'click-link') {
+      userTasks[taskId.toString()] = { isCompleted: true, points: taskToSave.points }
+      console.log('userTasks', userTasks)
+    } else {
+      return res.status(400).json({ message: 'Task not available yet.' })
     }
+    // getMoments -> check if user posted a moment
     // calculate score
     const score = Object.values(userTasks).reduce((acc, task: any) => acc + task?.points, 0)
     const profileToSave = { username, score, tasks: userTasks }
@@ -80,7 +105,8 @@ export default async function handler(
       .first()
 
     if (!profile) {
-      const profileToSave = { event_id: eventId, address, score: 5, tasks: { 1: { isCompleted: true, points: 5 } } }
+      // task 1: connect-wallet
+      const profileToSave = { event_id: eventId, address, score: 5, tasks: { 0: { isCompleted: true, points: 5 } } }
       console.log('Saving profile', profileToSave)
 
       const [profile] = await db('users')

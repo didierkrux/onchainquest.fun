@@ -112,3 +112,65 @@ export async function translateData(data: Event, targetLang: string): Promise<Ev
 
   return await translateObject(data)
 }
+
+export async function userHasPoap(address: string, eventId: string): Promise<boolean> {
+  try {
+    const response = await fetch("https://public.compass.poap.tech/v1/graphql", {
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+      },
+      "body": `{\"query\":\"\\n  query DropCollectorsCount(\\n    $dropswWhere: drops_bool_exp!\\n    $poapsWhere: poaps_bool_exp\\n    $distinct_on: [poaps_select_column!]\\n  ) {\\n    drops(where: $dropswWhere) {\\n      poaps_aggregate(distinct_on: $distinct_on, where: $poapsWhere) {\\n        aggregate {\\n          count\\n        }\\n      }\\n    }\\n  }\\n\",\"variables\":{\"dropswWhere\":{\"id\":{\"_eq\":${eventId}}},\"poapsWhere\":{\"collector_address\":{\"_in\":[\"${address?.toLowerCase()}\"]}},\"distinct_on\":[\"collector_address\"]}}`,
+      "method": "POST"
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching POAPs`);
+    }
+
+    const data = await response.json();
+    const count = data.data.drops?.[0]?.poaps_aggregate?.aggregate?.count
+    console.log('count', count)
+    return count > 0
+  } catch (error) {
+    console.error('Error checking POAP ownership:', error);
+    return false;
+  }
+}
+
+export async function getMoments(eventId: string) {
+  try {
+    const query = `query MyQuery {
+  moments(
+    limit: 100
+    where: {drop_id: {_eq: ${eventId}}}
+    order_by: {created_on: desc}
+  ) {
+    id
+    author
+    description
+    created_on
+    drop_id
+    media {
+      mime_type
+      gateways {
+        type
+        url
+      }
+    }
+  }
+}`
+    const response = await fetch('https://public.compass.poap.tech/v1/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+    })
+    const data = await response.json()
+    console.log('data', data)
+    return data
+  } catch (error) {
+    console.error('Error fetching moments:', error)
+    return []
+  }
+}

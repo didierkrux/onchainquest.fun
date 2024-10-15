@@ -26,11 +26,22 @@ export type Prize = {
   description: string
 }
 
+export type TaskAction =
+  | 'connect-wallet'
+  | 'setup-profile'
+  | 'claim-poap'
+  | 'secret-word'
+  | 'click-link'
+  | 'claim-tokens'
+  | 'swap-tokens'
+  | 'poap-picture'
+
 export type Quest = {
+  id: string
   name: string
   points: number
   description: string
-  action: string
+  action: TaskAction
   condition?: string
   actionField?: React.ReactNode
 }
