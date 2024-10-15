@@ -50,7 +50,7 @@ const LanguageSwitch = (): React.ReactElement => {
           <Box display="flex" flexWrap="wrap" justifyContent="center" alignItems="center" m="auto">
             {languages.map((l) => (
               <Button
-                variant={i18n.language === l ? 'solid' : 'outline'}
+                variant={i18n.language?.startsWith(l) ? 'solid' : 'outline'}
                 key={l}
                 onClick={() => {
                   i18n.changeLanguage(l)

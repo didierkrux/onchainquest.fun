@@ -40,7 +40,7 @@ export function useEventData() {
 
   useEffect(() => {
     if (i18n.language && eventData && eventData?.data_en) {
-      setEvent(i18n.language === 'en' ? eventData.data_en : eventData.data_tr)
+      setEvent(i18n.language?.startsWith('en') ? eventData.data_en : eventData.data_tr)
     }
   }, [i18n.language, eventData])
 
