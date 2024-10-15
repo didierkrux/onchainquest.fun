@@ -51,9 +51,7 @@ const LanguageSwitch = (): React.ReactElement => {
             {languages.map((l) => (
               <Button
                 variant={i18n.language === l ? 'solid' : 'outline'}
-                // variant="secondary"
-                // isselected={(i18n.language === l)?.toString()}
-                // title={l in LanguageDescription ? LanguageDescription[l] : ''}
+                key={l}
                 onClick={() => {
                   i18n.changeLanguage(l)
                 }}
