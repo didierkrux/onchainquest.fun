@@ -15,3 +15,26 @@ export const potionUrl = 'https://potion.banklessacademy.com/table?id=37a9e401c5
 if (!projectId) {
   throw new Error('Project ID is not defined')
 }
+
+export const MENU = [
+  {
+    label: 'Agenda',
+    href: '/',
+  },
+  {
+    label: 'Venue',
+    href: '/venue',
+  },
+  {
+    label: 'Onboarding',
+    href: '/onboarding',
+  },
+  {
+    label: 'Leaderboard',
+    href: '/leaderboard',
+  },
+  {
+    label: 'Profile',
+    href: '/profile',
+  },
+]

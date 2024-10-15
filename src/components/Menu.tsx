@@ -1,18 +1,14 @@
 import { Box, Flex, Image, useMediaQuery } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useAccount } from 'wagmi'
-import {
-  CalendarCheck,
-  ListChecks,
-  MapTrifold,
-  Ranking,
-  Plugs,
-  Translate,
-} from '@phosphor-icons/react'
+import { CalendarCheck, ListChecks, MapTrifold, Ranking, Plugs } from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
 import { useAppKit } from '@reown/appkit/react'
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
+import styled from '@emotion/styled'
+
+import { MENU } from 'config'
 
 type MenuItemProps = {
   label: string
@@ -20,8 +16,16 @@ type MenuItemProps = {
   children: React.ReactNode
 } & React.ComponentPropsWithoutRef<'div'>
 
+export const NoHoverDecoration = styled(Box)`
+  a:hover,
+  a[data-hover] {
+    -webkit-text-decoration: none !important;
+    text-decoration: none !important;
+  }
+`
+
 const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
-  const [isMobile] = useMediaQuery('(max-width: 48em)', { ssr: true })
+  const [isMobile] = useMediaQuery('(max-width: 48em)')
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -50,7 +54,7 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
 
 const Menu = () => {
   const { t } = useTranslation()
-  const [isMobile] = useMediaQuery('(max-width: 48em)', { ssr: true })
+  const [isMobile] = useMediaQuery('(max-width: 48em)')
   const { address, isConnected } = useAccount()
   const { open } = useAppKit()
 
@@ -58,28 +62,28 @@ const Menu = () => {
 
   const MENU_ITEMS = [
     {
-      label: t('Agenda'),
+      label: t(MENU[0].label),
       icon: CalendarCheck,
-      href: '/',
+      href: MENU[0].href,
     },
     {
-      label: t('Venue'),
+      label: t(MENU[1].label),
       icon: MapTrifold,
-      href: '/venue',
+      href: MENU[1].href,
     },
     {
-      label: t('Onboarding'),
+      label: t(MENU[2].label),
       icon: ListChecks,
-      href: '/onboarding',
+      href: MENU[2].href,
     },
     {
-      label: t('Leaderboard'),
+      label: t(MENU[3].label),
       icon: Ranking,
-      href: '/leaderboard',
+      href: MENU[3].href,
     },
   ]
 
-  const isProfileActive = asPath === '/profile'
+  const isProfileActive = asPath === MENU[4].href
 
   return (
     <Box
@@ -92,73 +96,53 @@ const Menu = () => {
       boxShadow={isMobile ? '0 -1px 2px rgba(0, 0, 0, 0.1)' : 'none'}
       zIndex={10}
     >
-      <Flex
-        justify="space-around"
-        align="center"
-        h="60px"
-        maxW="container.md"
-        mx="auto"
-        _hover={{ textDecoration: 'none !important' }}
-        textDecoration="center"
-      >
-        {MENU_ITEMS.map((item) => {
-          const isActive = asPath === item.href
-          return (
-            <Box
-              key={item.href}
-              w="100%"
-              h="100%"
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-            >
-              <NextLink
-                href={item.href}
-                style={{ textDecoration: 'none !important', width: '100%', height: '100%' }}
+      <NoHoverDecoration>
+        <Flex justify="space-around" align="center" h="60px" maxW="container.md" mx="auto">
+          {MENU_ITEMS.map((item) => {
+            const isActive = asPath === item.href
+            return (
+              <Box
+                key={item.href}
+                w="100%"
+                h="100%"
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
               >
-                <MenuItem label={item.label} isActive={isActive}>
-                  <item.icon size={24} />
-                </MenuItem>
-              </NextLink>
-            </Box>
-          )
-        })}
-        <Box
-          w="100%"
-          h="100%"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          _hover={{ textDecoration: 'none !important' }}
-          textDecoration="center"
-        >
-          <NextLink
-            href="/profile"
-            style={{ textDecoration: 'none !important', width: '100%', height: '100%' }}
-          >
-            <MenuItem
-              label={isConnected ? t('Profile') : t('Connect')}
-              isActive={isProfileActive}
-              onClick={() => {
-                if (!isConnected) {
-                  open({ view: 'Connect' })
-                }
-              }}
-            >
-              {address ? (
-                <Image
-                  h="24px"
-                  borderRadius="full"
-                  src={`https://ensdata.net/media/avatar/${address}`}
-                  border={isProfileActive ? '1px solid orange' : '1px solid white'}
-                />
-              ) : (
-                <Plugs size={24} />
-              )}
-            </MenuItem>
-          </NextLink>
-        </Box>
-      </Flex>
+                <NextLink href={item.href} style={{ width: '100%', height: '100%' }}>
+                  <MenuItem label={item.label} isActive={isActive}>
+                    <item.icon size={24} />
+                  </MenuItem>
+                </NextLink>
+              </Box>
+            )
+          })}
+          <Box w="100%" h="100%" display="flex" justifyContent="center" alignItems="center">
+            <NextLink href={MENU[4].href} style={{ width: '100%', height: '100%' }}>
+              <MenuItem
+                label={isConnected ? t(MENU[4].label) : t('Connect')}
+                isActive={isProfileActive}
+                onClick={() => {
+                  if (!isConnected) {
+                    open({ view: 'Connect' })
+                  }
+                }}
+              >
+                {address ? (
+                  <Image
+                    h="24px"
+                    borderRadius="full"
+                    src={`https://ensdata.net/media/avatar/${address}`}
+                    border={isProfileActive ? '1px solid orange' : '1px solid white'}
+                  />
+                ) : (
+                  <Plugs size={24} />
+                )}
+              </MenuItem>
+            </NextLink>
+          </Box>
+        </Flex>
+      </NoHoverDecoration>
     </Box>
   )
 }
