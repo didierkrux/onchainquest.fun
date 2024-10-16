@@ -3,6 +3,8 @@ import { Box, useMediaQuery } from '@chakra-ui/react'
 
 import Menu from 'components/Menu'
 import { useEventData } from 'hooks/useEventData'
+import { env } from 'process'
+import { useLocalStorage } from 'usehooks-ts'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -11,6 +13,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMobile] = useMediaQuery('(max-width: 48em)')
   const { event, error } = useEventData()
+  const [pwa] = useLocalStorage('pwa', false)
 
   return (
     <Box>
@@ -20,7 +23,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <main>
         <Box
           p="4"
-          mb={isMobile ? 'calc(60px + env(safe-area-inset-bottom))' : 0}
+          mb={isMobile ? `calc(60px + ${pwa ? '16px' : '0px'})` : 0}
           maxW="container.lg"
           mx="auto"
         >

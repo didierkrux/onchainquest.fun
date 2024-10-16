@@ -97,7 +97,7 @@ const Menu = () => {
       bg="black"
       boxShadow={isMobile ? '0 -1px 2px rgba(0, 0, 0, 0.1)' : 'none'}
       zIndex={10}
-      pb={pwa ? 'env(safe-area-inset-bottom)' : '0'}
+      pb={isMobile && pwa ? '16px' : '0'}
     >
       <NoHoverDecoration>
         <Flex justify="space-around" align="center" h="60px" maxW="container.md" mx="auto">
