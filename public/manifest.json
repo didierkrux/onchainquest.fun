@@ -3,7 +3,7 @@
   "short_name": "Start Here",
   "theme_color": "#000000",
   "background_color": "#000000",
-  "start_url": "/",
+  "start_url": "/?pwa=true",
   "icons": [
     {
       "src": "/app-icon.png",
@@ -11,6 +11,6 @@
       "type": "image/png"
     }
   ],
-  "scope": "/?pwa=true",
+  "scope": "/",
   "display": "standalone"
 }
