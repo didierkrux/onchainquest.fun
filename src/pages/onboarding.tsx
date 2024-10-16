@@ -51,7 +51,7 @@ export default function Onboarding({ event }: { event: Event }) {
   const { open } = useAppKit()
   const { address } = useAccount()
   const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
-  const [isLoading, setIsLoading] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState<number | null>(null)
   const [openModal, setOpenModal] = useState<string | null>(null)
   const toast = useToast()
   useEffect(() => {
@@ -68,27 +68,41 @@ export default function Onboarding({ event }: { event: Event }) {
 
   const handleAction = (quest: Quest) => {
     const taskId = quest.id
+    console.log('taskId', taskId)
     setIsLoading(taskId)
-    fetch(`/api/profile?address=${address}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        taskId: quest.id,
-      }),
-    })
+    fetch(
+      taskId === 5
+        ? `/api/claim?address=${address}`
+        : `/api/profile?address=${address}&taskId=${taskId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          taskId: quest.id,
+        }),
+      }
+    )
       .then((res) => res.json())
       .then((data) => {
         console.log('data', data)
         if (data?.message) {
+          const feedbackType = data?.txHash ? 'success' : 'error'
           toast({
-            title: 'Error',
-            description: ` ${data?.message}`,
-            status: 'error',
+            title: feedbackType === 'success' ? 'Success' : 'Error',
+            description: `${data?.message}${
+              data?.txHash
+                ? `\nTransaction hash: <a href="${data?.txHash}" target="_blank">View on Basescan</a>`
+                : ''
+            }`,
+            status: feedbackType,
             duration: 5000,
             isClosable: true,
           })
+          if (data?.tasks) {
+            setProfile(data)
+          }
         } else {
           setProfile(data)
         }
@@ -117,7 +131,11 @@ export default function Onboarding({ event }: { event: Event }) {
     if (quest.action === 'claim-tokens') {
       quest.actionField = (
         <Box>
-          <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
+          <Button
+            onClick={() => handleAction(quest)}
+            isLoading={isLoading === quest.id}
+            loadingText="Claiming... (takes ~30 seconds, please wait for confirmation)"
+          >
             Claim
           </Button>
         </Box>
@@ -133,18 +151,27 @@ export default function Onboarding({ event }: { event: Event }) {
       )
     }
     if (quest.action === 'swap-tokens') {
-      quest.actionField = (
-        <Box>
-          <Button
-            onClick={() => {
-              open({ view: 'Account' })
-            }}
-            isLoading={isLoading === quest.id}
-          >
-            Swap
-          </Button>
-        </Box>
-      )
+      quest.actionField =
+        profile?.tasks?.[5]?.isCompleted ?? false ? (
+          <Box display="flex" gap={4}>
+            <Button
+              onClick={() => {
+                open({ view: 'Account' })
+              }}
+            >
+              Swap
+            </Button>
+            {!profile?.tasks?.[6]?.isCompleted && (
+              <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
+                Verify
+              </Button>
+            )}
+          </Box>
+        ) : (
+          <Box>
+            <Text>Claim your tokens (taksk 6) to swap</Text>
+          </Box>
+        )
     }
     if (quest.action === 'poap-picture' && quest.condition) {
       quest.actionField = (
@@ -219,7 +246,7 @@ export default function Onboarding({ event }: { event: Event }) {
                     </React.Fragment>
                   ))}
                 </Box>
-                {quest?.actionField && !isCompleted && (
+                {((quest?.actionField && !isCompleted) || index === 6) && (
                   <Box pt="2">
                     <Box fontWeight="bold" fontSize="lg" mb="2">
                       👉 {t('Action')}:

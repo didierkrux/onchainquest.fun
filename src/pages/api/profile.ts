@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 
 import db from 'utils/db'
 import { eventId } from 'config/index'
-import { userHasPoap } from 'utils/index'
+import { userHasPoap, userHasSwappedTokens } from 'utils/index'
 import { TaskAction } from 'entities/data'
 
 export default async function handler(
@@ -81,6 +81,15 @@ export default async function handler(
     } else if (taskAction === 'click-link') {
       userTasks[taskId.toString()] = { isCompleted: true, points: taskToSave.points }
       console.log('userTasks', userTasks)
+    } else if (taskAction === 'swap-tokens') {
+      const swapCompleted = await userHasSwappedTokens(address, taskCondition)
+      console.log('swapCompleted', swapCompleted)
+      if (swapCompleted) {
+        userTasks[taskId.toString()] = { isCompleted: true, points: taskToSave.points }
+        console.log('userTasks', userTasks)
+      } else {
+        return res.status(400).json({ message: 'You have not swapped your tokens yet' })
+      }
     } else {
       return res.status(400).json({ message: 'Task not available yet.' })
     }

@@ -174,3 +174,59 @@ export async function getMoments(eventId: string) {
     return []
   }
 }
+
+export async function userHasSwappedTokens(address: string, tokenAddress: string): Promise<boolean> {
+  try {
+    console.log('tokenAddress', tokenAddress);
+
+    const oneInchBaseAddress = '0xe37e799d5077682fa0a244d46e5649f71457bd09';
+    const sevenDaysAgo = Math.floor(Date.now() / 1000) - 604800; // 7 days ago in seconds
+
+    const response = await fetch(`https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'alchemy_getAssetTransfers',
+        params: [
+          {
+            fromAddress: address,
+            toAddress: oneInchBaseAddress,
+            category: ['erc20'],
+            withMetadata: true,
+            excludeZeroValue: true,
+            maxCount: '0x3e8',
+            fromBlock: '0x0',
+            toBlock: 'latest',
+            order: 'desc',
+          },
+        ],
+      }),
+    });
+
+    const data = await response.json();
+    console.log('Alchemy response:', data);
+
+    if (data.result && data.result.transfers) {
+      return data.result.transfers.some((transfer: any) => {
+        console.log('transfer', transfer)
+        const transferTimestamp = new Date(transfer?.metadata?.blockTimestamp).getTime() / 1000 || 0;
+        const isTokenTransfer = transfer?.rawContract?.address?.toLowerCase() === tokenAddress?.toLowerCase();
+        console.log('isTokenTransfer', isTokenTransfer);
+        console.log('transferTimestamp', transferTimestamp);
+        const isRecentTransfer = transferTimestamp >= sevenDaysAgo;
+        console.log('isRecentTransfer', isRecentTransfer);
+
+        return isRecentTransfer && isTokenTransfer;
+      });
+    }
+
+    return false
+  } catch (error) {
+    console.error('Error checking 1inch interaction:', error);
+    return false;
+  }
+}

@@ -37,7 +37,7 @@ export type TaskAction =
   | 'poap-picture'
 
 export type Quest = {
-  id: string
+  id: number
   name: string
   points: number
   description: string
