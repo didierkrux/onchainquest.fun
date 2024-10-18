@@ -40,6 +40,27 @@ export default function Agenda({ event }: { event: Event }) {
         </Card>
       ))}
       <Heading as="h1" mt={4}>
+        {t('Venue map')}
+      </Heading>
+      {event?.venue?.length > 0 && event?.venue[0]?.image && <Image src={event.venue[0].image} />}
+      <Heading as="h1" mt={4}>
+        {t('Booths')}
+      </Heading>
+      {event.booths.map((booth, index) => (
+        <Card mt={4} key={index}>
+          <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
+            <Box>
+              <Text as="h3" mb={4} fontWeight="bold">
+                {booth.name}
+              </Text>
+              <Text as="h3" mb={4}>
+                {booth.description}
+              </Text>
+            </Box>
+          </CardBody>
+        </Card>
+      ))}
+      <Heading as="h1" mt={4}>
         {t('Sponsors')}
       </Heading>
       {event.sponsors.map((sponsor, index) => (
@@ -49,7 +70,9 @@ export default function Agenda({ event }: { event: Event }) {
               <a href={sponsor.link}>
                 <Image h="60px" src={sponsor.image} alt={sponsor.name} />
               </a>
-              <Text as="h3">{sponsor.description}</Text>
+              <Text as="h3" mt={4}>
+                {sponsor.description}
+              </Text>
             </Box>
           </CardBody>
         </Card>

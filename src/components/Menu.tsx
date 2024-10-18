@@ -1,7 +1,7 @@
 import { Box, Flex, Image, useMediaQuery } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useAccount } from 'wagmi'
-import { CalendarCheck, ListChecks, MapTrifold, Ranking, Plugs } from '@phosphor-icons/react'
+import { CalendarCheck, ListChecks, Ranking, Plugs, InstagramLogo } from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
 import { useAppKit } from '@reown/appkit/react'
 import { useTranslation } from 'react-i18next'
@@ -70,7 +70,7 @@ const Menu = () => {
     },
     {
       label: t(MENU[1].label),
-      icon: MapTrifold,
+      icon: InstagramLogo,
       href: MENU[1].href,
     },
     {

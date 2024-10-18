@@ -18,12 +18,12 @@ if (!projectId) {
 
 export const MENU = [
   {
-    label: 'Agenda',
+    label: 'Event',
     href: '/',
   },
   {
-    label: 'Venue',
-    href: '/venue',
+    label: 'Social',
+    href: '/social',
   },
   {
     label: 'Onboarding',
