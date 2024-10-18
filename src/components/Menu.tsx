@@ -1,4 +1,4 @@
-import { Box, Flex, Image, useMediaQuery } from '@chakra-ui/react'
+import { Box, Flex, useMediaQuery } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useAccount } from 'wagmi'
 import { CalendarCheck, ListChecks, Ranking, Plugs, InstagramLogo } from '@phosphor-icons/react'
@@ -12,7 +12,7 @@ import { MENU } from 'config'
 import { useLocalStorage } from 'usehooks-ts'
 import { profileAvatar } from 'utils'
 import { Profile } from 'entities/profile'
-
+import { Avatar } from 'components/Avatar'
 type MenuItemProps = {
   label: string
   isActive: boolean
@@ -58,7 +58,7 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
 const Menu = () => {
   const { t } = useTranslation()
   const [isMobile] = useMediaQuery('(max-width: 48em)')
-  const { address, isConnected } = useAccount()
+  const { isConnected } = useAccount()
   const { open } = useAppKit()
   const [pwa] = useLocalStorage('pwa', false)
   const [profile] = useLocalStorage<Profile | null>('profile', null)
@@ -135,12 +135,12 @@ const Menu = () => {
                 }}
               >
                 {profile ? (
-                  <Image
-                    h="24px"
-                    borderRadius="full"
-                    src={profileAvatar(profile)}
+                  <Box
                     border={isProfileActive ? '1px solid orange' : '1px solid white'}
-                  />
+                    borderRadius="full"
+                  >
+                    <Avatar w="24px" src={profileAvatar(profile)} />
+                  </Box>
                 ) : (
                   <Plugs size={24} />
                 )}

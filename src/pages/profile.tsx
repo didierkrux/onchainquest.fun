@@ -358,8 +358,8 @@ export default function Profile() {
                     onChange={(index) => setRole(index === 0 ? 'learner' : 'mentor')}
                   >
                     <TabList>
-                      <Tab>{t('Learner')}</Tab>
-                      <Tab>{t('Mentor')}</Tab>
+                      <Tab>{t('Learner')} 🧑‍🎓</Tab>
+                      <Tab>{t('Mentor')} 🧑‍🏫</Tab>
                     </TabList>
                   </Tabs>
                 </Box>
