@@ -8,8 +8,16 @@ export function shortAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
 }
 
-export function displayName(profile: Profile) {
-  return profile.username ? `@${profile.username}` : shortAddress(profile.address)
+export function profileName(profile: Profile) {
+  return profile.basename ? profile.basename : (profile.username ? `@${profile.username}` : shortAddress(profile.address))
+}
+
+export function profileAvatar(profile: Profile) {
+  return profile.basename_avatar ? profile.basename_avatar : profile?.avatar || `https://ensdata.net/media/avatar/${profile.address}`
+}
+
+export function profileRole(profile: Profile) {
+  return profile.role === 'mentor' ? '🧑‍🏫' : '🧑‍🎓'
 }
 
 export async function fetchPotionData(): Promise<Event> {

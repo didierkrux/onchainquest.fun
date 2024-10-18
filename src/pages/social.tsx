@@ -11,6 +11,7 @@ interface IGMedia {
 }
 
 export default function Social({ event }: { event: Event }) {
+  const { t } = useTranslation()
   const [instagramPosts, setInstagramPosts] = useState<string[]>([])
   const [twitterPosts, setTwitterPosts] = useState<string[]>([])
   useEffect(() => {
@@ -50,7 +51,7 @@ export default function Social({ event }: { event: Event }) {
       <Box>
         <Text>
           <Link href="https://www.instagram.com/explore/tags/new2web3/" isExternal>
-            View all #New2Web3 posts in Instagram
+            {t('View all #New2Web3 posts in Instagram')}
           </Link>
         </Text>
         <Box
@@ -76,7 +77,7 @@ export default function Social({ event }: { event: Event }) {
       <Box>
         <Text>
           <Link href="https://x.com/search?q=%23new2web3&src=recent_search_click&f=live" isExternal>
-            View all #New2Web3 posts in Twitter / X
+            {t('View all #New2Web3 posts in Twitter / X')}
           </Link>
         </Text>
         <Box

@@ -1,11 +1,11 @@
-import { Box, Card, CardBody, Heading, Stack, StackDivider, Text } from '@chakra-ui/react'
+import { Box, Card, CardBody, Heading, Stack, StackDivider, Text, Image } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
 import { useLocalStorage } from 'usehooks-ts'
 
 import { Event } from 'entities/data'
 import { Profile } from 'entities/profile'
-import { displayName } from 'utils/index'
+import { profileAvatar, profileName, profileRole } from 'utils/index'
 
 export default function Leaderboard({ event }: { event: Event }) {
   const { t } = useTranslation()
@@ -62,7 +62,9 @@ export default function Leaderboard({ event }: { event: Event }) {
                           ? '🥉'
                           : `#${index + 1}`}
                       </Box>
-                      <Text>{displayName(user)}</Text>
+                      <Image src={profileAvatar(user)} h="30px" w="30px" borderRadius="full" />
+                      <Text>{profileName(user)}</Text>
+                      <Text fontSize="24px">{profileRole(user)}</Text>
                     </Box>
                     <Text>{user.score} ⭐️</Text>
                   </Box>

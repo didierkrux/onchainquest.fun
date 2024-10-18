@@ -10,6 +10,8 @@ import styled from '@emotion/styled'
 
 import { MENU } from 'config'
 import { useLocalStorage } from 'usehooks-ts'
+import { profileAvatar } from 'utils'
+import { Profile } from 'entities/profile'
 
 type MenuItemProps = {
   label: string
@@ -59,27 +61,28 @@ const Menu = () => {
   const { address, isConnected } = useAccount()
   const { open } = useAppKit()
   const [pwa] = useLocalStorage('pwa', false)
+  const [profile] = useLocalStorage<Profile | null>('profile', null)
 
   const { pathname } = useRouter()
 
   const MENU_ITEMS = [
     {
-      label: t(MENU[0].label),
+      label: t('Event'),
       icon: CalendarCheck,
       href: MENU[0].href,
     },
     {
-      label: t(MENU[1].label),
+      label: t('Social'),
       icon: InstagramLogo,
       href: MENU[1].href,
     },
     {
-      label: t(MENU[2].label),
+      label: t('Onboarding'),
       icon: ListChecks,
       href: MENU[2].href,
     },
     {
-      label: t(MENU[3].label),
+      label: t('Leaderboard'),
       icon: Ranking,
       href: MENU[3].href,
     },
@@ -131,11 +134,11 @@ const Menu = () => {
                   }
                 }}
               >
-                {address ? (
+                {profile ? (
                   <Image
                     h="24px"
                     borderRadius="full"
-                    src={`https://ensdata.net/media/avatar/${address}`}
+                    src={profileAvatar(profile)}
                     border={isProfileActive ? '1px solid orange' : '1px solid white'}
                   />
                 ) : (

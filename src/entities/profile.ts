@@ -11,4 +11,6 @@ export type Profile = {
   role: string
   score: number
   tasks: Record<string, Task>
+  basename?: string
+  basename_avatar?: string
 }

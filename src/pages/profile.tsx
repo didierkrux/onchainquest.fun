@@ -6,7 +6,11 @@ import {
   Heading,
   Image,
   Input,
+  Tabs,
+  TabList,
+  Tab,
   Text,
+  useClipboard,
   useToast,
 } from '@chakra-ui/react'
 import { useAccount, useDisconnect, useSignMessage } from 'wagmi'
@@ -15,10 +19,13 @@ import QRCode from 'qrcode'
 import { useTranslation } from 'react-i18next'
 import { useLocalStorage } from 'usehooks-ts'
 import { verifyMessage } from 'viem'
+import twemoji from '@twemoji/api'
 
 import { Profile } from 'entities/profile'
-import { displayName } from 'utils/index'
+import { profileName, profileAvatar, profileRole } from 'utils/index'
 import { adminSignatureMessage, adminWallets } from 'config'
+import { Check, CopySimple } from '@phosphor-icons/react'
+import { Avatar } from 'components/Avatar'
 
 export default function Profile() {
   const { t } = useTranslation()
@@ -26,19 +33,25 @@ export default function Profile() {
   const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
   const { disconnect } = useDisconnect()
   const [username, setUsername] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [avatar, setAvatar] = useState('')
+  const [avatarEmoji, setAvatarEmoji] = useState('')
+  const [role, setRole] = useState('')
   const [isResetting, setIsResetting] = useState(false)
   const toast = useToast()
   const [adminSignature, setAdminSignature] = useLocalStorage('admin-signature', '')
   const { signMessageAsync } = useSignMessage()
   const [isSyncing, setIsSyncing] = useState(false)
+  const { onCopy, hasCopied } = useClipboard(profile?.address || '')
 
   const saveProfile = () => {
+    setIsSaving(true)
     fetch(`/api/profile?address=${address}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username, taskId: 1 }),
+      body: JSON.stringify({ username, avatar, role, taskId: 1 }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -53,10 +66,21 @@ export default function Profile() {
           })
         } else {
           setProfile(data)
+          toast({
+            title: 'Success',
+            description: `Profile saved successfully.`,
+            status: 'success',
+            duration: 5000,
+            isClosable: true,
+          })
         }
+      })
+      .finally(() => {
+        setIsSaving(false)
       })
       .catch((error) => {
         console.error('Error saving profile:', error)
+        setIsSaving(false)
         toast({
           title: 'Error',
           description: ` ${(error as Error).message}`,
@@ -73,6 +97,20 @@ export default function Profile() {
         .then((res) => res.json())
         .then((data) => {
           setProfile(data)
+          setUsername(data?.username || '')
+          setAvatar(data?.avatar || '')
+          if (data?.avatar?.includes('twemoji')) {
+            // Extract emoji code from URL
+            const emojiCode = data?.avatar.split('/').pop()?.split('.').shift()
+            if (emojiCode) {
+              // Convert hex code to actual emoji
+              const emoji = String.fromCodePoint(
+                ...emojiCode.split('-').map((code: any) => parseInt(code, 16))
+              )
+              setAvatarEmoji(emoji)
+            }
+          }
+          setRole(data?.role || 'learner')
         })
     }
   }
@@ -196,6 +234,19 @@ export default function Profile() {
     }
   }
 
+  const handleAvatarChange = (emoji: string) => {
+    const emojiUrl = twemoji.parse(emoji, {
+      folder: 'svg',
+      ext: '.svg',
+    })
+    // Extract the URL from the parsed HTML
+    const parsedUrl = emojiUrl.match(/src="([^"]+)"/)?.[1] || ''
+    if (parsedUrl || emoji === '') {
+      setAvatarEmoji(emoji)
+      setAvatar(parsedUrl)
+    }
+  }
+
   if (!address)
     return (
       <Box display="flex" flexDirection="column" alignItems="center">
@@ -205,19 +256,8 @@ export default function Profile() {
   else {
     return (
       <Box display="flex" flexDirection="column" alignItems="center">
-        {profile && !profile?.username && (
-          <Box display="flex" gap={4} mb={4} alignItems="center">
-            <Text>Username: </Text>
-            <Input
-              placeholder="Choose a username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <Button onClick={saveProfile}>Save</Button>
-          </Box>
-        )}
         {profile && profile?.address && (
-          <Card maxW="600px">
+          <Card maxW="600px" w="100%" mt={4} mb={4}>
             <CardBody>
               <Box
                 display="flex"
@@ -225,24 +265,34 @@ export default function Profile() {
                 flexDirection="column"
                 alignItems="center"
               >
-                <Box fontSize={['2xl', '4xl']} fontWeight="bold" mb={4}>
-                  {displayName(profile)}
+                <Box
+                  fontSize={['2xl', '4xl']}
+                  fontWeight="bold"
+                  mb={4}
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  gap={2}
+                >
+                  {profileName(profile)} {profileRole({ ...profile, role })}
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Text fontSize={['2xs', 'sm']} color="gray.500">
+                      {profile?.address}
+                    </Text>
+                    {hasCopied ? (
+                      <Check width={20} />
+                    ) : (
+                      <CopySimple width={20} onClick={onCopy} cursor="pointer" />
+                    )}
+                  </Box>
                 </Box>
               </Box>
               <Box m={4} display="flex" justifyContent="center">
-                <Image
-                  src={`https://ensdata.net/media/avatar/${address}`}
-                  mb={2}
-                  w="40%"
-                  h="auto"
-                  borderRadius="full"
-                />
+                <Avatar src={profileAvatar(profile)} w="40%" />
                 <Image src={qrCodeDataURL} w="40%" h="auto" alt="QR" ml={8} />
               </Box>
               <Box display="flex" justifyContent="space-around" alignItems="center">
-                <Text fontSize="3xl" color="gray.300">
-                  {profile?.role}
-                </Text>
                 <Box display="flex" alignItems="center">
                   <Heading fontSize="3xl">
                     {t('Score')}: {profile?.score} ⭐️
@@ -252,6 +302,108 @@ export default function Profile() {
             </CardBody>
           </Card>
         )}
+        <Card w="100%" maxW="600px" mt={4} mb={4}>
+          <CardBody>
+            <Box display="flex" flexDirection="column" gap={4} maxW="400px" mx="auto">
+              <Box display="flex" gap={4} mb={4} alignItems="center">
+                <Text>{t('Username: ')}</Text>
+                {profile?.basename ? (
+                  <a
+                    href={`https://www.base.org/name/${profile?.basename?.split('.')[0]}`}
+                    target="_blank"
+                  >
+                    <Text>{profile?.basename}</Text>
+                  </a>
+                ) : (
+                  <Input
+                    placeholder="Choose a username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                )}
+              </Box>
+              <Box display="flex" gap={4} mb={4} alignItems="center">
+                <Text>{t('Avatar: ')}</Text>
+                {profile?.basename_avatar ? (
+                  <a
+                    href={`https://www.base.org/name/${profile?.basename?.split('.')[0]}`}
+                    target="_blank"
+                  >
+                    <Avatar src={profile?.basename_avatar} />
+                  </a>
+                ) : (
+                  <>
+                    <Input
+                      placeholder="Enter an emoji"
+                      value={avatarEmoji}
+                      w="150px"
+                      textAlign="center"
+                      onChange={(e) => {
+                        const newValue = e.target.value?.replaceAll(avatarEmoji, '')
+                        if (newValue !== '') {
+                          handleAvatarChange(newValue)
+                        }
+                      }}
+                    />
+                    {avatar && <Avatar src={avatar} />}
+                  </>
+                )}
+              </Box>
+              {role !== '' ? (
+                <Box display="flex" gap={4} mb={4} alignItems="center">
+                  <Text>{t('Role: ')}</Text>
+                  <Tabs
+                    variant="soft-rounded"
+                    defaultIndex={role === 'learner' ? 0 : 1}
+                    onChange={(index) => setRole(index === 0 ? 'learner' : 'mentor')}
+                  >
+                    <TabList>
+                      <Tab>{t('Learner')}</Tab>
+                      <Tab>{t('Mentor')}</Tab>
+                    </TabList>
+                  </Tabs>
+                </Box>
+              ) : null}
+              <Box display="flex" justifyContent="center">
+                <Button onClick={saveProfile} isLoading={isSaving} loadingText="Saving..." w="100%">
+                  {t('Save')}
+                </Button>
+              </Box>
+            </Box>
+          </CardBody>
+        </Card>
+        <Card w="100%" maxW="600px" mt={4} mb={4} bg="red.100" color="black">
+          <CardBody>
+            {address && adminWallets.includes(address.toLowerCase()) && (
+              <Box display="flex" alignItems="center" gap={4} justifyContent="center">
+                <Text>Admin:</Text>
+                <a
+                  target="_blank"
+                  rel="noreferrer"
+                  href="https://www.notion.so/banklessacademy/37a9e401c55747d29af74e5d4d9f5c5b?v=6ab88582bf3e4b0d9b6a11cc9a70df36"
+                >
+                  Notion CMS
+                </a>
+                {adminSignature ? (
+                  <Box display="flex" gap={4}>
+                    <Button
+                      onClick={handleSyncData}
+                      isLoading={isSyncing}
+                      loadingText="Syncing... (~30sec)"
+                      colorScheme="red"
+                    >
+                      Sync Notion data
+                    </Button>
+                  </Box>
+                ) : (
+                  <Button onClick={handleAdminSignature} colorScheme="red">
+                    Verify signature
+                  </Button>
+                )}
+              </Box>
+            )}
+          </CardBody>
+        </Card>
         <Box mt={4} display="flex" gap={4} mb={4}>
           <Button onClick={() => disconnect()}>{t('Disconnect')}</Button>
           <Button
@@ -263,43 +415,6 @@ export default function Profile() {
             Reset my profile
           </Button>
         </Box>
-        {address && adminWallets.includes(address.toLowerCase()) && (
-          <Box
-            display="flex"
-            alignItems="center"
-            gap={4}
-            border="1px solid red"
-            p={4}
-            borderRadius="md"
-            justifyContent="center"
-            mb={4}
-          >
-            <Text>Admin:</Text>
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href="https://www.notion.so/banklessacademy/37a9e401c55747d29af74e5d4d9f5c5b?v=6ab88582bf3e4b0d9b6a11cc9a70df36"
-            >
-              Notion CMS
-            </a>
-            {adminSignature ? (
-              <Box display="flex" gap={4}>
-                <Button
-                  onClick={handleSyncData}
-                  isLoading={isSyncing}
-                  loadingText="Syncing... (~30sec)"
-                  colorScheme="red"
-                >
-                  Sync Notion data
-                </Button>
-              </Box>
-            ) : (
-              <Button onClick={handleAdminSignature} colorScheme="red">
-                Verify signature
-              </Button>
-            )}
-          </Box>
-        )}
       </Box>
     )
   }

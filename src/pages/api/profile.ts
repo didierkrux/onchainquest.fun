@@ -5,18 +5,22 @@ import db from 'utils/db'
 import { eventId } from 'config/index'
 import { userHasPoap, userHasSwappedTokens } from 'utils/index'
 import { TaskAction } from 'entities/data'
+import { getBasename } from 'utils/basenames'
+import { getBasenameAvatar } from 'utils/basenames'
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
   const { address } = req.query
-  const { username, taskId } = req.body
+  const { username, avatar, role, taskId } = req.body
   console.log('req.query', req.query)
   console.log('req.body', req.body)
   console.log('req.method', req.method)
   console.log('address', address)
   console.log('username', username)
+  console.log('avatar', avatar)
+  console.log('role', role)
   console.log('taskId', taskId)
 
   if (!address || typeof address !== 'string') {
@@ -55,15 +59,17 @@ export default async function handler(
     console.log('taskToSave', taskToSave)
 
     // update profile (username + avatar)
-    if (taskAction === 'setup-profile' && username?.length > 0) {
+    if (taskAction === 'setup-profile') {
       // check if username already exists
+      if (username?.length > 0) {
       const userWithUsername = await db('users')
         .select('*')
         .where('event_id', eventId)
         .whereILike('username', username)
         .first()
-      if (userWithUsername) {
-        return res.status(400).json({ message: 'Username already exists' })
+        if (userWithUsername && userWithUsername.address?.toLowerCase() !== address?.toLowerCase()) {
+          return res.status(400).json({ message: 'Username already exists' })
+        }
       }
       userTasks[taskId.toString()] = { isCompleted: true, points: taskToSave.points }
       console.log('userTasks', userTasks)
@@ -96,7 +102,7 @@ export default async function handler(
     // getMoments -> check if user posted a moment
     // calculate score
     const score = Object.values(userTasks).reduce((acc, task: any) => acc + task?.points, 0)
-    const profileToSave = { username, score, tasks: userTasks }
+    const profileToSave = { username, avatar, role, score, tasks: userTasks }
 
     console.log('Saving profile', profileToSave)
     const [profile] = await db('users')
@@ -124,8 +130,31 @@ export default async function handler(
       return res.status(200).json(profile)
     }
 
+      if (!profile.basename) {
+        const basename = await getBasename(address as `0x${string}`)
+        if (basename?.endsWith('.base.eth')) {
+          console.log('updating basename', basename)
+          await db('users')
+            .update({ basename })
+            .where('event_id', eventId)
+            .whereILike('address', address)
+          profile.basename = basename
+        }
+      }
+      if (!profile.basename_avatar && profile.basename?.endsWith('.base.eth')) {
+        const basename_avatar = await getBasenameAvatar(profile.basename)
+        if (basename_avatar) {
+          console.log('updating basename_avatar', basename_avatar)
+          await db('users')
+            .update({ basename_avatar })
+            .where('event_id', eventId)
+            .whereILike('address', address)
+          profile.basename_avatar = basename_avatar
+        }
+      }
+
     res.status(200).json(profile)
-  } catch (error) {
+    } catch (error) {
       console.error('Error fetching profile:', error)
       res.status(500).json({ message: 'Internal server error' })
     }

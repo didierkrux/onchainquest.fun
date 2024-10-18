@@ -22,6 +22,7 @@
     "@safe-global/protocol-kit": "^5.0.2",
     "@safe-global/safe-core-sdk-types": "^5.1.0",
     "@tanstack/react-query": "5.56.2",
+    "@twemoji/api": "^15.1.0",
     "@wagmi/core": "2.13.4",
     "@web3modal/react": "^2.7.1",
     "dotenv": "^16.4.5",
