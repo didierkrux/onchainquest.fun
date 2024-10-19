@@ -77,7 +77,7 @@ export default function Leaderboard({ event }: { event: Event }) {
           <Heading as="h1" mt={4}>
             {t('Leaderboard')}
           </Heading>
-          <Tabs variant="soft-rounded" colorScheme="gray" defaultIndex={1} mt={4}>
+          <Tabs defaultIndex={1} mt={4}>
             <TabList>
               <Tab>{t('All')}</Tab>
               <Tab>{t('Learners')}</Tab>
@@ -85,17 +85,17 @@ export default function Leaderboard({ event }: { event: Event }) {
             </TabList>
             <TabPanels>
               <TabPanel p={0}>
-                <Card mt={4}>
+                <Card borderTopRadius={0}>
                   <CardBody>{renderLeaderboardList(leaderboard)}</CardBody>
                 </Card>
               </TabPanel>
               <TabPanel p={0}>
-                <Card mt={4}>
+                <Card borderTopRadius={0}>
                   <CardBody>{renderLeaderboardList(filterByRole('learner'))}</CardBody>
                 </Card>
               </TabPanel>
               <TabPanel p={0}>
-                <Card mt={4}>
+                <Card borderTopRadius={0}>
                   <CardBody>{renderLeaderboardList(filterByRole('mentor'))}</CardBody>
                 </Card>
               </TabPanel>
