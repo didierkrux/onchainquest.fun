@@ -142,6 +142,15 @@ export default function Onboarding({ event }: { event: Event }) {
           </Button>
         </Box>
       )
+      if (profile?.tasks?.[quest.id]?.txLink) {
+        quest.completedField = (
+          <Box>
+            <a href={profile?.tasks?.[quest.id]?.txLink} target="_blank">
+              {t('View claiming transaction on BaseScan')}
+            </a>
+          </Box>
+        )
+      }
     }
     if (quest.action === 'claim-poap' || quest.action === 'own-basename') {
       quest.actionField = (
@@ -151,6 +160,21 @@ export default function Onboarding({ event }: { event: Event }) {
           </Button>
         </Box>
       )
+    }
+    if (quest.action === 'own-basename') {
+      if (profile?.basename) {
+        quest.completedField = (
+          <Box display="flex" gap={1}>
+            <Box>{t('Your Base domain: ')}</Box>
+            <a
+              href={`https://www.base.org/name/${profile?.basename?.split('.')[0]}`}
+              target="_blank"
+            >
+              <Text>{profile?.basename}</Text>
+            </a>
+          </Box>
+        )
+      }
     }
     if (quest.action === 'swap-tokens') {
       quest.actionField =
@@ -267,13 +291,7 @@ export default function Onboarding({ event }: { event: Event }) {
                       {quest?.actionField}
                     </Box>
                   )}
-                {txLink && (
-                  <Box pt="2">
-                    <a href={txLink} target="_blank">
-                      {t('View claiming transaction on BaseScan')}
-                    </a>
-                  </Box>
-                )}
+                {quest.completedField && <Box pt="2">{quest.completedField}</Box>}
               </Box>
               <Box>{isCompleted ? '✅' : '❌'}</Box>
             </CardBody>
