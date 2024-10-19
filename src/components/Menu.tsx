@@ -1,9 +1,20 @@
-import { Box, Flex, useMediaQuery } from '@chakra-ui/react'
+import {
+  Box,
+  Flex,
+  useMediaQuery,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverArrow,
+  PopoverCloseButton,
+  PopoverHeader,
+  PopoverBody,
+} from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useAccount } from 'wagmi'
 import { CalendarCheck, ListChecks, Ranking, Plugs, InstagramLogo } from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
-import { useAppKit } from '@reown/appkit/react'
+import { useAppKit, useAppKitState } from '@reown/appkit/react'
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import styled from '@emotion/styled'
@@ -47,7 +58,6 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
       w="100%"
       h="100%"
       borderBottom={isActive && !isMobile ? '1px solid orange' : '1px solid black'}
-      cursor={isActive ? 'default' : 'pointer'}
     >
       {children}
       <Box fontSize={['10px', '16px']}>{mounted ? label : ''}</Box>
@@ -60,6 +70,7 @@ const Menu = () => {
   const [isMobile] = useMediaQuery('(max-width: 48em)')
   const { isConnected } = useAccount()
   const { open } = useAppKit()
+  const { open: isOpen } = useAppKitState()
   const [pwa] = useLocalStorage('pwa', false)
   const [profile] = useLocalStorage<Profile | null>('profile', null)
 
@@ -123,30 +134,40 @@ const Menu = () => {
               </Box>
             )
           })}
-          <Box w="100%" h="100%" display="flex" justifyContent="center" alignItems="center">
-            <NextLink href={MENU[4].href} style={{ width: '100%', height: '100%' }}>
-              <MenuItem
-                label={isConnected ? t(MENU[4].label) : t('Connect')}
-                isActive={isProfileActive}
-                onClick={() => {
-                  if (!isConnected) {
-                    open({ view: 'Connect' })
-                  }
-                }}
-              >
-                {profile ? (
-                  <Box
-                    border={isProfileActive ? '1px solid orange' : '1px solid white'}
-                    borderRadius="full"
+          <Popover isOpen={!isConnected && isProfileActive && !isOpen}>
+            <PopoverTrigger>
+              <Box w="100%" h="100%" display="flex" justifyContent="center" alignItems="center">
+                <NextLink href={MENU[4].href} style={{ width: '100%', height: '100%' }}>
+                  <MenuItem
+                    label={isConnected ? t(MENU[4].label) : t('Connect')}
+                    isActive={isProfileActive}
+                    onClick={() => {
+                      if (!isConnected) {
+                        open({ view: 'Connect' })
+                      }
+                    }}
                   >
-                    <Avatar width="24px" src={profileAvatar(profile)} />
-                  </Box>
-                ) : (
-                  <Plugs size={24} />
-                )}
-              </MenuItem>
-            </NextLink>
-          </Box>
+                    {profile && isConnected ? (
+                      <Box
+                        border={isProfileActive ? '1px solid orange' : '1px solid white'}
+                        borderRadius="full"
+                      >
+                        <Avatar width="24px" src={profileAvatar(profile)} />
+                      </Box>
+                    ) : (
+                      <Plugs size={24} />
+                    )}
+                  </MenuItem>
+                </NextLink>
+              </Box>
+            </PopoverTrigger>
+            <PopoverContent>
+              <PopoverArrow />
+              <PopoverBody>
+                {t('Click here to connect your wallet & access your profile')}
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
         </Flex>
       </NoHoverDecoration>
     </Box>
