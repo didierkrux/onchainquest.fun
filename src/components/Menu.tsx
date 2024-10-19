@@ -139,7 +139,7 @@ const Menu = () => {
                     border={isProfileActive ? '1px solid orange' : '1px solid white'}
                     borderRadius="full"
                   >
-                    <Avatar w="24px" src={profileAvatar(profile)} />
+                    <Avatar width="24px" src={profileAvatar(profile)} />
                   </Box>
                 ) : (
                   <Plugs size={24} />
