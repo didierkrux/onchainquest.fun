@@ -35,7 +35,7 @@ const Moments = ({ eventId }: { eventId: string }) => {
 export default function Onboarding({ event }: { event: Event }) {
   const { t } = useTranslation()
   const { open } = useAppKit()
-  const { address } = useAccount()
+  const { address, isConnected } = useAccount()
   const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
   const [isLoading, setIsLoading] = useState<number | null>(null)
   const toast = useToast()
@@ -73,17 +73,16 @@ export default function Onboarding({ event }: { event: Event }) {
       .then((data) => {
         console.log('data', data)
         if (data?.message) {
-          const feedbackType = data?.txHash ? 'success' : 'error'
+          const feedbackType = data?.txLink ? 'success' : 'error'
           toast({
             title: feedbackType === 'success' ? 'Success' : 'Error',
             description: (
               <>
                 {data?.message}
-                {data?.txHash && (
+                {data?.txLink && (
                   <Box>
-                    {`\n${t('Transaction hash: ')}`}
-                    <a href={`https://basescan.org/tx/${data?.txHash}`} target="_blank">
-                      {t('View on BaseScan')}
+                    <a href={data?.txLink} target="_blank">
+                      {t('View claiming transaction on BaseScan')}
                     </a>
                   </Box>
                 )}
@@ -99,6 +98,16 @@ export default function Onboarding({ event }: { event: Event }) {
         } else {
           setProfile(data)
         }
+      })
+      .catch((error) => {
+        console.error('Error in transaction process:', error)
+        toast({
+          title: 'Error',
+          description: error.message,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        })
       })
       .finally(() => {
         setIsLoading(null)
@@ -134,7 +143,7 @@ export default function Onboarding({ event }: { event: Event }) {
         </Box>
       )
     }
-    if (quest.action === 'claim-poap') {
+    if (quest.action === 'claim-poap' || quest.action === 'own-basename') {
       quest.actionField = (
         <Box>
           <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
@@ -162,7 +171,7 @@ export default function Onboarding({ event }: { event: Event }) {
           </Box>
         ) : (
           <Box>
-            <Text>{t('Claim your tokens (task 6) to swap')}</Text>
+            <Text>{t('🚨 Claim your free tokens (task 6) before swapping')}</Text>
           </Box>
         )
     }
@@ -210,9 +219,17 @@ export default function Onboarding({ event }: { event: Event }) {
 
   return (
     <Box>
-      <Heading as="h1">{t('Onboarding tasks')}</Heading>
+      <Heading as="h1" display="flex" gap={4} justifyContent="space-between">
+        {t('Onboarding tasks')}
+        {profile?.score && profile?.score > 0 && (
+          <span>
+            {t('Score')}: {profile?.score} ⭐️
+          </span>
+        )}
+      </Heading>
       {QUESTS.map((quest, index) => {
         const isCompleted = !!profile?.tasks?.[index.toString()]?.isCompleted
+        const txLink = profile?.tasks?.[index.toString()]?.txLink
         return (
           <Card mt={4} key={index} variant={isCompleted ? 'outline' : 'filled'}>
             <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
@@ -241,12 +258,20 @@ export default function Onboarding({ event }: { event: Event }) {
                     </React.Fragment>
                   ))}
                 </Box>
-                {((quest?.actionField && !isCompleted) || index === 6) && (
-                  <Box pt="2">
-                    <Box fontWeight="bold" fontSize="lg" mb="2">
-                      👉 {t('Action')}:
+                {((quest?.actionField && !isCompleted) || quest.action === 'swap-tokens') &&
+                  isConnected && (
+                    <Box pt="2">
+                      <Box fontWeight="bold" fontSize="lg" mb="2">
+                        👉 {t('Action')}:
+                      </Box>
+                      {quest?.actionField}
                     </Box>
-                    {quest?.actionField}
+                  )}
+                {txLink && (
+                  <Box pt="2">
+                    <a href={txLink} target="_blank">
+                      {t('View claiming transaction on BaseScan')}
+                    </a>
                   </Box>
                 )}
               </Box>

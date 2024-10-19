@@ -2,7 +2,10 @@ export type Task = {
   id: number
   points: number
   isCompleted: boolean
+  txLink?: string
 }
+
+export type Tasks = { [key: string]: Task }
 
 export type Profile = {
   address: string
@@ -10,7 +13,7 @@ export type Profile = {
   avatar: string
   role: string
   score: number
-  tasks: Record<string, Task>
+  tasks: Tasks
   basename?: string
   basename_avatar?: string
 }

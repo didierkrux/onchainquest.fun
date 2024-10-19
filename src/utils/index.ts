@@ -1,8 +1,9 @@
 import OpenAI from 'openai'
 
 import { Event } from 'entities/data'
-import { Profile } from 'entities/profile'
+import { Profile, Task, Tasks } from 'entities/profile'
 import { potionUrl } from 'config'
+import db from './db'
 
 export function shortAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
@@ -237,4 +238,8 @@ export async function userHasSwappedTokens(address: string, tokenAddress: string
     console.error('Error checking 1inch interaction:', error);
     return false;
   }
+}
+
+export const calculateScore = (tasks: Tasks) => {
+  return Object.values(tasks).reduce((acc, task: any) => acc + task?.points, 0)
 }

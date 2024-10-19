@@ -35,6 +35,7 @@ export type TaskAction =
   | 'claim-tokens'
   | 'swap-tokens'
   | 'poap-picture'
+  | 'own-basename'
 
 export type Quest = {
   id: number
