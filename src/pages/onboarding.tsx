@@ -227,7 +227,9 @@ export default function Onboarding({ event }: { event: Event }) {
                 <Heading size="md">
                   {index + 1}. {quest.name}
                 </Heading>
-                <Text pt="2">Points: {quest.points} ⭐️</Text>
+                <Text pt="2">
+                  {t('Points')}: {quest.points} ⭐️
+                </Text>
                 <Box pt="2">
                   <Box fontWeight="bold" fontSize="lg">
                     👉 {t('Instructions')}:
