@@ -137,7 +137,7 @@ const Menu = () => {
               <Box w="100%" h="100%" display="flex" justifyContent="center" alignItems="center">
                 <NextLink href={MENU[4].href} style={{ width: '100%', height: '100%' }}>
                   <MenuItem
-                    label={isConnected ? t(MENU[4].label) : t('Connect')}
+                    label={isConnected ? t('Profile') : t('Connect')}
                     isActive={isProfileActive}
                     onClick={() => {
                       if (!isConnected) {

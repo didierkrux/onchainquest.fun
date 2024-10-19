@@ -255,126 +255,130 @@ export default function Profile() {
       <Box display="flex" flexDirection="column" alignItems="center">
         {profile && profile?.address && (
           <Box>
-            <Heading as="h1">{t('Profile Card')}</Heading>
-            <Card maxW="600px" w="100%" mt={4} mb={4}>
-              <CardBody>
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="column"
-                  alignItems="center"
-                >
+            <Box>
+              <Heading as="h1">{t('Profile Card')}</Heading>
+              <Card maxW="600px" w="100%" mt={4} mb={4}>
+                <CardBody>
                   <Box
-                    fontSize={['2xl', '4xl']}
-                    fontWeight="bold"
-                    mb={4}
                     display="flex"
-                    flexDirection="column"
                     justifyContent="center"
+                    flexDirection="column"
                     alignItems="center"
-                    gap={2}
                   >
-                    {profileName(profile)} {profileRole({ ...profile, role })}
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Text fontSize={['2xs', 'sm']} color="gray.500">
-                        {profile?.address}
-                      </Text>
-                      {hasCopied ? (
-                        <Check width={20} />
-                      ) : (
-                        <CopySimple width={20} onClick={onCopy} cursor="pointer" />
-                      )}
+                    <Box
+                      fontSize={['2xl', '4xl']}
+                      fontWeight="bold"
+                      mb={4}
+                      display="flex"
+                      flexDirection="column"
+                      justifyContent="center"
+                      alignItems="center"
+                      gap={2}
+                    >
+                      {profileName(profile)} {profileRole({ ...profile, role })}
+                      <Box display="flex" alignItems="center" gap={2}>
+                        <Text fontSize={['2xs', 'sm']} color="gray.500">
+                          {profile?.address}
+                        </Text>
+                        {hasCopied ? (
+                          <Check width={20} />
+                        ) : (
+                          <CopySimple width={20} onClick={onCopy} cursor="pointer" />
+                        )}
+                      </Box>
                     </Box>
                   </Box>
-                </Box>
-                <Box m={4} display="flex" justifyContent="center">
-                  <Avatar src={profileAvatar(profile)} width="40%" />
-                  <Image src={qrCodeDataURL} w="40%" h="auto" alt="QR" ml={8} />
-                </Box>
-                <Box display="flex" justifyContent="space-around" alignItems="center">
-                  <Box display="flex" alignItems="center">
-                    <Heading fontSize="3xl">
-                      {t('Score')}: {profile?.score} ⭐️
-                    </Heading>
+                  <Box m={4} display="flex" justifyContent="center">
+                    <Avatar src={profileAvatar(profile)} width="40%" />
+                    <Image src={qrCodeDataURL} w="40%" h="auto" alt="QR" ml={8} />
                   </Box>
-                </Box>
-              </CardBody>
-            </Card>
+                  <Box display="flex" justifyContent="space-around" alignItems="center">
+                    <Box display="flex" alignItems="center">
+                      <Heading fontSize="3xl">
+                        {t('Score')}: {profile?.score} ⭐️
+                      </Heading>
+                    </Box>
+                  </Box>
+                </CardBody>
+              </Card>
+            </Box>
+            <Box w="100%" maxW="600px">
+              <Heading as="h1">{t('Update Profile')}</Heading>
+              <Card mt={4} mb={4}>
+                <CardBody>
+                  <Box display="flex" flexDirection="column" gap={4} maxW="400px" mx="auto">
+                    <Box display="flex" gap={4} mb={4} alignItems="center">
+                      <Text>{t('Username: ')}</Text>
+                      {profile?.basename ? (
+                        <a
+                          href={`https://www.base.org/name/${profile?.basename?.split('.')[0]}`}
+                          target="_blank"
+                        >
+                          <Text>{profile?.basename}</Text>
+                        </a>
+                      ) : (
+                        <Input
+                          placeholder="Choose a username"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                        />
+                      )}
+                    </Box>
+                    <Box display="flex" gap={4} mb={4} alignItems="center">
+                      <Text>{t('Avatar: ')}</Text>
+                      {profile?.basename_avatar ? (
+                        <a
+                          href={`https://www.base.org/name/${profile?.basename?.split('.')[0]}`}
+                          target="_blank"
+                        >
+                          <Avatar src={profile?.basename_avatar} />
+                        </a>
+                      ) : (
+                        <>
+                          <Input
+                            placeholder="Enter an emoji"
+                            value={avatarEmoji}
+                            w="150px"
+                            textAlign="center"
+                            onChange={(e) => {
+                              const newValue = e.target.value?.replaceAll(avatarEmoji, '')
+                              if (newValue !== '') {
+                                handleAvatarChange(newValue)
+                              }
+                            }}
+                          />
+                          {avatar && <Avatar src={avatar} />}
+                        </>
+                      )}
+                    </Box>
+                    <Box display="flex" gap={4} mb={4} alignItems="center" minH="42px">
+                      <Text>{t('Role: ')}</Text>
+                      {role !== '' ? (
+                        <SelectTab
+                          tabLabels={tabLabels}
+                          selectedIndex={selectedIndex}
+                          onTabChange={(index: number) =>
+                            setRole(index === 0 ? 'learner' : 'mentor')
+                          }
+                        />
+                      ) : null}
+                    </Box>
+                    <Box display="flex" justifyContent="center">
+                      <Button
+                        onClick={saveProfile}
+                        isLoading={isSaving}
+                        loadingText="Saving..."
+                        w="100%"
+                      >
+                        {profile?.tasks?.[1]?.isCompleted ? t('Update') : t('Setup')}
+                      </Button>
+                    </Box>
+                  </Box>
+                </CardBody>
+              </Card>
+            </Box>
           </Box>
         )}
-        <Box w="100%" maxW="600px">
-          <Heading as="h1">{t('Update Profile')}</Heading>
-          <Card mt={4} mb={4}>
-            <CardBody>
-              <Box display="flex" flexDirection="column" gap={4} maxW="400px" mx="auto">
-                <Box display="flex" gap={4} mb={4} alignItems="center">
-                  <Text>{t('Username: ')}</Text>
-                  {profile?.basename ? (
-                    <a
-                      href={`https://www.base.org/name/${profile?.basename?.split('.')[0]}`}
-                      target="_blank"
-                    >
-                      <Text>{profile?.basename}</Text>
-                    </a>
-                  ) : (
-                    <Input
-                      placeholder="Choose a username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                    />
-                  )}
-                </Box>
-                <Box display="flex" gap={4} mb={4} alignItems="center">
-                  <Text>{t('Avatar: ')}</Text>
-                  {profile?.basename_avatar ? (
-                    <a
-                      href={`https://www.base.org/name/${profile?.basename?.split('.')[0]}`}
-                      target="_blank"
-                    >
-                      <Avatar src={profile?.basename_avatar} />
-                    </a>
-                  ) : (
-                    <>
-                      <Input
-                        placeholder="Enter an emoji"
-                        value={avatarEmoji}
-                        w="150px"
-                        textAlign="center"
-                        onChange={(e) => {
-                          const newValue = e.target.value?.replaceAll(avatarEmoji, '')
-                          if (newValue !== '') {
-                            handleAvatarChange(newValue)
-                          }
-                        }}
-                      />
-                      {avatar && <Avatar src={avatar} />}
-                    </>
-                  )}
-                </Box>
-                {role !== '' ? (
-                  <Box display="flex" gap={4} mb={4} alignItems="center">
-                    <Text>{t('Role: ')}</Text>
-                    <SelectTab
-                      tabLabels={tabLabels}
-                      selectedIndex={selectedIndex}
-                      onTabChange={(index: number) => setRole(index === 0 ? 'learner' : 'mentor')}
-                    />
-                  </Box>
-                ) : null}
-                <Box display="flex" justifyContent="center">
-                  <Button
-                    onClick={saveProfile}
-                    isLoading={isSaving}
-                    loadingText="Saving..."
-                    w="100%"
-                  >
-                    {t('Save')}
-                  </Button>
-                </Box>
-              </Box>
-            </CardBody>
-          </Card>
-        </Box>
         {address && adminWallets.includes(address.toLowerCase()) && (
           <Box w="100%" maxW="600px">
             <Heading as="h1">Admin</Heading>
@@ -409,24 +413,26 @@ export default function Profile() {
             </Card>
           </Box>
         )}
-        <Box mt={4} display="flex" gap={4} mb={4}>
-          <Button
-            onClick={() => {
-              disconnect()
-              setProfile(null)
-            }}
-          >
-            {t('Disconnect')}
-          </Button>
-          <Button
-            onClick={handleResetProfile}
-            isLoading={isResetting}
-            loadingText="Resetting..."
-            colorScheme="red"
-          >
-            {t('Reset my profile')}
-          </Button>
-        </Box>
+        {profile && profile?.address && (
+          <Box mt={4} display="flex" gap={4} mb={4}>
+            <Button
+              onClick={() => {
+                disconnect()
+                setProfile(null)
+              }}
+            >
+              {t('Disconnect')}
+            </Button>
+            <Button
+              onClick={handleResetProfile}
+              isLoading={isResetting}
+              loadingText="Resetting..."
+              colorScheme="red"
+            >
+              {t('Reset my profile')}
+            </Button>
+          </Box>
+        )}
       </Box>
     )
   }

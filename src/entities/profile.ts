@@ -3,6 +3,7 @@ export type Task = {
   points: number
   isCompleted: boolean
   txLink?: string
+  condition?: string
 }
 
 export type Tasks = { [key: string]: Task }
