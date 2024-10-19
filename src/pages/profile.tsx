@@ -6,9 +6,6 @@ import {
   Heading,
   Image,
   Input,
-  Tabs,
-  TabList,
-  Tab,
   Text,
   useClipboard,
   useToast,
@@ -26,6 +23,7 @@ import { profileName, profileAvatar, profileRole } from 'utils/index'
 import { adminSignatureMessage, adminWallets } from 'config'
 import { Check, CopySimple } from '@phosphor-icons/react'
 import { Avatar } from 'components/Avatar'
+import SelectTab from 'components/SelectTab'
 
 export default function Profile() {
   const { t } = useTranslation()
@@ -58,7 +56,7 @@ export default function Profile() {
         console.log('data', data)
         if (data?.message) {
           toast({
-            title: 'Error',
+            title: t('Error'),
             description: ` ${data?.message}`,
             status: 'error',
             duration: 5000,
@@ -67,8 +65,8 @@ export default function Profile() {
         } else {
           setProfile(data)
           toast({
-            title: 'Success',
-            description: `Profile saved successfully.`,
+            title: t('Success'),
+            description: t('Profile saved successfully.'),
             status: 'success',
             duration: 5000,
             isClosable: true,
@@ -82,7 +80,7 @@ export default function Profile() {
         console.error('Error saving profile:', error)
         setIsSaving(false)
         toast({
-          title: 'Error',
+          title: t('Error'),
           description: ` ${(error as Error).message}`,
           status: 'error',
           duration: 5000,
@@ -144,8 +142,8 @@ export default function Profile() {
       const response = await fetch(`/api/admin/reset-my-profile?address=${address}`)
       if (response.ok) {
         toast({
-          title: 'Success',
-          description: 'Profile reset successfully.',
+          title: t('Success'),
+          description: t('Profile reset successfully.'),
           status: 'success',
           duration: 5000,
           isClosable: true,
@@ -159,7 +157,7 @@ export default function Profile() {
     } catch (error) {
       console.error('Error resetting profile:', error)
       toast({
-        title: 'Error',
+        title: t('Error'),
         description: ` ${(error as Error).message}`,
         status: 'error',
         duration: 5000,
@@ -205,8 +203,8 @@ export default function Profile() {
         )
         if (response.ok) {
           toast({
-            title: 'Success',
-            description: 'Data synced successfully.',
+            title: t('Success'),
+            description: t('Data synced successfully.'),
             status: 'success',
             duration: 5000,
             isClosable: true,
@@ -223,7 +221,7 @@ export default function Profile() {
     } catch (error) {
       console.error('Error syncing data:', error)
       toast({
-        title: 'Error',
+        title: t('Error'),
         description: ` ${(error as Error).message}`,
         status: 'error',
         duration: 5000,
@@ -247,12 +245,10 @@ export default function Profile() {
     }
   }
 
-  if (!address)
-    return (
-      <Box display="flex" flexDirection="column" alignItems="center">
-        <Text>{t('Click the "Connect" button to connect your wallet.')}</Text>
-      </Box>
-    )
+  const tabLabels = [`${t('Learner')} 🧑‍🎓`, `${t('Mentor')} 🧑‍🏫`]
+  const selectedIndex = role === 'mentor' ? 1 : 0
+
+  if (!address) return <Box display="flex" flexDirection="column" alignItems="center"></Box>
   else {
     return (
       <Box display="flex" flexDirection="column" alignItems="center">
@@ -357,19 +353,11 @@ export default function Profile() {
                 {role !== '' ? (
                   <Box display="flex" gap={4} mb={4} alignItems="center">
                     <Text>{t('Role: ')}</Text>
-                    <Tabs
-                      variant="soft-rounded"
-                      border="1px solid gray"
-                      borderRadius="full"
-                      colorScheme="gray"
-                      defaultIndex={role === 'learner' ? 0 : 1}
-                      onChange={(index) => setRole(index === 0 ? 'learner' : 'mentor')}
-                    >
-                      <TabList>
-                        <Tab color="gray.300">{t('Learner')} 🧑‍🎓</Tab>
-                        <Tab color="gray.300">{t('Mentor')} 🧑‍🏫</Tab>
-                      </TabList>
-                    </Tabs>
+                    <SelectTab
+                      tabLabels={tabLabels}
+                      selectedIndex={selectedIndex}
+                      onTabChange={(index: number) => setRole(index === 0 ? 'learner' : 'mentor')}
+                    />
                   </Box>
                 ) : null}
                 <Box display="flex" justifyContent="center">
@@ -428,7 +416,7 @@ export default function Profile() {
             loadingText="Resetting..."
             colorScheme="red"
           >
-            Reset my profile
+            {t('Reset my profile')}
           </Button>
         </Box>
       </Box>

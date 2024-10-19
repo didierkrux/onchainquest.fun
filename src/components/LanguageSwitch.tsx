@@ -1,6 +1,7 @@
-import React from 'react'
-import { Box, Button } from '@chakra-ui/react'
+import React, { useState, useEffect } from 'react'
+import { Box } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
+import SelectTab from './SelectTab'
 
 export type LanguageType = 'en' | 'th'
 export type LanguageDescriptionType = { [Key in LanguageType as string]?: string }
@@ -13,29 +14,29 @@ export const LanguageDescription: LanguageDescriptionType = Object.fromEntries(
 
 const LanguageSwitch = (): React.ReactElement => {
   const { i18n } = useTranslation()
+  const languages = Object.keys(LanguageDescription) as LanguageType[]
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
-  const languages = ['en', 'th']
+  useEffect(() => {
+    const currentIndex = languages.findIndex((lang) => i18n.language?.startsWith(lang))
+    setSelectedIndex(currentIndex >= 0 ? currentIndex : 0)
+  }, [i18n.language, languages])
+
+  const handleTabChange = (index: number) => {
+    const newLanguage = languages[index]
+    i18n.changeLanguage(newLanguage)
+  }
+
+  if (selectedIndex === null) return <></>
 
   return (
     <Box>
-      {languages?.length ? (
-        <Box textAlign="center">
-          <Box display="flex" flexWrap="wrap" justifyContent="center" alignItems="center" m="auto">
-            {languages.map((l) => (
-              <Button
-                variant={i18n.language?.startsWith(l) ? 'solid' : 'outline'}
-                key={l}
-                onClick={() => {
-                  i18n.changeLanguage(l)
-                }}
-                m={2}
-              >
-                {l in LanguageDescription ? LanguageDescription[l] : ''}
-              </Button>
-            ))}
-          </Box>
-        </Box>
-      ) : null}
+      <SelectTab
+        tabLabels={languages.map((lang) => LanguageDescription[lang] || lang)}
+        selectedIndex={selectedIndex}
+        onTabChange={handleTabChange}
+        colorScheme="orange"
+      />
     </Box>
   )
 }
