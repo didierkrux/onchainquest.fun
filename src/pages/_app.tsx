@@ -16,7 +16,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter()
 
   const menuIndex = router.pathname ? MENU.findIndex((item) => item.href === router.pathname) : 0
-  const label = MENU[menuIndex]?.label
+  const label = MENU[menuIndex]?.label || ''
   const title = label ? t(label) : ''
 
   return (

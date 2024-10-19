@@ -1,18 +1,4 @@
-import {
-  Box,
-  Card,
-  CardBody,
-  Heading,
-  Text,
-  Button,
-  Modal,
-  useToast,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  Image,
-} from '@chakra-ui/react'
+import { Box, Card, CardBody, Heading, Text, Button, useToast, Image } from '@chakra-ui/react'
 import { useAppKit } from '@reown/appkit/react'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
@@ -52,7 +38,6 @@ export default function Onboarding({ event }: { event: Event }) {
   const { address } = useAccount()
   const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
   const [isLoading, setIsLoading] = useState<number | null>(null)
-  const [openModal, setOpenModal] = useState<string | null>(null)
   const toast = useToast()
   useEffect(() => {
     if (address) {
@@ -91,11 +76,19 @@ export default function Onboarding({ event }: { event: Event }) {
           const feedbackType = data?.txHash ? 'success' : 'error'
           toast({
             title: feedbackType === 'success' ? 'Success' : 'Error',
-            description: `${data?.message}${
-              data?.txHash
-                ? `\nTransaction hash: <a href="${data?.txHash}" target="_blank">View on Basescan</a>`
-                : ''
-            }`,
+            description: (
+              <>
+                {data?.message}
+                {data?.txHash && (
+                  <Box>
+                    {`\n${t('Transaction hash: ')}`}
+                    <a href={`https://basescan.org/tx/${data?.txHash}`} target="_blank">
+                      {t('View on BaseScan')}
+                    </a>
+                  </Box>
+                )}
+              </>
+            ),
             status: feedbackType,
             duration: 5000,
             isClosable: true,
@@ -134,7 +127,7 @@ export default function Onboarding({ event }: { event: Event }) {
           <Button
             onClick={() => handleAction(quest)}
             isLoading={isLoading === quest.id}
-            loadingText="Claiming... (takes ~30 seconds, please wait for confirmation)"
+            loadingText={t('Claiming... (takes ~30 seconds, please wait for confirmation)')}
           >
             Claim
           </Button>
@@ -145,7 +138,7 @@ export default function Onboarding({ event }: { event: Event }) {
       quest.actionField = (
         <Box>
           <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
-            Verify
+            {t('Verify')}
           </Button>
         </Box>
       )
@@ -159,39 +152,39 @@ export default function Onboarding({ event }: { event: Event }) {
                 open({ view: 'Account' })
               }}
             >
-              Swap
+              {t('Swap')}
             </Button>
             {!profile?.tasks?.[6]?.isCompleted && (
               <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
-                Verify
+                {t('Verify')}
               </Button>
             )}
           </Box>
         ) : (
           <Box>
-            <Text>Claim your tokens (taksk 6) to swap</Text>
+            <Text>{t('Claim your tokens (task 6) to swap')}</Text>
           </Box>
         )
     }
-    if (quest.action === 'poap-picture' && quest.condition) {
-      quest.actionField = (
-        <Box display="flex" gap={4}>
-          <a target="_blank" href={`https://moments.poap.xyz/upload?drop=${quest.condition}`}>
-            <Button>Upload a picture</Button>
-          </a>
-          <Button
-            onClick={() => {
-              // setModalUrl(`https://moments.poap.xyz/drops/${quest.condition}`)
-              if (quest.condition) {
-                setOpenModal(quest.condition)
-              }
-            }}
-          >
-            View gallery
-          </Button>
-        </Box>
-      )
-    }
+    // if (quest.action === 'poap-picture' && quest.condition) {
+    //   quest.actionField = (
+    //     <Box display="flex" gap={4}>
+    //       <a target="_blank" href={`https://moments.poap.xyz/upload?drop=${quest.condition}`}>
+    //         <Button>{t('Upload a picture')}</Button>
+    //       </a>
+    //       <Button
+    //         onClick={() => {
+    //           // setModalUrl(`https://moments.poap.xyz/drops/${quest.condition}`)
+    //           if (quest.condition) {
+    //             setOpenModal(quest.condition)
+    //           }
+    //         }}
+    //       >
+    //         {t('View gallery')}
+    //       </Button>
+    //     </Box>
+    //   )
+    // }
     // if (quest.action === 'attest') {
     //   quest.actionField = (
     //     <Box display="flex" gap={4}>
@@ -262,15 +255,15 @@ export default function Onboarding({ event }: { event: Event }) {
           </Card>
         )
       })}
-      <Modal isOpen={!!openModal} onClose={() => setOpenModal(null)} size="full">
+      {/* <Modal isOpen={!!openModal} onClose={() => setOpenModal(null)} size="full">
         <ModalContent>
           <ModalCloseButton color="black" />
-          <ModalHeader>POAP Gallery</ModalHeader>
+          <ModalHeader>{t('POAP Gallery')}</ModalHeader>
           <ModalBody w="100vw" h="100vh" p={0}>
             {openModal && <Moments eventId={openModal} />}
           </ModalBody>
         </ModalContent>
-      </Modal>
+      </Modal> */}
     </Box>
   )
 }

@@ -6,8 +6,6 @@ import {
   PopoverTrigger,
   PopoverContent,
   PopoverArrow,
-  PopoverCloseButton,
-  PopoverHeader,
   PopoverBody,
 } from '@chakra-ui/react'
 import NextLink from 'next/link'
