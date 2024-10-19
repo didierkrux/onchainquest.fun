@@ -35,17 +35,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: 'Address is not an admin' });
     }
 
+    const tasks = await getTasks(eventId)
+
     // check if user has already claimed tokens
     const profile = await fetch(`${DOMAIN_URL}/api/profile?address=${address}&taskId=2`)
     const profileData = await profile.json()
     console.log('profileData', profileData)
-    // HACK: hardcode taskId 5 for now (claim tokens)
-    const swapCompleted = profileData?.tasks?.[5]?.isCompleted ?? false
+    const taskIdClaimTokens = Object.values(tasks).findIndex((task: any) => task.action === 'claim-tokens')
+    const swapCompleted = profileData?.tasks?.[taskIdClaimTokens]?.isCompleted ?? false
     if (swapCompleted === true) {
       return res.status(400).json({ ...profileData, message: 'You have already claimed your tokens' });
     }
-    // HACK: hardcode taskId 2 for now (claim POAP event)
-    const badgeCompleted = profileData?.tasks?.[2]?.isCompleted ?? false
+    const taskCondition = tasks[taskIdClaimTokens].condition
+    console.log('taskCondition', taskCondition)
+    const taskIdClaimPOAP = Object.values(tasks).findIndex((task: any) => task.condition === taskCondition)
+    const badgeCompleted = profileData?.tasks?.[taskIdClaimPOAP]?.isCompleted ?? false
     if (badgeCompleted === false) {
       return res.status(400).json({ ...profileData, message: 'You have not claimed the POAP event yet' });
     }
@@ -118,11 +122,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (receipt && 'transactionHash' in receipt) {
       // update task as completed in profile
       const userTasks = profileData?.tasks
-      // HACK: hardcode the points + taskId for now
       const txLink = `https://basescan.org/tx/${receipt.transactionHash}`;
       console.log('txLink', txLink);
-      const tasks = await getTasks(eventId)
-      console.log('tasks', tasks)
       const taskAction = 'claim-tokens'
       const taskId = Object.values(tasks).findIndex((task: any) => task.action === taskAction)
       userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: tasks[taskId].points, txLink }
