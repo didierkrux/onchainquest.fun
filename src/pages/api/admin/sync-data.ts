@@ -37,13 +37,20 @@ export default async function handler(
 
     const data = await fetchPotionData()
     console.log('data', data)
-    const translatedData = await translateData(data, 'Thai')
-    console.log('translatedData', translatedData)
-
     // save to db
-    await db('events').update({ data_en: data, data_tr: translatedData })
+    await db('events').update({ data_en: data })
+    res.status(200).json({ message: 'English data synced successfully' })
 
-    res.status(200).json({ message: 'Data synced successfully' })
+    // const translatedData = await translateData(data, 'Thai')
+    // if (translatedData) {
+    //   console.log('translatedData', translatedData)
+
+    //   // save to db
+    //   await db('events').update({ data_en: data, data_tr: translatedData })
+    //   res.status(200).json({ message: 'Data synced successfully' })
+    // } else {
+    //   res.status(200).json({ message: 'Issue with translation' })
+    // }
   } catch (error) {
     console.error('Error syncing data:', error)
     res.status(500).json({ message: 'Internal server error' })

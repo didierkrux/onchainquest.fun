@@ -90,6 +90,7 @@ export async function translateData(data: Event, targetLang: string): Promise<Ev
     apiKey: process.env.OPENAI_API_KEY,
   })
 
+  // Translate the following object to Thai except the following fields: 'time', 'image', 'link', 'action', 'condition'
   const fieldsToExclude = ['time', 'image', 'link', 'action', 'condition']
 
   async function translateObject(obj: any): Promise<any> {
@@ -102,7 +103,7 @@ export async function translateData(data: Event, targetLang: string): Promise<Ev
           { role: 'system', content: `Translate the following object to ${targetLang} except the following fields: ${fieldsToExclude.join(', ')}, but keep the keys as they are.` },
           { role: 'user', content: stringifiedObj }
         ],
-        max_tokens: 3000,
+        max_tokens: 4096,
       })
       // check cost here: https://platform.openai.com/settings/organization/billing/overview
 
