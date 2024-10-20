@@ -6,6 +6,8 @@ import { fetchPotionData, translateData } from 'utils/index'
 import db from 'utils/db'
 import { adminSignatureMessage, adminWallets } from 'config/index'
 
+export const maxDuration = 90 // 90 seconds
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse

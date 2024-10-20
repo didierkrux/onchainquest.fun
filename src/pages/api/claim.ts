@@ -22,6 +22,8 @@ const apiKit = new SafeApiKit({
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 // const USDGLO_ADDRESS = '0x4F604735c1cF31399C6E711D5962b2B3E0225AD3';
 
+export const maxDuration = 90 // 90 seconds
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { address } = req.query;
