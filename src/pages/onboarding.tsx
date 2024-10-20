@@ -138,7 +138,7 @@ export default function Onboarding({ event }: { event: Event }) {
             isLoading={isLoading === quest.id}
             loadingText={t('Claiming... (takes ~30 seconds, please wait for confirmation)')}
           >
-            Claim
+            {t('Claim')}
           </Button>
         </Box>
       )
@@ -253,7 +253,6 @@ export default function Onboarding({ event }: { event: Event }) {
       </Heading>
       {QUESTS.map((quest, index) => {
         const isCompleted = !!profile?.tasks?.[index.toString()]?.isCompleted
-        const txLink = profile?.tasks?.[index.toString()]?.txLink
         return (
           <Card mt={4} key={index} variant={isCompleted ? 'outline' : 'filled'}>
             <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
