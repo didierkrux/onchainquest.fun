@@ -18,10 +18,9 @@ export default function Agenda({ event }: { event: Event }) {
           <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
             <Box>
               <Text as="h2" fontWeight="bold">
-                {item.time}
+                {item.time}: {item.title}
               </Text>
-              <Text as="h3">{item.title}</Text>
-              <Text as="h3" mb={4}>
+              <Text as="h3" mt={4}>
                 📍 {item.location}
               </Text>
             </Box>
@@ -39,10 +38,10 @@ export default function Agenda({ event }: { event: Event }) {
         <Card mt={4} key={index}>
           <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
             <Box>
-              <Text as="h3" mb={4} fontWeight="bold">
+              <Text as="h2" fontWeight="bold">
                 {booth.name}
               </Text>
-              <Text as="h3" mb={4}>
+              <Text as="h3" mt={4}>
                 {booth.description}
               </Text>
             </Box>

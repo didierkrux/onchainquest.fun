@@ -414,7 +414,7 @@ export default function Profile() {
           </Box>
         )}
         {profile && profile?.address && (
-          <Box mt={4} display="flex" gap={4} mb={4}>
+          <Box mt={4} display="flex" gap={4}>
             <Button
               onClick={() => {
                 disconnect()

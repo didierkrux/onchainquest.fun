@@ -11,6 +11,7 @@ import {
   TabPanels,
   Tab,
   TabPanel,
+  useMediaQuery,
 } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
@@ -23,6 +24,7 @@ import { Avatar } from 'components/Avatar'
 
 export default function Leaderboard({ event }: { event: Event }) {
   const { t } = useTranslation()
+  const [isMobile] = useMediaQuery('(max-width: 48em)')
   const [leaderboard, setLeaderboard] = useLocalStorage<Profile[] | null>('leaderboard', null)
 
   useEffect(() => {
@@ -38,19 +40,28 @@ export default function Leaderboard({ event }: { event: Event }) {
     return leaderboard?.filter((user) => (user.role || 'learner') === role) || []
   }
 
-  const renderLeaderboardList = (users: Profile[]) => (
+  const renderLeaderboardList = (users: Profile[], isMobile: boolean, displayRole: boolean) => (
     <Stack divider={<StackDivider />} spacing="4">
       {users.map((user, index) => (
-        <Box key={index} display="flex" justifyContent="space-between" alignItems="center" m={4}>
-          <Box display="flex" alignItems="center" gap={2}>
+        <Box
+          key={index}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          m={isMobile ? 0 : 4}
+          flexWrap="nowrap"
+        >
+          <Box display="flex" alignItems="center" gap={2} flex="1" minWidth="0">
             <Box>
               {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
             </Box>
             <Avatar src={profileAvatar(user)} w="30px" />
-            <Text>{profileName(user)}</Text>
-            <Text fontSize="24px">{profileRole(user)}</Text>
+            <Text isTruncated>{profileName(user)}</Text>
+            {displayRole && <Text>{profileRole(user)}</Text>}
           </Box>
-          <Text>{user.score} ⭐️</Text>
+          <Box flexShrink={0} ml={2}>
+            <Text whiteSpace="nowrap">{user.score} ⭐️</Text>
+          </Box>
         </Box>
       ))}
     </Stack>
@@ -80,23 +91,27 @@ export default function Leaderboard({ event }: { event: Event }) {
           <Tabs defaultIndex={1} mt={4}>
             <TabList>
               <Tab>{t('All')}</Tab>
-              <Tab>{t('Learners')}</Tab>
-              <Tab>{t('Mentors')}</Tab>
+              <Tab>{t('Learners')} 🧑‍🎓</Tab>
+              <Tab>{t('Mentors')} 🧑‍🏫</Tab>
             </TabList>
             <TabPanels>
               <TabPanel p={0}>
                 <Card borderTopRadius={0}>
-                  <CardBody>{renderLeaderboardList(leaderboard)}</CardBody>
+                  <CardBody>{renderLeaderboardList(leaderboard, isMobile, true)}</CardBody>
                 </Card>
               </TabPanel>
               <TabPanel p={0}>
                 <Card borderTopRadius={0}>
-                  <CardBody>{renderLeaderboardList(filterByRole('learner'))}</CardBody>
+                  <CardBody>
+                    {renderLeaderboardList(filterByRole('learner'), isMobile, false)}
+                  </CardBody>
                 </Card>
               </TabPanel>
               <TabPanel p={0}>
                 <Card borderTopRadius={0}>
-                  <CardBody>{renderLeaderboardList(filterByRole('mentor'))}</CardBody>
+                  <CardBody>
+                    {renderLeaderboardList(filterByRole('mentor'), isMobile, false)}
+                  </CardBody>
                 </Card>
               </TabPanel>
             </TabPanels>
