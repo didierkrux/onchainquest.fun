@@ -10,39 +10,41 @@ export function useEventData() {
   const router = useRouter()
   const [event, setEvent] = useLocalStorage<Event | null>('event', null)
   const [eventData, setEventData] = useState<EventData | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true)
-      try {
-        const response = await fetch('/api/event')
-        const data = await response.json()
-        setEventData(data)
-        setError(null)
-      } catch (error) {
-        console.error('Error fetching event data:', error)
-        setError(error instanceof Error ? error : new Error('Unknown error occurred'))
-      } finally {
-        setIsLoading(false)
+      if (!eventData) {
+        setIsLoading(true)
+        try {
+          const response = await fetch('/api/event')
+          const data = await response.json()
+          setEventData(data)
+          setError(null)
+        } catch (error) {
+          console.error('Error fetching event data:', error)
+          setError(error instanceof Error ? error : new Error('Unknown error occurred'))
+        } finally {
+          setIsLoading(false)
+        }
       }
     }
 
-    if (router.isReady && !isLoading) {
+    if (router.isReady) {
       fetchData()
     }
     if (router.route === '/404') {
       console.log('404 detected: redirecting to /')
       router.push('/')
     }
-  }, [router.asPath])
+  }, [router.isReady, router.route, eventData])
 
   useEffect(() => {
     if (i18n.language && eventData && eventData?.data_en) {
       setEvent(i18n.language?.startsWith('en') ? eventData.data_en : eventData.data_tr)
     }
-  }, [i18n.language, eventData])
+  }, [i18n.language, eventData, setEvent])
 
   return { event, isLoading, error }
 }

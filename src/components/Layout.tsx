@@ -1,9 +1,8 @@
 import React from 'react'
-import { Box, useMediaQuery } from '@chakra-ui/react'
+import { Box, useMediaQuery, Spinner, Text } from '@chakra-ui/react'
 
 import Menu from 'components/Menu'
 import { useEventData } from 'hooks/useEventData'
-import { env } from 'process'
 import { useLocalStorage } from 'usehooks-ts'
 
 interface LayoutProps {
@@ -12,7 +11,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMobile] = useMediaQuery('(max-width: 48em)')
-  const { event, error } = useEventData()
+  const { event, isLoading, error } = useEventData()
   const [pwa] = useLocalStorage('pwa', false)
 
   return (
@@ -27,10 +26,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           maxW="container.lg"
           mx="auto"
         >
-          {event === null ? (
-            <Box>Loading...</Box>
+          {isLoading ? (
+            <Box textAlign="center" py={10}>
+              <Spinner size="xl" />
+              <Text mt={4}>Loading event data...</Text>
+            </Box>
           ) : error ? (
-            <Box>Error: {error.message}</Box>
+            <Box textAlign="center" py={10}>
+              <Text color="red.500">Error: {error.message}</Text>
+            </Box>
+          ) : event === null ? (
+            <Box textAlign="center" py={10}>
+              <Text>No event data available.</Text>
+            </Box>
           ) : (
             React.Children.map(children, (child) => {
               if (React.isValidElement(child)) {
