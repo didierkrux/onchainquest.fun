@@ -60,9 +60,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <main>
         <Box
           p="4"
-          mb={isMobile ? `calc(60px + ${pwa ? '16px' : '0px'})` : 0}
           maxW="container.lg"
           mx="auto"
+          h={isMobile ? `calc(100vh - 60px${pwa ? ' - 16px' : ''})` : '100vh'}
+          overflow={isMobile ? 'scroll' : 'visible'}
         >
           {latestDeploymentId &&
             latestDeploymentId !== '' &&
@@ -107,6 +108,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               return child
             })
           )}
+          <Box h={isMobile ? '0' : '8'} />
         </Box>
       </main>
     </Box>
