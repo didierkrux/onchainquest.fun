@@ -1,4 +1,14 @@
-import { Box, Card, CardBody, Heading, Text, Button, useToast, Image } from '@chakra-ui/react'
+import {
+  Box,
+  Card,
+  CardBody,
+  Heading,
+  Text,
+  Button,
+  useToast,
+  Image,
+  useMediaQuery,
+} from '@chakra-ui/react'
 import { useAppKit } from '@reown/appkit/react'
 import { useAccount } from 'wagmi'
 import { useTranslation } from 'react-i18next'
@@ -39,6 +49,8 @@ export default function Onboarding({ event }: { event: Event }) {
   const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
   const [isLoading, setIsLoading] = useState<number | null>(null)
   const toast = useToast()
+  const [isMobile] = useMediaQuery('(max-width: 48em)')
+
   useEffect(() => {
     if (address) {
       fetch(`/api/profile?address=${address}`)
@@ -243,14 +255,14 @@ export default function Onboarding({ event }: { event: Event }) {
 
   return (
     <Box>
-      <Heading as="h1" display="flex" gap={4} justifyContent="space-between">
-        {t('Onboarding tasks')}
+      <Box display={isMobile ? 'block' : 'flex'} w="100%" gap={4} justifyContent="space-between">
+        <Heading as="h1">{t('Onboarding tasks')}</Heading>
         {profile?.score && profile?.score > 0 && (
-          <span>
-            {t('Score')}: {profile?.score} ⭐️
-          </span>
+          <Text textAlign="right" fontSize="2xl" mt={isMobile ? 4 : 0} fontWeight="bold">
+            {t('Total score')}: {profile?.score} ⭐️
+          </Text>
         )}
-      </Heading>
+      </Box>
       {QUESTS.map((quest, index) => {
         const isCompleted = !!profile?.tasks?.[index.toString()]?.isCompleted
         return (
