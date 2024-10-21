@@ -2,6 +2,8 @@ import Web3ModalProvider from 'context'
 import type { AppProps } from 'next/app'
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import NextHead from 'next/head'
+import { useEffect } from 'react'
+import { useLocalStorage } from 'usehooks-ts'
 
 import Layout from 'components/Layout'
 import theme from 'theme'
@@ -14,6 +16,13 @@ import { useRouter } from 'next/router'
 export default function MyApp({ Component, pageProps }: AppProps) {
   const { t } = useTranslation()
   const router = useRouter()
+  const [, setPwa] = useLocalStorage('pwa', false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('pwa=true')) {
+      setPwa(true)
+    }
+  }, [setPwa])
 
   const menuIndex = router.pathname ? MENU.findIndex((item) => item.href === router.pathname) : 0
   const label = MENU[menuIndex]?.label || ''

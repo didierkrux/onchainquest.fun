@@ -1,21 +1,10 @@
-import { Box, Heading, Text, Image, CardBody, Card, Button, useToast } from '@chakra-ui/react'
+import { Box, Heading, Text, Image, CardBody, Card } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
-import { useRouter } from 'next/router'
 import LanguageSwitch from 'components/LanguageSwitch'
 import { Event } from 'entities/data'
-import { useEffect } from 'react'
-import { useLocalStorage } from 'usehooks-ts'
 
 export default function Agenda({ event }: { event: Event }) {
   const { t } = useTranslation()
-  const router = useRouter()
-  const [, setPwa] = useLocalStorage('pwa', false)
-
-  useEffect(() => {
-    if (router.query?.pwa) {
-      setPwa(true)
-    }
-  }, [router.query?.pwa])
 
   return (
     <Box>
