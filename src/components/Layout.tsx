@@ -62,7 +62,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           p="4"
           maxW="container.lg"
           mx="auto"
-          h={isMobile ? `calc(100vh - 60px${pwa ? ' - 16px' : ''})` : '100vh'}
+          h={isMobile ? `calc(var(--vh, 1vh) * 100 - 60px${pwa ? ' - 16px' : ''})` : '100vh'}
           overflow={isMobile ? 'scroll' : 'visible'}
         >
           {latestDeploymentId &&
@@ -80,9 +80,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 borderRadius="md"
               >
                 <SquaresFour />
-                {t('A new app version is available!')}
+                {t('A new app version available!')}
                 {' · '}
-                <Link onClick={() => window.location.reload()}>{t('Click to reload')}</Link>
+                <Link onClick={() => window.location.reload()}>{t('Refresh')}</Link>
               </Box>
             )}
           {isLoading ? (
