@@ -17,11 +17,11 @@ import { useTranslation } from 'react-i18next'
 import { useLocalStorage } from 'usehooks-ts'
 import { verifyMessage } from 'viem'
 import twemoji from '@twemoji/api'
+import { Check, CopySimple } from '@phosphor-icons/react'
 
 import { Profile } from 'entities/profile'
 import { profileName, profileAvatar, profileRole } from 'utils/index'
 import { adminSignatureMessage, adminWallets } from 'config'
-import { Check, CopySimple } from '@phosphor-icons/react'
 import { Avatar } from 'components/Avatar'
 import SelectTab from 'components/SelectTab'
 
