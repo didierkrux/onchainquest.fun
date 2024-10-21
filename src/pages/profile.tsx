@@ -9,6 +9,7 @@ import {
   Text,
   useClipboard,
   useToast,
+  useMediaQuery,
 } from '@chakra-ui/react'
 import { useAccount, useDisconnect, useSignMessage } from 'wagmi'
 import { useEffect, useState } from 'react'
@@ -41,6 +42,7 @@ export default function Profile() {
   const { signMessageAsync } = useSignMessage()
   const [isSyncing, setIsSyncing] = useState(false)
   const { onCopy, hasCopied } = useClipboard(profile?.address || '')
+  const [isMobile] = useMediaQuery('(max-width: 48em)')
 
   const saveProfile = () => {
     setIsSaving(true)
@@ -59,8 +61,9 @@ export default function Profile() {
             title: t('Error'),
             description: ` ${data?.message}`,
             status: 'error',
-            duration: 5000,
+            duration: 10000,
             isClosable: true,
+            position: isMobile ? 'top' : 'bottom-right',
           })
         } else {
           setProfile(data)
@@ -68,8 +71,9 @@ export default function Profile() {
             title: t('Success'),
             description: t('Profile saved successfully.'),
             status: 'success',
-            duration: 5000,
+            duration: 10000,
             isClosable: true,
+            position: isMobile ? 'top' : 'bottom-right',
           })
         }
       })
@@ -83,8 +87,9 @@ export default function Profile() {
           title: t('Error'),
           description: ` ${(error as Error).message}`,
           status: 'error',
-          duration: 5000,
+          duration: 10000,
           isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
         })
       })
   }
@@ -145,8 +150,9 @@ export default function Profile() {
           title: t('Success'),
           description: t('Profile reset successfully.'),
           status: 'success',
-          duration: 5000,
+          duration: 10000,
           isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
         })
         // Refresh the profile after resetting
         disconnect()
@@ -161,8 +167,9 @@ export default function Profile() {
         title: t('Error'),
         description: ` ${(error as Error).message}`,
         status: 'error',
-        duration: 5000,
+        duration: 10000,
         isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
       })
     } finally {
       setIsResetting(false)
@@ -207,8 +214,9 @@ export default function Profile() {
             title: t('Success'),
             description: t('Data synced successfully.'),
             status: 'success',
-            duration: 5000,
+            duration: 10000,
             isClosable: true,
+            position: isMobile ? 'top' : 'bottom-right',
           })
         } else {
           const data = await response.json()
@@ -225,8 +233,9 @@ export default function Profile() {
         title: t('Error'),
         description: ` ${(error as Error).message}`,
         status: 'error',
-        duration: 5000,
+        duration: 10000,
         isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
       })
     } finally {
       setIsSyncing(false)

@@ -101,8 +101,9 @@ export default function Onboarding({ event }: { event: Event }) {
               </>
             ),
             status: feedbackType,
-            duration: 5000,
+            duration: 10000,
             isClosable: true,
+            position: isMobile ? 'top' : 'bottom-right',
           })
           if (data?.tasks) {
             setProfile(data)
@@ -117,8 +118,9 @@ export default function Onboarding({ event }: { event: Event }) {
           title: 'Error',
           description: error.message,
           status: 'error',
-          duration: 5000,
+          duration: 10000,
           isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
         })
       })
       .finally(() => {
