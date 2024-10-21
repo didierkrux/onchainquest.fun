@@ -7,10 +7,18 @@ import {
   PopoverContent,
   PopoverArrow,
   PopoverBody,
+  Link,
 } from '@chakra-ui/react'
 import NextLink from 'next/link'
 import { useAccount } from 'wagmi'
-import { CalendarCheck, ListChecks, Ranking, Plugs, InstagramLogo } from '@phosphor-icons/react'
+import {
+  CalendarCheck,
+  ListChecks,
+  Ranking,
+  Plugs,
+  InstagramLogo,
+  SquaresFour,
+} from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
 import { useAppKit, useAppKitState } from '@reown/appkit/react'
 import { useTranslation } from 'react-i18next'
@@ -71,6 +79,8 @@ const Menu = () => {
   const { open: isOpen } = useAppKitState()
   const [pwa] = useLocalStorage('pwa', false)
   const [profile] = useLocalStorage<Profile | null>('profile', null)
+  const [appDeploymentId, setAppDeploymentId] = useLocalStorage('app-deployment-id', '')
+  const [latestDeploymentId, setLatestDeploymentId] = useState(appDeploymentId)
 
   const { pathname } = useRouter()
 
@@ -99,6 +109,36 @@ const Menu = () => {
 
   const isProfileActive = pathname === MENU[4].href
 
+  useEffect(() => {
+    const fetchDeploymentId = async (loadType: string) => {
+      try {
+        const res = await fetch('/api/deployment')
+        const data = await res.json()
+        const newDeploymentId = data.deploymentId
+        if (newDeploymentId && newDeploymentId !== appDeploymentId) {
+          // only update the app deployment id on first load
+          if (loadType === 'first-load') {
+            setAppDeploymentId(newDeploymentId)
+          }
+          setLatestDeploymentId(newDeploymentId)
+        }
+      } catch (error) {
+        console.error('Failed to fetch deployment ID:', error)
+      }
+    }
+
+    // call the api to get the deployment id every 1 minute
+    const interval = setInterval(() => fetchDeploymentId('interval-load'), 60000)
+
+    // on first load, fetch the deployment id
+    fetchDeploymentId('first-load')
+
+    return () => clearInterval(interval)
+  }, [appDeploymentId])
+
+  const newVersionAvailable =
+    latestDeploymentId && latestDeploymentId !== '' && latestDeploymentId !== appDeploymentId
+
   return (
     <Box
       as="nav"
@@ -113,59 +153,84 @@ const Menu = () => {
     >
       <NoHoverDecoration>
         <Flex justify="space-around" align="center" h="60px" maxW="container.md" mx="auto">
-          {MENU_ITEMS.map((item) => {
-            const isActive = pathname === item.href
-            return (
-              <Box
-                key={item.href}
-                w="100%"
-                h="100%"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <NextLink href={item.href} style={{ width: '100%', height: '100%' }}>
-                  <MenuItem label={item.label} isActive={isActive}>
-                    <item.icon size={24} />
-                  </MenuItem>
-                </NextLink>
-              </Box>
-            )
-          })}
-          <Popover isOpen={!isConnected && isProfileActive && !isOpen}>
-            <PopoverTrigger>
-              <Box w="100%" h="100%" display="flex" justifyContent="center" alignItems="center">
-                <NextLink href={MENU[4].href} style={{ width: '100%', height: '100%' }}>
-                  <MenuItem
-                    label={isConnected ? t('Profile') : t('Connect')}
-                    isActive={isProfileActive}
-                    onClick={() => {
-                      if (!isConnected) {
-                        open({ view: 'Connect' })
-                      }
-                    }}
+          {newVersionAvailable ? (
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={2}
+              justifyContent="center"
+              bg="orange.300"
+              color="gray.900"
+              p={4}
+              w="100%"
+              h="100%"
+            >
+              <SquaresFour />
+              {t('New app version available!')}
+              {' · '}
+              <Link onClick={() => window.location.reload()}>{t('Refresh')}</Link>
+            </Box>
+          ) : (
+            <>
+              {MENU_ITEMS.map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <Box
+                    key={item.href}
+                    w="100%"
+                    h="100%"
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
                   >
-                    {profile && isConnected ? (
-                      <Box
-                        border={isProfileActive ? '1px solid orange' : '1px solid white'}
-                        borderRadius="full"
+                    <NextLink href={item.href} style={{ width: '100%', height: '100%' }}>
+                      <MenuItem label={item.label} isActive={isActive}>
+                        <item.icon size={24} />
+                      </MenuItem>
+                    </NextLink>
+                  </Box>
+                )
+              })}
+            </>
+          )}
+          {newVersionAvailable ? null : (
+            <>
+              <Popover isOpen={!isConnected && isProfileActive && !isOpen}>
+                <PopoverTrigger>
+                  <Box w="100%" h="100%" display="flex" justifyContent="center" alignItems="center">
+                    <NextLink href={MENU[4].href} style={{ width: '100%', height: '100%' }}>
+                      <MenuItem
+                        label={isConnected ? t('Profile') : t('Connect')}
+                        isActive={isProfileActive}
+                        onClick={() => {
+                          if (!isConnected) {
+                            open({ view: 'Connect' })
+                          }
+                        }}
                       >
-                        <Avatar width="24px" src={profileAvatar(profile)} />
-                      </Box>
-                    ) : (
-                      <Plugs size={24} />
-                    )}
-                  </MenuItem>
-                </NextLink>
-              </Box>
-            </PopoverTrigger>
-            <PopoverContent>
-              <PopoverArrow />
-              <PopoverBody>
-                {t('Click here to connect your wallet & access your profile')}
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
+                        {profile && isConnected ? (
+                          <Box
+                            border={isProfileActive ? '1px solid orange' : '1px solid white'}
+                            borderRadius="full"
+                          >
+                            <Avatar width="24px" src={profileAvatar(profile)} />
+                          </Box>
+                        ) : (
+                          <Plugs size={24} />
+                        )}
+                      </MenuItem>
+                    </NextLink>
+                  </Box>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverBody>
+                    {t('Click here to connect your wallet & access your profile')}
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+            </>
+          )}
         </Flex>
       </NoHoverDecoration>
     </Box>
