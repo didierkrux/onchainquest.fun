@@ -55,7 +55,9 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
   return (
     <Box
       color={isActive ? 'orange' : 'white'}
-      _hover={!isActive ? { color: 'orange.200' } : { color: 'orange' }}
+      _hover={
+        !isActive ? (isMobile ? { color: 'white' } : { color: 'orange.200' }) : { color: 'orange' }
+      }
       {...props}
       display="flex"
       flexDirection="column"
