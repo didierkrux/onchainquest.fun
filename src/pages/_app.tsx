@@ -7,7 +7,7 @@ import Layout from 'components/Layout'
 import theme from 'theme'
 import 'utils/translation'
 import NonSSRWrapper from 'components/NonSSRWrapper'
-import { MENU } from 'config'
+import { MENU, eventName } from 'config/index'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
 
@@ -24,11 +24,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       <ChakraProvider theme={theme}>
         <ColorModeScript initialColorMode={theme.config.initialColorMode} />
         <NextHead>
-          <title>{title ? `${title} | Start here` : 'Start here'}</title>
+          <title>{title ? `${title} | ${eventName}` : eventName}</title>
           <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
           {/* Progressive Web App */}
           <link rel="apple-touch-icon" href="/app-icon.png" />
-          <meta name="apple-mobile-web-app-title" content="Start here" />
+          <meta name="apple-mobile-web-app-title" content={eventName} />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="black" />
           <link rel="manifest" crossOrigin="use-credentials" href="/manifest.json" />

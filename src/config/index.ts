@@ -1,5 +1,7 @@
 export const eventId = 1
 
+export const eventName = 'New to Web3'
+
 export const adminWallets = [
   '0xBD19a3F0A9CaCE18513A1e2863d648D13975CB30'.toLowerCase(), // didierkrux.eth
   '0xb749A586080436e616f097f193Ba9CB6A25E7Ea6'.toLowerCase(), // ornellaweb3.eth
