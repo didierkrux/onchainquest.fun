@@ -113,7 +113,7 @@ export default function Profile() {
               setAvatarEmoji(emoji)
             }
           }
-          setRole(data?.role || 'learner')
+          setRole(data?.role || 'Explorer')
         })
     }
   }
@@ -255,7 +255,7 @@ export default function Profile() {
     }
   }
 
-  const tabLabels = [`${t('Learner')} 🧑‍🎓`, `${t('Mentor')} 🧑‍🏫`]
+  const tabLabels = [`${t('Explorer')} 🧑‍🎓`, `${t('Mentor')} 🧑‍🏫`]
   const selectedIndex = role === 'mentor' ? 1 : 0
 
   if (!address) return <Box display="flex" flexDirection="column" alignItems="center"></Box>
@@ -367,7 +367,7 @@ export default function Profile() {
                           tabLabels={tabLabels}
                           selectedIndex={selectedIndex}
                           onTabChange={(index: number) =>
-                            setRole(index === 0 ? 'learner' : 'mentor')
+                            setRole(index === 0 ? 'Explorer' : 'mentor')
                           }
                         />
                       ) : null}

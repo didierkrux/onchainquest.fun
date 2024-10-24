@@ -24,7 +24,7 @@ export default function SelectTab({
     >
       <TabList>
         {tabLabels.map((label, index) => (
-          <Tab key={index} color="gray.300" minW="100px">
+          <Tab key={index} minW="100px">
             {label}
           </Tab>
         ))}

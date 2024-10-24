@@ -1,7 +1,12 @@
 export type AgendaItem = {
+  emoji: string
   time: string
   title: string
   location: string
+  locationColor: string
+  highlight?: boolean
+  format: string
+  people?: string
 }
 
 export type Sponsor = {

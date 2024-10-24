@@ -37,7 +37,7 @@ export default function Leaderboard({ event }: { event: Event }) {
   }, [])
 
   const filterByRole = (role: string) => {
-    return leaderboard?.filter((user) => (user.role || 'learner') === role) || []
+    return leaderboard?.filter((user) => (user.role || 'Explorer') === role) || []
   }
 
   const renderLeaderboardList = (users: Profile[], isMobile: boolean, displayRole: boolean) => (
@@ -91,7 +91,7 @@ export default function Leaderboard({ event }: { event: Event }) {
           <Tabs defaultIndex={1} mt={4}>
             <TabList>
               <Tab>{t('All')}</Tab>
-              <Tab>{t('Learners')} 🧑‍🎓</Tab>
+              <Tab>{t('Explorers')} 🧑‍🎓</Tab>
               <Tab>{t('Mentors')} 🧑‍🏫</Tab>
             </TabList>
             <TabPanels>
@@ -103,7 +103,7 @@ export default function Leaderboard({ event }: { event: Event }) {
               <TabPanel p={0}>
                 <Card borderTopRadius={0}>
                   <CardBody>
-                    {renderLeaderboardList(filterByRole('learner'), isMobile, false)}
+                    {renderLeaderboardList(filterByRole('Explorer'), isMobile, false)}
                   </CardBody>
                 </Card>
               </TabPanel>

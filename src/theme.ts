@@ -1,9 +1,9 @@
 import { extendTheme, localStorageManager, ThemeConfig, withDefaultColorScheme } from "@chakra-ui/react"
 
-localStorageManager.set('dark')
+localStorageManager.set('light')
 
 const config: ThemeConfig = {
-  initialColorMode: "dark",
+  initialColorMode: "light",
   useSystemColorMode: false,
 }
 
@@ -28,9 +28,28 @@ const theme = extendTheme({
         },
       },
     },
+    Card: {
+      baseStyle: {
+        borderRadius: '10px',
+      },
+      variants: {
+        outline: {
+          border: '1px solid #FF7614', // orange 1px border for outline variant
+        },
+      },
+    },
+  },
+  colors: {
+    purple: {
+      500: "#3D154C", // deep purple
+      600: "#5F177A", // medium purple
+    },
+    orange: "#FF7614", // orange
+    salmon: "#CD577E", // salmon
+    background: "#E3D7C9", // light gray
   },
 },
-  withDefaultColorScheme({ colorScheme: 'orange' })
+  withDefaultColorScheme({ colorScheme: 'purple' })
 )
 
 export default theme

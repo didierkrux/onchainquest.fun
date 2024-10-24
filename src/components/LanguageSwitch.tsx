@@ -35,7 +35,6 @@ const LanguageSwitch = (): React.ReactElement => {
         tabLabels={languages.map((lang) => LanguageDescription[lang] || lang)}
         selectedIndex={selectedIndex}
         onTabChange={handleTabChange}
-        colorScheme="orange"
       />
     </Box>
   )

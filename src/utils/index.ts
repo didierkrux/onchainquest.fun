@@ -36,9 +36,14 @@ export async function fetchPotionData(): Promise<Event> {
       agenda: data
         .filter((item: any) => item.fields.Type === 'Agenda')
         .map((item: any) => ({
+          emoji: item.fields.Emoji,
           title: item.fields.Label,
           time: item.fields.Time,
           location: item.fields.Location,
+          locationColor: item.fields['Location color'],
+          highlight: item.fields.Highlight,
+          format: item.fields.Format,
+          people: item.fields.People,
         })),
       sponsors: data
         .filter((item: any) => item.fields.Type === 'Sponsor')

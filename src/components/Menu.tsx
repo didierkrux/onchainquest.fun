@@ -54,9 +54,9 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
 
   return (
     <Box
-      color={isActive ? 'orange' : 'white'}
+      color={isActive ? 'orange' : 'black'}
       _hover={
-        !isActive ? (isMobile ? { color: 'white' } : { color: 'orange.200' }) : { color: 'orange' }
+        !isActive ? (isMobile ? { color: 'black' } : { color: 'salmon' }) : { color: 'orange' }
       }
       {...props}
       display="flex"
@@ -65,7 +65,9 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
       justifyContent="center"
       w="100%"
       h="100%"
-      borderBottom={isActive && !isMobile ? '1px solid orange' : '1px solid black'}
+      style={{
+        borderBottom: isActive && !isMobile ? '2px solid #FF7614' : '2px solid #D1B3AC',
+      }}
     >
       {children}
       <Box fontSize={['10px', '16px']}>{mounted ? label : ''}</Box>
@@ -148,7 +150,7 @@ const Menu = () => {
       bottom={isMobile ? 0 : 'auto'}
       left={0}
       right={0}
-      bg="black"
+      bg="#D1B3AC"
       boxShadow={isMobile ? '0 -1px 2px rgba(0, 0, 0, 0.1)' : 'none'}
       zIndex={10}
       pb={isMobile && pwa ? '16px' : '0'}

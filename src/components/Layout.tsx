@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Box, useMediaQuery, Spinner, Text } from '@chakra-ui/react'
+import { Box, useMediaQuery, Spinner, Text, Image } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
 
 import Menu from 'components/Menu'
@@ -22,12 +22,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   }, [setPwa])
 
+  const isHomepage = typeof window !== 'undefined' && window.location.pathname === '/'
+
   return (
     <Box>
       <header>
         <Menu />
       </header>
-      <main>
+      {isHomepage && <Image src={isMobile ? '/banner-mobile.jpg' : '/banner.jpg'} alt="Banner" />}
+      <main style={{ backgroundColor: '#E3D7C9' }}>
         <Box
           p="4"
           maxW="container.lg"

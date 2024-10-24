@@ -14,6 +14,8 @@
       const colorMode = localStorage.getItem("chakra-ui-color-mode");
       if (colorMode === "dark") {
         document.documentElement.style.setProperty("color-scheme", "dark");
+      } else {
+        document.documentElement.style.setProperty("color-scheme", "light");
       }
     })();
   </script>
