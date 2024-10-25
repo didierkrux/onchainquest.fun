@@ -54,9 +54,9 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
 
   return (
     <Box
-      color={isActive ? 'orange' : 'black'}
+      color={isActive ? 'purple' : 'black'}
       _hover={
-        !isActive ? (isMobile ? { color: 'black' } : { color: 'salmon' }) : { color: 'orange' }
+        !isActive ? (isMobile ? { color: 'black' } : { color: 'salmon' }) : { color: 'purple' }
       }
       {...props}
       display="flex"
@@ -66,7 +66,7 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
       w="100%"
       h="100%"
       style={{
-        borderBottom: isActive && !isMobile ? '2px solid #FF7614' : '2px solid #D1B3AC',
+        borderBottom: isActive && !isMobile ? '2px solid #3D154C' : '2px solid #D1B3AC',
       }}
     >
       {children}
@@ -163,7 +163,7 @@ const Menu = () => {
               alignItems="center"
               gap={2}
               justifyContent="center"
-              bg="orange.300"
+              bg="purple.300"
               color="gray.900"
               p={4}
               w="100%"
@@ -214,7 +214,7 @@ const Menu = () => {
                       >
                         {profile && isConnected ? (
                           <Box
-                            border={isProfileActive ? '1px solid orange' : '1px solid white'}
+                            border={isProfileActive ? '1px solid purple' : '1px solid black'}
                             borderRadius="full"
                           >
                             <Avatar width="24px" src={profileAvatar(profile)} />

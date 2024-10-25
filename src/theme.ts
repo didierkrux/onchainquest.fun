@@ -11,6 +11,9 @@ const theme = extendTheme({
   config,
   styles: {
     global: {
+      body: {
+        backgroundColor: "#E3D7C9",
+      },
       a: {
         color: "#3182ce",
         _hover: {
