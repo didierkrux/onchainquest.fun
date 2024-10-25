@@ -33,8 +33,8 @@ export async function fetchPotionData(): Promise<Event> {
     const data: any = await response.json()
 
     const transformedData: Event = {
-      agenda: data
-        .filter((item: any) => item.fields.Type === 'Agenda')
+      program: data
+        .filter((item: any) => item.fields.Type === 'Program')
         .map((item: any) => ({
           emoji: item.fields.Emoji,
           title: item.fields.Label,
@@ -49,12 +49,13 @@ export async function fetchPotionData(): Promise<Event> {
         .filter((item: any) => item.fields.Type === 'Sponsor')
         .map((item: any) => ({
           name: item.fields.Label,
-          description: replaceLinks(item.fields.Description),
+          // description: replaceLinks(item.fields.Description),
+          sponsorCategory: item.fields['Sponsor category'],
           image: item.fields.Image || '',
           link: item.fields.Link || '',
         })),
       venue: data
-        .filter((item: any) => item.fields.Type === 'Map')
+        .filter((item: any) => item.fields.Type === 'Venue')
         .map((item: any) => ({
           name: item.fields.Label,
           image: item.fields.Image || '',

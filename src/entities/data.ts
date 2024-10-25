@@ -1,4 +1,4 @@
-export type AgendaItem = {
+export type ProgramItem = {
   emoji: string
   time: string
   title: string
@@ -11,7 +11,8 @@ export type AgendaItem = {
 
 export type Sponsor = {
   name: string
-  description: string
+  // description: string
+  sponsorCategory: string
   link: string
   image: string
 }
@@ -21,7 +22,7 @@ export type Booth = {
   description: string
 }
 
-export type Venue = {
+export type VenueItem = {
   name: string
   image: string
 }
@@ -54,7 +55,7 @@ export type Quest = {
 }
 
 export const Empty = {
-  agenda: [],
+  program: [],
   sponsors: [],
   booths: [],
   venue: [],
@@ -63,10 +64,10 @@ export const Empty = {
 }
 
 export interface Event {
-  agenda: AgendaItem[]
+  program: ProgramItem[]
   sponsors: Sponsor[]
   booths: Booth[]
-  venue: Venue[]
+  venue: VenueItem[]
   prizes: Prize[]
   tasks: Quest[]
 }
