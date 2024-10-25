@@ -50,8 +50,8 @@ export default function Social({ event }: { event: Event }) {
       <Heading as="h1">Instagram</Heading>
       <Box>
         <Text>
-          <Link href="https://www.instagram.com/explore/tags/new2web3/" isExternal>
-            {t('View all #New2Web3 posts in Instagram')}
+          <Link href="https://www.instagram.com/explore/tags/newtoweb3/" isExternal>
+            {t('View all #NewToWeb3 posts in Instagram')}
           </Link>
         </Text>
         <Box
@@ -76,8 +76,11 @@ export default function Social({ event }: { event: Event }) {
       </Heading>
       <Box>
         <Text>
-          <Link href="https://x.com/search?q=%23new2web3&src=recent_search_click&f=live" isExternal>
-            {t('View all #New2Web3 posts in Twitter / X')}
+          <Link
+            href="https://x.com/search?q=%23newtoweb3&src=recent_search_click&f=live"
+            isExternal
+          >
+            {t('View all #NewToWeb3 posts in Twitter / X')}
           </Link>
         </Text>
         <Box

@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // const response = await fetch(
-    //   'https://api.twitter.com/2/tweets/search/recent?query=%23new2web3&tweet.fields=id,author_id&max_results=20',
+    //   'https://api.twitter.com/2/tweets/search/recent?query=%23newtoweb3&tweet.fields=id,author_id&max_results=20',
     //   {
     //     headers: {
     //       Authorization: `Bearer ${bearerToken}`,

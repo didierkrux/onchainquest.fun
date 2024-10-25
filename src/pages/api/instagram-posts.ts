@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // const IG_USER_ID = '27293640893617009'
   // const response = await fetch(
-  //   `https://graph.facebook.com/v21.0/ig_hashtag_search?user_id=${IG_USER_ID}&q=new2web3&access_token=${INSTAGRAM_ACCESS_TOKEN}`
+  //   `https://graph.facebook.com/v21.0/ig_hashtag_search?user_id=${IG_USER_ID}&q=newtoweb3&access_token=${INSTAGRAM_ACCESS_TOKEN}`
   // )
 
   try {
@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // // console.log(JSON.stringify(headers))
 
-    // const response = await fetch("https://www.instagram.com/api/v1/fbsearch/web/top_serp/?query=%23new2web3", {
+    // const response = await fetch("https://www.instagram.com/api/v1/fbsearch/web/top_serp/?query=%23newtoweb3", {
     //   headers,
     //   "body": null,
     //   "method": "GET"

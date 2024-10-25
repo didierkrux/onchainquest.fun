@@ -41,7 +41,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           <meta name="apple-mobile-web-app-title" content={eventName} />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-          <link rel="manifest" crossOrigin="use-credentials" href={`${DOMAIN_URL}/manifest.json`} />
+          <link rel="manifest" crossOrigin="use-credentials" href="/manifest.json" />
           {/* Open Graph / Facebook (needs to be < 300kb to work on WhatsApp) */}
           <meta property="og:type" content="website" />
           <meta property="og:url" content={url} />
