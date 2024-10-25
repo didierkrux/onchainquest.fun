@@ -1,12 +1,16 @@
-import { Box, Heading, Text, Image, CardBody } from '@chakra-ui/react'
+import { Box, Heading, Text, Image, CardBody, Link } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
 
 import LanguageSwitch from 'components/LanguageSwitch'
 import { Event } from 'entities/data'
 import { Card } from 'components/Card'
 
-export default function Agenda({ event }: { event: Event }) {
+export default function Event({ event }: { event: Event }) {
   const { t } = useTranslation()
+
+  const goldSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === 'Gold')
+  const silverSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === 'Silver')
+  const bronzeSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === 'Bronze')
 
   return (
     <Box>
@@ -15,7 +19,7 @@ export default function Agenda({ event }: { event: Event }) {
         <LanguageSwitch />
       </Box>
       <Heading as="h1">{t('Program')}</Heading>
-      {event.agenda.map((item, index) => (
+      {event.program?.map((item, index) => (
         <Card mt={4} key={index} highlight={item.highlight} borderRadius="10px">
           <CardBody
             p={[3, 5]}
@@ -27,7 +31,7 @@ export default function Agenda({ event }: { event: Event }) {
             <Box display="flex" flexDirection="column" alignItems="start">
               <Box
                 display="flex"
-                fontSize="21px"
+                fontSize="18px"
                 fontWeight="bold"
                 color="orange"
                 flexDirection="column"
@@ -48,10 +52,10 @@ export default function Agenda({ event }: { event: Event }) {
                 gap={2}
                 fontSize="12px"
               >
-                <Text bg={item.locationColor} p={2} borderRadius="md">
+                <Text bg={item.locationColor} p="4px 10px" borderRadius="md">
                   {item.location}
                 </Text>
-                <Text bg="#FBF5EE" p={2} borderRadius="md">
+                <Text bg="#FBF5EE" color="purple.500" p="4px 10px" borderRadius="md">
                   {item.format}
                 </Text>
               </Box>
@@ -66,13 +70,13 @@ export default function Agenda({ event }: { event: Event }) {
         </Card>
       ))}
       <Heading as="h1" mt={4}>
-        {t('Venue map')}
+        {t('Venue')}
       </Heading>
       {event?.venue?.length > 0 && event?.venue[0]?.image && <Image src={event.venue[0].image} />}
       <Heading as="h1" mt={4}>
         {t('Booths')}
       </Heading>
-      {event.booths.map((booth, index) => (
+      {event.booths?.map((booth, index) => (
         <Card mt={4} key={index}>
           <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
             <Box>
@@ -89,20 +93,64 @@ export default function Agenda({ event }: { event: Event }) {
       <Heading as="h1" mt={4}>
         {t('Sponsors')}
       </Heading>
-      {event.sponsors.map((sponsor, index) => (
-        <Card mt={4} key={index}>
-          <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
-            <Box>
-              <a href={sponsor.link}>
-                <Image h="60px" src={sponsor.image} alt={sponsor.name} />
-              </a>
-              <Text as="h3" mt={4}>
-                {sponsor.description}
-              </Text>
-            </Box>
-          </CardBody>
-        </Card>
-      ))}
+      <Box display="flex" flexDirection="column" gap={4}>
+        <Box mt="10">
+          <Text fontWeight="bold" textTransform="uppercase" textAlign="center">
+            {t('Powered by')}
+          </Text>
+          <Box display="flex" flexWrap="wrap" justifyContent="center">
+            {goldSponsors?.map((sponsor, index) => (
+              <Box key={index} mt="8" width="60%" h="auto">
+                <Link isExternal href={sponsor.link} display="contents">
+                  <Image src={sponsor.image} alt={sponsor.name} />
+                </Link>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+        <Box mt="10">
+          <Text fontWeight="bold" textTransform="uppercase" textAlign="center">
+            {t('Supported by')}
+          </Text>
+          <Box display="flex" flexWrap="wrap">
+            {silverSponsors?.map((sponsor, index) => (
+              <Box
+                key={index}
+                mt="8"
+                width="50%"
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Link isExternal href={sponsor.link} display="contents">
+                  <Image src={sponsor.image} alt={sponsor.name} width="60%" h="auto" />
+                </Link>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+        <Box mt="10">
+          <Text fontWeight="bold" textTransform="uppercase" textAlign="center">
+            {t('Community partners')}
+          </Text>
+          <Box display="flex" flexWrap="wrap">
+            {bronzeSponsors?.map((sponsor, index) => (
+              <Box
+                key={index}
+                mt="8"
+                width="50%"
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Link isExternal href={sponsor.link} display="contents">
+                  <Image src={sponsor.image} alt={sponsor.name} width="60%" h="auto" />
+                </Link>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Box>
     </Box>
   )
 }
