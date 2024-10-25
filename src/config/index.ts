@@ -2,6 +2,8 @@ export const eventId = 1
 
 export const eventName = 'New to Web3'
 
+export const eventDescription = '"New to Web3? Start Here" is a day of activities to get you from 0 to 1 in Web3'
+
 export const adminWallets = [
   '0xBD19a3F0A9CaCE18513A1e2863d648D13975CB30'.toLowerCase(), // didierkrux.eth
   '0xb749A586080436e616f097f193Ba9CB6A25E7Ea6'.toLowerCase(), // ornellaweb3.eth
@@ -41,9 +43,11 @@ export const MENU = [
   },
 ]
 
+export const IS_PROD = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
+
 export const DOMAIN_URL =
   process.env.NODE_ENV === 'development'
     ? `http://localhost:3000`
-    : process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
+    : IS_PROD
       ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
       : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
