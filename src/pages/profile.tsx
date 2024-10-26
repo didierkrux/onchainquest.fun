@@ -10,6 +10,9 @@ import {
   useClipboard,
   useToast,
   useMediaQuery,
+  FormControl,
+  FormLabel,
+  Switch,
 } from '@chakra-ui/react'
 import { useAccount, useDisconnect, useSignMessage } from 'wagmi'
 import { useEffect, useState } from 'react'
@@ -43,6 +46,7 @@ export default function Profile() {
   const [isSyncing, setIsSyncing] = useState(false)
   const { onCopy, hasCopied } = useClipboard(profile?.address || '')
   const [isMobile] = useMediaQuery('(max-width: 48em)')
+  const isSocialCronActive = profile?.isSocialCronActive || false
 
   const saveProfile = () => {
     setIsSaving(true)
@@ -191,6 +195,35 @@ export default function Profile() {
       }
     } catch (error) {
       console.error('Error signing message:', error)
+    }
+  }
+
+  const toggleSocialCron = async (isSocialCronActive: boolean) => {
+    if (!address || !adminSignature) return
+    console.log('toggleSocialCron', isSocialCronActive)
+
+    try {
+      fetch(`/api/admin/toggle-social-cron`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address, isSocialCronActive, adminSignature }),
+      })
+        .then((res) => res.json())
+        .then(() => {
+          setProfile((prevProfile) => {
+            if (prevProfile) {
+              return {
+                ...prevProfile,
+                isSocialCronActive,
+              }
+            }
+            return prevProfile
+          })
+        })
+    } catch (error) {
+      console.error('Error toggling social cron:', error)
     }
   }
 
@@ -392,7 +425,13 @@ export default function Profile() {
           <Box w="100%" maxW="600px">
             <Heading as="h1">Admin</Heading>
             <Card mt={4} mb={4} bg="red.100" color="black">
-              <CardBody>
+              <CardBody
+                display="flex"
+                flexDirection="column"
+                gap={4}
+                alignItems="center"
+                justifyContent="center"
+              >
                 <Box display="flex" alignItems="center" gap={4} justifyContent="center">
                   <a
                     target="_blank"
@@ -418,6 +457,20 @@ export default function Profile() {
                     </Button>
                   )}
                 </Box>
+                {adminSignature && (
+                  <Box display="flex" alignItems="center" gap={4}>
+                    <FormControl display="flex" alignItems="center">
+                      <FormLabel htmlFor="social-cron" mb="0">
+                        Social cron
+                      </FormLabel>
+                      <Switch
+                        id="social-cron"
+                        isChecked={isSocialCronActive}
+                        onChange={() => toggleSocialCron(!isSocialCronActive)}
+                      />
+                    </FormControl>
+                  </Box>
+                )}
               </CardBody>
             </Card>
           </Box>

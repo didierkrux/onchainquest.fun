@@ -19,9 +19,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // const { socials: isCronOn } = await db('events').where({ id: eventId }).select('socials').first()
 
-  const isCronOn = false
+  let { socials: { ig, twitter, isSocialCronActive } } = await db('events')
+    .select('socials')
+    .where('id', eventId)
+    .first()
 
-  if (!isCronOn) {
+  console.log('isSocialCronActive', isSocialCronActive)
+
+  if (!isSocialCronActive) {
     res.status(200).json({ message: 'Cron is not enabled' })
     return
   }
@@ -44,9 +49,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const ig_data = await ig_response.json()
+    console.log('ig_data', JSON.stringify(ig_data))
 
-    // console.log(data)
-    const ig_ids = ig_data.media_grid.sections[0].layout_content.medias.map((media: any) => media.media.code)
+    const igIds = ig_data.media_grid.sections.map((section: any) => section.layout_content.medias.map((media: any) => media.media.code)).flat()
+    console.log('igIds', igIds)
+
+    if (igIds?.length > 0 && JSON.stringify(ig) !== JSON.stringify(igIds)) {
+      console.log('updating ig posts')
+      ig = igIds
+      await db.raw(
+        `update "events" set "socials" = socials || ? where "id" = ?`,
+        [{ ig, igLastUpdated: new Date().toISOString() }, eventId]
+      )
+    }
 
     const twitter_response = await fetch(
       'https://api.twitter.com/2/tweets/search/recent?query=%23NewToWeb3&tweet.fields=id,author_id&max_results=20',
@@ -62,18 +77,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const twitter_data = await twitter_response.json()
+    console.log('twitter_data', twitter_data)
 
-    console.log(twitter_data)
     const twitterPosts = twitter_data?.data?.map((tweet: any) => `${tweet.author_id}/status/${tweet.id}`)
+    console.log('twitterPosts', twitterPosts)
 
-    await db('events').where({ id: eventId }).update({
-      socials: {
-        ig: ig_ids,
-        twitter: twitterPosts
-      }
-    })
+    if (twitterPosts?.length > 0 && JSON.stringify(twitter) !== JSON.stringify(twitterPosts)) {
+      twitter = twitterPosts
+      console.log('updating twitter posts')
+      await db.raw(
+        `update "events" set "socials" = socials || ? where "id" = ?`,
+        [{ twitter, twitterLastUpdated: new Date().toISOString() }, eventId]
+      )
+    }
 
-    res.status(200).json({ ig_ids, twitterPosts })
+    res.status(200).json({ ig, twitter })
   } catch (error) {
     console.error('Error fetching hashtag ID:', error)
     res.status(500).json({ error: 'Internal Server Error' })

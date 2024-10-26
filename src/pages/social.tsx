@@ -15,34 +15,21 @@ export default function Social({ event }: { event: Event }) {
   const [instagramPosts, setInstagramPosts] = useState<string[]>([])
   const [twitterPosts, setTwitterPosts] = useState<string[]>([])
   useEffect(() => {
-    const fetchInstagramPosts = async () => {
+    const fetchSocials = async () => {
       try {
-        const response = await fetch('/api/instagram-posts')
+        const response = await fetch('/api/socials')
         if (!response.ok) {
           throw new Error('Network response was not ok')
         }
         const data = await response.json()
-        setInstagramPosts(data)
+        setInstagramPosts(data.ig)
+        setTwitterPosts(data.twitter)
       } catch (error) {
         console.error('Error fetching Instagram posts:', error)
       }
     }
 
-    const fetchTwitterPosts = async () => {
-      try {
-        const response = await fetch('/api/twitter-posts')
-        if (!response.ok) {
-          throw new Error('Network response was not ok')
-        }
-        const data = await response.json()
-        setTwitterPosts(data)
-      } catch (error) {
-        console.error('Error fetching Twitter posts:', error)
-      }
-    }
-
-    fetchInstagramPosts()
-    fetchTwitterPosts()
+    fetchSocials()
   }, [])
 
   return (
@@ -76,10 +63,7 @@ export default function Social({ event }: { event: Event }) {
       </Heading>
       <Box>
         <Text>
-          <Link
-            href="https://x.com/search?q=%23newtoweb3&src=recent_search_click&f=live"
-            isExternal
-          >
+          <Link href="https://x.com/hashtag/NewToWeb3?src=hashtag_click&f=live" isExternal>
             {t('View all #NewToWeb3 posts in Twitter / X')}
           </Link>
         </Text>

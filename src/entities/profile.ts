@@ -17,4 +17,5 @@ export type Profile = {
   tasks: Tasks
   basename?: string
   basename_avatar?: string
+  isSocialCronActive?: boolean
 }

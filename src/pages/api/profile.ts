@@ -2,7 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import db from 'utils/db'
-import { eventId } from 'config/index'
+import { adminWallets, eventId } from 'config/index'
 import { calculateScore, userHasPoap, userHasSwappedTokens } from 'utils/index'
 import { getTasks } from 'utils/queries'
 import { TaskAction } from 'entities/data'
@@ -27,6 +27,13 @@ export default async function handler(
   if (!address || typeof address !== 'string') {
     return res.status(400).json({ message: 'Invalid address' })
   }
+
+  const { socials: { isSocialCronActive } } = await db('events')
+    .select('socials')
+    .where('id', eventId)
+    .first()
+
+  console.log('isSocialCronActive', isSocialCronActive)
 
   // Include task 7 (own-basename) in the POST method handling
   if (req.method === 'POST' && taskId && taskId >= 0) {
@@ -124,7 +131,7 @@ export default async function handler(
         .returning('*')
 
       if (updatedProfile && updatedProfile.length > 0) {
-        return res.status(200).json(updatedProfile[0])
+        return res.status(200).json({ ...updatedProfile[0], isSocialCronActive })
       } else {
         return res.status(404).json({ message: 'Profile not found or not updated' })
       }
@@ -192,7 +199,7 @@ export default async function handler(
       }
       console.log('profile', profile)
 
-      res.status(200).json(profile)
+      res.status(200).json({ ...profile, isSocialCronActive })
     } catch (error) {
       console.error('Error fetching profile:', error)
       res.status(500).json({ message: 'Internal server error' })
