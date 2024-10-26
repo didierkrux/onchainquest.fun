@@ -1,9 +1,9 @@
-import { Box, Heading, Text, Image, CardBody, Link } from '@chakra-ui/react'
+import { Box, Heading, Text, Image, CardBody, Link, Card } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
 
 import LanguageSwitch from 'components/LanguageSwitch'
 import { Event } from 'entities/data'
-import { Card } from 'components/Card'
+import { Card as CardComponent } from 'components/Card'
 
 export default function Event({ event }: { event: Event }) {
   const { t } = useTranslation()
@@ -20,7 +20,7 @@ export default function Event({ event }: { event: Event }) {
       </Box>
       <Heading as="h1">{t('Program')}</Heading>
       {event.program?.map((item, index) => (
-        <Card mt={4} key={index} highlight={item.highlight} borderRadius="10px">
+        <CardComponent mt={4} key={index} highlighted={item.highlight}>
           <CardBody
             p={[3, 5]}
             display="flex"
@@ -67,7 +67,7 @@ export default function Event({ event }: { event: Event }) {
               </Text>
             </Box>
           </CardBody>
-        </Card>
+        </CardComponent>
       ))}
       <Heading as="h1" mt={4}>
         {t('Venue')}
