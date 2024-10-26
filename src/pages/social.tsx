@@ -2,6 +2,7 @@ import { Box, Heading, Text, Link } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { InstagramEmbed, XEmbed } from 'react-social-media-embed'
+import { useLocalStorage } from 'usehooks-ts'
 
 import { Event } from 'entities/data'
 
@@ -12,8 +13,9 @@ interface IGMedia {
 
 export default function Social({ event }: { event: Event }) {
   const { t } = useTranslation()
-  const [instagramPosts, setInstagramPosts] = useState<string[]>([])
-  const [twitterPosts, setTwitterPosts] = useState<string[]>([])
+  const [instagramPosts, setInstagramPosts] = useLocalStorage<string[]>('instagramPosts', [])
+  const [twitterPosts, setTwitterPosts] = useLocalStorage<string[]>('twitterPosts', [])
+
   useEffect(() => {
     const fetchSocials = async () => {
       try {
@@ -29,8 +31,10 @@ export default function Social({ event }: { event: Event }) {
       }
     }
 
-    fetchSocials()
-  }, [])
+    if (instagramPosts.length === 0 || twitterPosts.length === 0) {
+      fetchSocials()
+    }
+  }, [instagramPosts, twitterPosts, setInstagramPosts, setTwitterPosts])
 
   return (
     <Box>
