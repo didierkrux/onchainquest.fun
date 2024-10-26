@@ -37,7 +37,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           mx="auto"
           mb={isMobile ? `calc(60px + ${pwa ? '16px' : '0px'})` : 0}
         >
-          {isLoading ? (
+          {event !== null && event?.program?.length > 0 ? (
+            React.Children.map(children, (child) => {
+              if (React.isValidElement(child)) {
+                return React.cloneElement(child as React.ReactElement<any>, { event })
+              }
+              return child
+            })
+          ) : isLoading ? (
             <Box textAlign="center" py={10}>
               <Spinner size="xl" />
               <Text mt={4}>{t('Loading event data...')}</Text>
@@ -48,17 +55,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {t('Error: ')} {error.message}
               </Text>
             </Box>
-          ) : event === null ? (
+          ) : (
             <Box textAlign="center" py={10}>
               <Text>{t('No event data available.')}</Text>
             </Box>
-          ) : (
-            React.Children.map(children, (child) => {
-              if (React.isValidElement(child)) {
-                return React.cloneElement(child as React.ReactElement<any>, { event })
-              }
-              return child
-            })
           )}
         </Box>
       </main>
