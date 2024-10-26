@@ -45,7 +45,7 @@ export const NoHoverDecoration = styled(Box)`
 `
 
 const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
-  const [isMobile] = useMediaQuery('(max-width: 48em)')
+  const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -54,9 +54,9 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
 
   return (
     <Box
-      color={isActive ? 'purple' : 'black'}
+      color={isActive ? 'purple.500' : 'black'}
       _hover={
-        !isActive ? (isMobile ? { color: 'black' } : { color: 'salmon' }) : { color: 'purple' }
+        !isActive ? (isMobile ? { color: 'black' } : { color: 'salmon' }) : { color: 'purple.500' }
       }
       {...props}
       display="flex"
@@ -77,7 +77,7 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
 
 const Menu = () => {
   const { t } = useTranslation()
-  const [isMobile] = useMediaQuery('(max-width: 48em)')
+  const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const { isConnected } = useAccount()
   const { open } = useAppKit()
   const { open: isOpen } = useAppKitState()
@@ -214,7 +214,7 @@ const Menu = () => {
                       >
                         {profile && isConnected ? (
                           <Box
-                            border={isProfileActive ? '1px solid purple' : '1px solid black'}
+                            border={isProfileActive ? '1px solid #3D154C' : '1px solid black'}
                             borderRadius="full"
                           >
                             <Avatar width="24px" src={profileAvatar(profile)} />

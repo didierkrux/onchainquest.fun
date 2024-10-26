@@ -12,7 +12,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { t } = useTranslation()
-  const [isMobile] = useMediaQuery('(max-width: 48em)')
+  const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const { event, isLoading, error } = useEventData()
   const [pwa, setPwa] = useLocalStorage('pwa', false)
 
@@ -29,7 +29,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <header>
         <Menu />
       </header>
-      {isHomepage && <Image src={isMobile ? '/banner-mobile.jpg' : '/banner.jpg'} alt="Banner" />}
+      {isHomepage && (
+        <Image w="100vw" src={isMobile ? '/banner-mobile.jpg' : '/banner.jpg'} alt="Banner" />
+      )}
       <main style={{ backgroundColor: '#E3D7C9' }}>
         <Box
           p="4"

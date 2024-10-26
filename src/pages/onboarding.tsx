@@ -49,7 +49,7 @@ export default function Onboarding({ event }: { event: Event }) {
   const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
   const [isLoading, setIsLoading] = useState<number | null>(null)
   const toast = useToast()
-  const [isMobile] = useMediaQuery('(max-width: 48em)')
+  const [isMobile] = useMediaQuery('(max-width: 1024px)')
 
   useEffect(() => {
     if (address) {
@@ -271,7 +271,7 @@ export default function Onboarding({ event }: { event: Event }) {
           <Card mt={4} key={index} variant={isCompleted ? 'outline' : 'filled'}>
             <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
               <Box>
-                <Heading size="md">
+                <Heading size="md" color="purple.500">
                   {index + 1}. {quest.name}
                 </Heading>
                 <Text pt="2">

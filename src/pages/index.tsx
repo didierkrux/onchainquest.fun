@@ -80,7 +80,7 @@ export default function Event({ event }: { event: Event }) {
         <Card mt={4} key={index}>
           <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
             <Box>
-              <Text as="h2" fontWeight="bold">
+              <Text as="h2" fontWeight="bold" color="purple.500">
                 {booth.name}
               </Text>
               <Text as="h3" mt={4}>

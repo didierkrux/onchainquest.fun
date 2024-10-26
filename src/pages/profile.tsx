@@ -45,7 +45,7 @@ export default function Profile() {
   const { signMessageAsync } = useSignMessage()
   const [isSyncing, setIsSyncing] = useState(false)
   const { onCopy, hasCopied } = useClipboard(profile?.address || '')
-  const [isMobile] = useMediaQuery('(max-width: 48em)')
+  const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const isSocialCronActive = profile?.isSocialCronActive || false
 
   const saveProfile = () => {

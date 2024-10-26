@@ -24,7 +24,7 @@ import { Avatar } from 'components/Avatar'
 
 export default function Leaderboard({ event }: { event: Event }) {
   const { t } = useTranslation()
-  const [isMobile] = useMediaQuery('(max-width: 48em)')
+  const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const [leaderboard, setLeaderboard] = useLocalStorage<Profile[] | null>('leaderboard', null)
 
   useEffect(() => {
@@ -75,7 +75,10 @@ export default function Leaderboard({ event }: { event: Event }) {
           <Card mt={4} key={index}>
             <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
               <Box>
-                <Text as="h3">{`${prize.name}: ${prize.description}`}</Text>
+                <Heading size="md" color="purple.500">
+                  {prize.name}
+                </Heading>
+                <Text as="h3">{prize.description}</Text>
               </Box>
             </CardBody>
           </Card>
