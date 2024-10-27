@@ -13,6 +13,7 @@ import {
   FormControl,
   FormLabel,
   Switch,
+  Link,
 } from '@chakra-ui/react'
 import { useAccount, useDisconnect, useSignMessage } from 'wagmi'
 import { useEffect, useState } from 'react'
@@ -438,7 +439,7 @@ export default function Profile() {
                     rel="noreferrer"
                     href="https://www.notion.so/banklessacademy/37a9e401c55747d29af74e5d4d9f5c5b?v=6ab88582bf3e4b0d9b6a11cc9a70df36"
                   >
-                    Notion CMS
+                    <Text>Notion CMS</Text>
                   </a>
                   {adminSignature ? (
                     <Box display="flex" gap={4}>
@@ -469,6 +470,11 @@ export default function Profile() {
                         onChange={() => toggleSocialCron(!isSocialCronActive)}
                       />
                     </FormControl>
+                    <Box>
+                      <Link href="/api/cron/socials?force=true" isExternal>
+                        <Text whiteSpace="nowrap">Manual sync</Text>
+                      </Link>
+                    </Box>
                   </Box>
                 )}
               </CardBody>

@@ -19,6 +19,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // const { socials: isCronOn } = await db('events').where({ id: eventId }).select('socials').first()
 
+  const { force = false } = req.query
+
   let { socials: { ig, twitter, isSocialCronActive } } = await db('events')
     .select('socials')
     .where('id', eventId)
@@ -26,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   console.log('isSocialCronActive', isSocialCronActive)
 
-  if (!isSocialCronActive) {
+  if (!isSocialCronActive && !force) {
     res.status(200).json({ message: 'Cron is not enabled' })
     return
   }

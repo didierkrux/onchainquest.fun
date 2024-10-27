@@ -33,7 +33,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           <title>{pageTitle}</title>
           <meta name="description" content={description} />
           <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-          <link rel="shortcut icon" sizes="512x512" type="image/png" href={appIcon} />
+          {IS_PROD && <link rel="shortcut icon" sizes="512x512" type="image/png" href={appIcon} />}
           <link rel="canonical" href={canonical} />
           <meta name="robots" content={IS_PROD ? 'all' : 'noindex'}></meta>
           {/* Progressive Web App */}
