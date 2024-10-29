@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocalStorage } from 'usehooks-ts'
 import { verifyMessage } from 'viem'
 import twemoji from '@twemoji/api'
-import { Check, CopySimple } from '@phosphor-icons/react'
+import { Check, CopySimple, Star } from '@phosphor-icons/react'
 
 import { Profile } from 'entities/profile'
 import { profileName, profileAvatar, profileRole } from 'utils/index'
@@ -342,8 +342,9 @@ export default function Profile() {
                   </Box>
                   <Box display="flex" justifyContent="space-around" alignItems="center">
                     <Box display="flex" alignItems="center">
-                      <Heading fontSize="3xl">
-                        {t('Score')}: {profile?.score} ⭐️
+                      <Heading fontSize="2xl" color="purple.300" display="flex" alignItems="center">
+                        <Box mr={1}>{profile?.score}</Box>
+                        <Star weight="fill" size={24} />
                       </Heading>
                     </Box>
                   </Box>

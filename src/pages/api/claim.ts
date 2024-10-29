@@ -59,7 +59,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const addressToLower = (address as string).toLowerCase();
 
     const destination = addressToLower;
-    const ethAmount = ethers.parseUnits('0.0004', 'ether').toString();
+    const ethAmount = ethers.parseUnits('0.000555', 'ether').toString();
     const usdcAmount = ethers.parseUnits('2', 6).toString(); // USDC has 6 decimals
     // const usdgloAmount = ethers.parseUnits('1', 18).toString(); // USDGLO has 18 decimals
 

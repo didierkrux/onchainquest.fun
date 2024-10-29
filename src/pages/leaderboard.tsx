@@ -21,6 +21,7 @@ import { Event } from 'entities/data'
 import { Profile } from 'entities/profile'
 import { profileAvatar, profileName, profileRole } from 'utils/index'
 import { Avatar } from 'components/Avatar'
+import { Star } from '@phosphor-icons/react'
 
 export default function Leaderboard({ event }: { event: Event }) {
   const { t } = useTranslation()
@@ -60,7 +61,12 @@ export default function Leaderboard({ event }: { event: Event }) {
             {displayRole && <Text>{profileRole(user)}</Text>}
           </Box>
           <Box flexShrink={0} ml={2}>
-            <Text whiteSpace="nowrap">{user.score} ⭐️</Text>
+            <Text whiteSpace="nowrap" display="flex" alignItems="center" color="purple.300">
+              <Box mr={1} fontSize="14px">
+                {user.score}
+              </Box>
+              <Star weight="fill" size={24} />
+            </Text>
           </Box>
         </Box>
       ))}

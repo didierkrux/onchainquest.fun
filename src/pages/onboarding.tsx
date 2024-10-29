@@ -8,6 +8,8 @@ import {
   useToast,
   Image,
   useMediaQuery,
+  Badge,
+  Divider,
 } from '@chakra-ui/react'
 import { useAppKit } from '@reown/appkit/react'
 import { useAccount } from 'wagmi'
@@ -18,6 +20,8 @@ import { useLocalStorage } from 'usehooks-ts'
 
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
+import { CheckCircle, Star } from '@phosphor-icons/react/dist/ssr'
+import { Trophy } from '@phosphor-icons/react/dist/ssr'
 import { getMoments } from 'utils/index'
 
 const Moments = ({ eventId }: { eventId: string }) => {
@@ -92,7 +96,7 @@ export default function Onboarding({ event }: { event: Event }) {
               <>
                 {data?.message}
                 {data?.txLink && (
-                  <Box>
+                  <Box color="white !important">
                     <a href={data?.txLink} target="_blank">
                       {t('View claiming transaction on BaseScan')}
                     </a>
@@ -150,7 +154,7 @@ export default function Onboarding({ event }: { event: Event }) {
           <Button
             onClick={() => handleAction(quest)}
             isLoading={isLoading === quest.id}
-            loadingText={t('Claiming... (takes ~30 seconds, please wait for confirmation)')}
+            loadingText={t('Claiming... (takes ~30 seconds)')}
           >
             {t('Claim')}
           </Button>
@@ -209,7 +213,9 @@ export default function Onboarding({ event }: { event: Event }) {
           </Box>
         ) : (
           <Box>
-            <Text>{t('🔒 Requirements: Claim your free tokens (task 6) before swapping')}</Text>
+            <Text textAlign="left">
+              {t('🔒 Requirements: Claim your free tokens (task 6) before swapping')}
+            </Text>
           </Box>
         )
     }
@@ -257,30 +263,49 @@ export default function Onboarding({ event }: { event: Event }) {
 
   return (
     <Box>
-      <Box display={isMobile ? 'block' : 'flex'} w="100%" gap={4} justifyContent="space-between">
+      <Box display={'flex'} w="100%" gap={4} justifyContent="space-between">
         <Heading as="h1">{t('Onboarding tasks')}</Heading>
         {profile?.score && profile?.score > 0 && (
-          <Text textAlign="right" fontSize="2xl" mt={isMobile ? 4 : 0} fontWeight="bold">
-            {t('Total score')}: {profile?.score} ⭐️
-          </Text>
+          <Box display="flex" justifyContent="flex-end">
+            <Text display="flex" alignItems="end" fontSize="2xl" fontWeight="bold">
+              <Box display="flex" alignItems="center" color="purple.300" ml={1}>
+                <Box display="inline" mr={1}>
+                  {profile?.score}
+                </Box>
+                <Star weight="fill" size={24} />
+              </Box>
+            </Text>
+          </Box>
         )}
       </Box>
       {QUESTS.map((quest, index) => {
         const isCompleted = !!profile?.tasks?.[index.toString()]?.isCompleted
         return (
-          <Card mt={4} key={index} variant={isCompleted ? 'outline' : 'filled'}>
+          <Card mt={4} key={index} bg={isCompleted ? 'green.50' : 'white'}>
             <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
               <Box>
-                <Heading size="md" color="purple.500">
-                  {index + 1}. {quest.name}
-                </Heading>
-                <Text pt="2">
-                  {t('Points')}: {quest.points} ⭐️
-                </Text>
-                <Box pt="2">
-                  <Box fontWeight="bold" fontSize="lg">
-                    🥕 {t('Instructions')}:
+                <Box display="flex" gap={2} justifyContent="space-between" fontSize="18px">
+                  <Box display="flex" alignItems="center" gap={2} color="grey" fontWeight="bold">
+                    <Trophy color="orange" size={24} /> Task #{index + 1}
                   </Box>
+                  <Badge
+                    size="xl"
+                    borderRadius="md"
+                    colorScheme="purple"
+                    display="flex"
+                    alignItems="center"
+                    p="4px 8px"
+                  >
+                    <Star weight="fill" size={24} />
+                    <Box ml={1} fontSize="14px">
+                      {quest.points} {t('points')}
+                    </Box>
+                  </Badge>
+                </Box>
+                <Heading size="md" color="purple.500" fontSize="xl" mt={2}>
+                  {quest.name}
+                </Heading>
+                <Box pt="2">
                   {quest.description?.split('\n').map((line, index) => (
                     <React.Fragment key={index}>
                       <span
@@ -295,18 +320,29 @@ export default function Onboarding({ event }: { event: Event }) {
                     </React.Fragment>
                   ))}
                 </Box>
+                <Divider my={2} />
                 {((quest?.actionField && !isCompleted) || quest.action === 'swap-tokens') &&
                   isConnected && (
-                    <Box pt="2">
-                      <Box fontWeight="bold" fontSize="lg" mb="2">
-                        🎯 {t('Action')}:
-                      </Box>
+                    <Box pt="2" textAlign="right">
                       {quest?.actionField}
                     </Box>
                   )}
                 {quest.completedField && <Box pt="2">{quest.completedField}</Box>}
+                {isCompleted && (
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    gap={2}
+                    color="green"
+                    fontWeight="bold"
+                    justifyContent="flex-end"
+                    pt="2"
+                  >
+                    <CheckCircle size={24} />
+                    <span>{t('Completed')}</span>
+                  </Box>
+                )}
               </Box>
-              <Box>{isCompleted ? '✅' : '❌'}</Box>
             </CardBody>
           </Card>
         )

@@ -23,7 +23,7 @@ export function profileRole(profile: Profile) {
 
 export async function fetchPotionData(): Promise<Event> {
   // force all links in new tab
-  const replaceLinks = (string: string) => string?.replaceAll('<a ', '<a target="_blank" ')
+  const replaceLinks = (string: string) => string?.replaceAll('<a ', '<a target="_blank" ').replaceAll('<a target="_blank" href="https://newtoweb3.io/profile"', '<a href="/profile"')
 
   try {
     const response = await fetch(potionUrl)
@@ -196,7 +196,7 @@ export async function userHasSwappedTokens(address: string, tokenAddress: string
     console.log('tokenAddress', tokenAddress);
 
     const oneInchBaseAddress = '0xe37e799d5077682fa0a244d46e5649f71457bd09';
-    const sevenDaysAgo = Math.floor(Date.now() / 1000) - 604800; // 7 days ago in seconds
+    const twentyDaysAgo = Math.floor(Date.now() / 1000) - 20 * 24 * 60 * 60; // 20 days ago in seconds
 
     const response = await fetch(`https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`, {
       method: 'POST',
@@ -233,7 +233,7 @@ export async function userHasSwappedTokens(address: string, tokenAddress: string
         const isTokenTransfer = transfer?.rawContract?.address?.toLowerCase() === tokenAddress?.toLowerCase();
         console.log('isTokenTransfer', isTokenTransfer);
         console.log('transferTimestamp', transferTimestamp);
-        const isRecentTransfer = transferTimestamp >= sevenDaysAgo;
+        const isRecentTransfer = transferTimestamp >= twentyDaysAgo;
         console.log('isRecentTransfer', isRecentTransfer);
 
         return isRecentTransfer && isTokenTransfer;
