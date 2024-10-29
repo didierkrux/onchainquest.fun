@@ -14,7 +14,7 @@ export default async function handler(
   res: NextApiResponse
 ): Promise<void> {
   const { address } = req.query
-  const { username, avatar, role, taskId } = req.body
+  const { username, avatar, role, email, taskId } = req.body
   console.log('req.query', req.query)
   console.log('req.body', req.body)
   console.log('req.method', req.method)
@@ -22,6 +22,7 @@ export default async function handler(
   console.log('username', username)
   console.log('avatar', avatar)
   console.log('role', role)
+  console.log('email', email)
   console.log('taskId', taskId)
 
   if (!address || typeof address !== 'string') {
@@ -120,7 +121,7 @@ export default async function handler(
     // getMoments -> check if user posted a moment
     // calculate score
     const score = calculateScore(userTasks)
-    const profileToSave = { username, avatar, role, score, tasks: userTasks }
+    const profileToSave = { username, avatar, role, email, score, tasks: userTasks }
 
     console.log('Saving profile', profileToSave)
     try {
@@ -131,6 +132,10 @@ export default async function handler(
         .returning('*')
 
       if (updatedProfile && updatedProfile.length > 0) {
+        if (updatedProfile[0]?.email) {
+          updatedProfile[0].emailOK = true
+          delete updatedProfile[0].email
+        }
         return res.status(200).json({ ...updatedProfile[0], isSocialCronActive })
       } else {
         return res.status(404).json({ message: 'Profile not found or not updated' })
@@ -198,6 +203,11 @@ export default async function handler(
         }
       }
       console.log('profile', profile)
+
+      if (profile?.email) {
+        profile.emailOK = true
+        delete profile.email
+      }
 
       res.status(200).json({ ...profile, isSocialCronActive })
     } catch (error) {

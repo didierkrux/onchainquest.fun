@@ -18,4 +18,6 @@ export type Profile = {
   basename?: string
   basename_avatar?: string
   isSocialCronActive?: boolean
+  email?: string
+  emailOK?: boolean
 }

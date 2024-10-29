@@ -36,6 +36,7 @@ export default function Profile() {
   const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
   const { disconnect } = useDisconnect()
   const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [avatar, setAvatar] = useState('')
   const [avatarEmoji, setAvatarEmoji] = useState('')
@@ -56,7 +57,7 @@ export default function Profile() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username, avatar, role, taskId: 1 }),
+      body: JSON.stringify({ username, email, avatar, role, taskId: 1 }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -106,6 +107,7 @@ export default function Profile() {
         .then((data) => {
           setProfile(data)
           setUsername(data?.username || '')
+          setEmail(data?.email || '')
           setAvatar(data?.avatar || '')
           if (data?.avatar?.includes('twemoji')) {
             // Extract emoji code from URL
@@ -135,7 +137,10 @@ export default function Profile() {
       return
     }
 
-    QRCode.toDataURL(address, { type: 'image/png', color: { dark: '#ffffff', light: '#fffff00' } })
+    QRCode.toDataURL(address, {
+      type: 'image/png',
+      color: { dark: '#000000' },
+    })
       .then((url: string) => {
         setQrCodeDataURL(url)
       })
@@ -406,6 +411,21 @@ export default function Profile() {
                         />
                       ) : null}
                     </Box>
+                    {!profile?.emailOK && (
+                      <Box mb={4}>
+                        <Box gap={4} display="flex" alignItems="center">
+                          <Text>{t('Email: ')}</Text>
+                          <Input
+                            placeholder={t('Enter your email')}
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                          />
+                        </Box>
+                        <Text ml="16" mt="1">
+                          {t('* email only shared with organizers')}
+                        </Text>
+                      </Box>
+                    )}
                     <Box display="flex" justifyContent="center">
                       <Button
                         onClick={saveProfile}

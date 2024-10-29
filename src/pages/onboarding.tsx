@@ -209,7 +209,7 @@ export default function Onboarding({ event }: { event: Event }) {
           </Box>
         ) : (
           <Box>
-            <Text>{t('🚨 Claim your free tokens (task 6) before swapping')}</Text>
+            <Text>{t('🔒 Requirements: Claim your free tokens (task 6) before swapping')}</Text>
           </Box>
         )
     }
@@ -279,7 +279,7 @@ export default function Onboarding({ event }: { event: Event }) {
                 </Text>
                 <Box pt="2">
                   <Box fontWeight="bold" fontSize="lg">
-                    👉 {t('Instructions')}:
+                    🥕 {t('Instructions')}:
                   </Box>
                   {quest.description?.split('\n').map((line, index) => (
                     <React.Fragment key={index}>
@@ -299,7 +299,7 @@ export default function Onboarding({ event }: { event: Event }) {
                   isConnected && (
                     <Box pt="2">
                       <Box fontWeight="bold" fontSize="lg" mb="2">
-                        👉 {t('Action')}:
+                        🎯 {t('Action')}:
                       </Box>
                       {quest?.actionField}
                     </Box>

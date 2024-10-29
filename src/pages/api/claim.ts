@@ -137,6 +137,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .where('event_id', eventId)
         .whereILike('address', address)
         .returning('*')
+
+      if (profile?.email) {
+        profile.emailOK = true
+        delete profile.email
+      }
+
       return res.status(200).json({ ...profile, message: 'Tokens sent successfully.', txLink })
     } else {
       console.log('Transaction hash not available');
