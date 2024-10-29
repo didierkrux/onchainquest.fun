@@ -48,6 +48,7 @@ export type Quest = {
   name: string
   points: number
   description: string
+  image?: string
   action: TaskAction
   condition?: string
   actionField?: React.ReactNode

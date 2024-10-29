@@ -73,6 +73,7 @@ export async function fetchPotionData(): Promise<Event> {
           name: item.fields.Label,
           points: item.fields.Points,
           description: replaceLinks(item.fields.Description),
+          image: item.fields.Image,
           action: item.fields.Action,
           condition: item.fields.Condition,
         })),

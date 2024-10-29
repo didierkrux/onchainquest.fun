@@ -319,6 +319,11 @@ export default function Onboarding({ event }: { event: Event }) {
                       <br />
                     </React.Fragment>
                   ))}
+                  {quest.image && (
+                    <Box display="flex" justifyContent="right">
+                      <Image w="100px" h="auto" src={quest.image} alt={quest.name} m="2" />
+                    </Box>
+                  )}
                 </Box>
                 <Divider my={2} />
                 {((quest?.actionField && !isCompleted) || quest.action === 'swap-tokens') &&
