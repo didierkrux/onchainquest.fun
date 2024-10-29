@@ -283,7 +283,7 @@ export default function Onboarding({ event }: { event: Event }) {
         return (
           <Card mt={4} key={index} bg={isCompleted ? 'green.50' : 'white'}>
             <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
-              <Box>
+              <Box w="100%">
                 <Box display="flex" gap={2} justifyContent="space-between" fontSize="18px">
                   <Box display="flex" alignItems="center" gap={2} color="grey" fontWeight="bold">
                     <Trophy color="orange" size={24} /> Task #{index + 1}
