@@ -21,11 +21,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('twitter', twitter)
     console.log('twitterFilter', twitterFilter)
 
-    const igExtraPosts = ['C9vR_LHAgYg', 'C6exyZSsKI0']
-    const twitterExtraPosts = ['OrnellaWeb3/status/1839314702385791462']
+    // const igExtraPosts = ['C9vR_LHAgYg', 'C6exyZSsKI0']
+    // const twitterExtraPosts = ['OrnellaWeb3/status/1839314702385791462']
+    const igExtraPosts: string[] = []
+    const twitterExtraPosts: string[] = []
 
-    const igPosts = [...ig, ...igExtraPosts].filter((post) => !igFilter?.includes(post))
-    const twitterPosts = [...twitter, ...twitterExtraPosts].filter((post) => !twitterFilter?.includes(post))
+    const igPosts = Array.from(new Set([...ig, ...igExtraPosts].filter((post) => !igFilter?.includes(post)))).slice(0, 8)
+    const twitterPosts = Array.from(new Set([...twitter, ...twitterExtraPosts].filter((post) => !twitterFilter?.includes(post)))).slice(0, 8)
 
     res.status(200).json({ ig: igPosts, twitter: twitterPosts })
   } catch (error) {

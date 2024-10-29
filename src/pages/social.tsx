@@ -31,10 +31,8 @@ export default function Social({ event }: { event: Event }) {
       }
     }
 
-    if (instagramPosts.length === 0 || twitterPosts.length === 0) {
-      fetchSocials()
-    }
-  }, [instagramPosts, twitterPosts, setInstagramPosts, setTwitterPosts])
+    fetchSocials()
+  }, [setInstagramPosts, setTwitterPosts])
 
   return (
     <Box>

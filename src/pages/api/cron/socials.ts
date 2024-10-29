@@ -34,8 +34,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-
-
     const headers = JSON.parse(process.env.INSTAGRAM_HEADERS || '{}')
 
     // console.log(JSON.stringify(headers))
@@ -66,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const twitter_response = await fetch(
-      'https://api.twitter.com/2/tweets/search/recent?query=%23NewToWeb3&tweet.fields=id,author_id&max_results=20',
+      'https://api.twitter.com/2/tweets/search/recent?query=%23NewToWeb3 -is:retweet&tweet.fields=id,author_id,edit_history_tweet_ids&expansions=author_id&max_results=20',
       {
         headers: {
           Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
@@ -81,7 +79,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const twitter_data = await twitter_response.json()
     console.log('twitter_data', twitter_data)
 
-    const twitterPosts = twitter_data?.data?.map((tweet: any) => `${tweet.author_id}/status/${tweet.id}`)
+    const twitterPosts = twitter_data?.data?.map((tweet: any) => {
+      const latestTweetId = tweet.edit_history_tweet_ids[tweet.edit_history_tweet_ids.length - 1]
+      const author = twitter_data.includes.users.find((user: any) => user.id === tweet.author_id)
+      return `${author.username}/status/${latestTweetId}`
+    })
     console.log('twitterPosts', twitterPosts)
 
     if (twitterPosts?.length > 0 && JSON.stringify(twitter) !== JSON.stringify(twitterPosts)) {
