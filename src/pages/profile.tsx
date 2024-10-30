@@ -40,7 +40,7 @@ export default function Profile() {
   const [isSaving, setIsSaving] = useState(false)
   const [avatar, setAvatar] = useState('')
   const [avatarEmoji, setAvatarEmoji] = useState('')
-  const [role, setRole] = useState('')
+  const [role, setRole] = useState(profile?.role || 'explorer')
   const [isResetting, setIsResetting] = useState(false)
   const toast = useToast()
   const [adminSignature, setAdminSignature] = useLocalStorage('admin-signature', '')
@@ -120,7 +120,7 @@ export default function Profile() {
               setAvatarEmoji(emoji)
             }
           }
-          setRole(data?.role || 'Explorer')
+          setRole(data?.role || 'explorer')
         })
     }
   }
@@ -295,7 +295,7 @@ export default function Profile() {
   }
 
   const tabLabels = [`${t('Explorer')} 🧑‍🎓`, `${t('Mentor')} 🧑‍🏫`]
-  const selectedIndex = role === 'mentor' ? 1 : 0
+  const selectedRoleIndex = role === 'mentor' ? 1 : 0
 
   if (!address) return <Box display="flex" flexDirection="column" alignItems="center"></Box>
   else {
@@ -314,7 +314,7 @@ export default function Profile() {
                     alignItems="center"
                   >
                     <Box
-                      fontSize={['2xl', '4xl']}
+                      fontSize={['xl', '3xl']}
                       fontWeight="bold"
                       mb={4}
                       display="flex"
@@ -326,15 +326,15 @@ export default function Profile() {
                       <Box
                         display={'flex'}
                         w="100%"
-                        gap={4}
                         justifyContent="space-between"
                         alignItems="center"
+                        flex="1"
                       >
-                        <Box display="flex" alignItems="center">
+                        <Text display="flex" alignItems="center" noOfLines={1}>
                           {profileName(profile)} {profileRole({ ...profile, role })}
-                        </Box>
-                        {profile?.score && profile?.score > 0 && (
-                          <Box display="flex" justifyContent="flex-end">
+                        </Text>
+                        <Box display="flex" justifyContent="flex-end" flexShrink={0} pl={4}>
+                          {profile?.score && profile?.score > 0 && (
                             <Text display="flex" alignItems="end" fontSize="2xl" fontWeight="bold">
                               <Box display="flex" alignItems="center" color="purple.300" ml={1}>
                                 <Box display="inline" mr={1}>
@@ -343,8 +343,8 @@ export default function Profile() {
                                 <Star weight="fill" size={24} />
                               </Box>
                             </Text>
-                          </Box>
-                        )}
+                          )}
+                        </Box>
                       </Box>
                       <Box display="flex" alignItems="center" gap={2}>
                         <Text fontSize={['2xs', 'sm']} color="gray.500">
@@ -419,9 +419,9 @@ export default function Profile() {
                       {role !== '' ? (
                         <SelectTab
                           tabLabels={tabLabels}
-                          selectedIndex={selectedIndex}
+                          selectedIndex={selectedRoleIndex}
                           onTabChange={(index: number) =>
-                            setRole(index === 0 ? 'Explorer' : 'mentor')
+                            setRole(index === 0 ? 'explorer' : 'mentor')
                           }
                         />
                       ) : null}
