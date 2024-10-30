@@ -323,7 +323,29 @@ export default function Profile() {
                       alignItems="center"
                       gap={2}
                     >
-                      {profileName(profile)} {profileRole({ ...profile, role })}
+                      <Box
+                        display={'flex'}
+                        w="100%"
+                        gap={4}
+                        justifyContent="space-between"
+                        alignItems="center"
+                      >
+                        <Box display="flex" alignItems="center">
+                          {profileName(profile)} {profileRole({ ...profile, role })}
+                        </Box>
+                        {profile?.score && profile?.score > 0 && (
+                          <Box display="flex" justifyContent="flex-end">
+                            <Text display="flex" alignItems="end" fontSize="2xl" fontWeight="bold">
+                              <Box display="flex" alignItems="center" color="purple.300" ml={1}>
+                                <Box display="inline" mr={1}>
+                                  {profile?.score}
+                                </Box>
+                                <Star weight="fill" size={24} />
+                              </Box>
+                            </Text>
+                          </Box>
+                        )}
+                      </Box>
                       <Box display="flex" alignItems="center" gap={2}>
                         <Text fontSize={['2xs', 'sm']} color="gray.500">
                           {profile?.address}
@@ -339,14 +361,6 @@ export default function Profile() {
                   <Box m={4} display="flex" justifyContent="center">
                     <Avatar src={profileAvatar(profile)} width="40%" />
                     <Image src={qrCodeDataURL} w="40%" h="auto" alt="QR" ml={8} />
-                  </Box>
-                  <Box display="flex" justifyContent="space-around" alignItems="center">
-                    <Box display="flex" alignItems="center">
-                      <Heading fontSize="2xl" color="purple.300" display="flex" alignItems="center">
-                        <Box mr={1}>{profile?.score}</Box>
-                        <Star weight="fill" size={24} />
-                      </Heading>
-                    </Box>
                   </Box>
                 </CardBody>
               </Card>
