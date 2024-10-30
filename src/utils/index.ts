@@ -248,6 +248,11 @@ export async function userHasSwappedTokens(address: string, tokenAddress: string
   }
 }
 
-export const calculateScore = (tasks: Tasks) => {
-  return Object.values(tasks).reduce((acc, task: any) => acc + task?.points, 0)
+export const calculateScore = (tasks: Tasks, allTasks: Tasks) => {
+  return Object.values(tasks).reduce((acc, task) => {
+    if (task?.isCompleted) {
+      return acc + (allTasks[task.id]?.points || 0)
+    }
+    return acc
+  }, 0)
 }
