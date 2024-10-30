@@ -2,7 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import db from 'utils/db'
-import { adminWallets, eventId } from 'config/index'
+import { eventId } from 'config/index'
 import { calculateScore, userHasPoap, userHasSwappedTokens } from 'utils/index'
 import { getTasks } from 'utils/queries'
 import { TaskAction } from 'entities/data'
@@ -120,7 +120,7 @@ export default async function handler(
     }
     // getMoments -> check if user posted a moment
     // calculate score
-    const score = calculateScore(userTasks)
+    const score = calculateScore(userTasks, tasks)
     const profileToSave = { username, avatar, role, email, score, tasks: userTasks }
 
     console.log('Saving profile', profileToSave)
@@ -159,7 +159,7 @@ export default async function handler(
         const taskId = Object.values(tasks).findIndex((task: any) => task.action === taskAction)
         console.log('taskId', taskId)
         const userTasks = { [taskId]: { id: taskId, isCompleted: true, points: tasks[taskId].points } }
-        const score = calculateScore(userTasks)
+        const score = calculateScore(userTasks, tasks)
         const profileToSave = { event_id: eventId, address, score, tasks: userTasks }
         console.log('Saving profile', profileToSave)
 
@@ -181,7 +181,7 @@ export default async function handler(
           const taskId = Object.values(tasks).findIndex((task: any) => task.action === taskAction)
           console.log('taskId', taskId)
           userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: tasks[taskId].points }
-          const score = calculateScore(userTasks)
+          const score = calculateScore(userTasks, tasks)
           profile = await db('users')
             .where('event_id', eventId)
             .whereILike('address', address)

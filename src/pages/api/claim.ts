@@ -130,7 +130,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const taskId = Object.values(tasks).findIndex((task: any) => task.action === taskAction)
       userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: tasks[taskId].points, txLink }
       console.log('userTasks', userTasks)
-      const score = calculateScore(userTasks)
+      const score = calculateScore(userTasks, tasks)
       const profileToSave = { score, tasks: userTasks }
       const [profile] = await db('users')
         .update(profileToSave)
