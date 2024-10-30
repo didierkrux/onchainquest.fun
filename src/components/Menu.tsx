@@ -150,7 +150,7 @@ const Menu = () => {
       bottom={isMobile ? 0 : 'auto'}
       left={0}
       right={0}
-      bg="#D1B3AC"
+      bg={newVersionAvailable ? 'purple.300' : '#D1B3AC'}
       boxShadow={isMobile ? '0 -1px 2px rgba(0, 0, 0, 0.1)' : 'none'}
       zIndex={10}
       pb={isMobile && pwa ? '16px' : '0'}
