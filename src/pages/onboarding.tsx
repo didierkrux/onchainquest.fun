@@ -214,7 +214,7 @@ export default function Onboarding({ event }: { event: Event }) {
         ) : (
           <Box>
             <Text textAlign="left">
-              {t('🔒 Requirements: Claim your free tokens (task 6) before swapping')}
+              {t('🔒 Requirements: Claim your free tokens (task #6) before swapping')}
             </Text>
           </Box>
         )
@@ -328,11 +328,15 @@ export default function Onboarding({ event }: { event: Event }) {
                 <Divider my={2} />
                 {((quest?.actionField && !isCompleted) || quest.action === 'swap-tokens') &&
                   isConnected && (
-                    <Box pt="2" textAlign="right">
+                    <Box pt="2" display="flex" justifyContent="flex-end">
                       {quest?.actionField}
                     </Box>
                   )}
-                {quest.completedField && <Box pt="2">{quest.completedField}</Box>}
+                {quest.completedField && (
+                  <Box pt="2" display="flex" justifyContent="flex-end">
+                    {quest.completedField}
+                  </Box>
+                )}
                 {isCompleted && (
                   <Box
                     display="flex"

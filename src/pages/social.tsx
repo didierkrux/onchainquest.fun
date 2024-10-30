@@ -38,7 +38,7 @@ export default function Social({ event }: { event: Event }) {
     <Box>
       <Heading as="h1">Instagram</Heading>
       <Box>
-        <Text>
+        <Text mt={2}>
           <Link href="https://www.instagram.com/explore/tags/newtoweb3/" isExternal>
             {t('View all #NewToWeb3 posts in Instagram')}
           </Link>
@@ -64,7 +64,7 @@ export default function Social({ event }: { event: Event }) {
         Twitter / X
       </Heading>
       <Box>
-        <Text>
+        <Text mt={2}>
           <Link href="https://x.com/hashtag/NewToWeb3?src=hashtag_click&f=live" isExternal>
             {t('View all #NewToWeb3 posts in Twitter / X')}
           </Link>
