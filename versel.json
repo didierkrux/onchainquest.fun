@@ -14,7 +14,7 @@
   "redirects": [
     {
       "source": "/mint",
-      "destination": "zerion://browser?url=https%3A%2F%2Fzora.co%2Fcollect%2Fzora%3A0x86c14105d858ac0409b5a8ab88f8899480d9cd88%2F1"
+      "destination": "/mint.html"
     }
   ]
 }
