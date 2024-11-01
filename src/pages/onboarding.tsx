@@ -95,13 +95,13 @@ export default function Onboarding({ event }: { event: Event }) {
             description: (
               <>
                 {data?.message}
-                {data?.txLink && (
+                {/* {data?.txLink && (
                   <Box color="white !important">
                     <a href={data?.txLink} target="_blank">
                       {t('View claiming transaction on BaseScan')}
                     </a>
                   </Box>
-                )}
+                )} */}
               </>
             ),
             status: feedbackType,
