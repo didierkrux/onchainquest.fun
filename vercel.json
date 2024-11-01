@@ -3,10 +3,6 @@
     {
       "source": "/robots.txt",
       "destination": "/api/robots"
-    },
-    {
-      "source": "/mint",
-      "destination": "/mint.html"
     }
   ],
   "crons": [
