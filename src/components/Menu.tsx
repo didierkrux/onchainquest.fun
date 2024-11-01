@@ -137,7 +137,18 @@ const Menu = () => {
     // on first load, fetch the deployment id
     fetchDeploymentId('first-load')
 
-    return () => clearInterval(interval)
+    // Add visibility change listener
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchDeploymentId('interval-load')
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [appDeploymentId])
 
   const newVersionAvailable =
