@@ -6,6 +6,46 @@ import { eventId } from 'config/index'
 const IG_USER_ID = '1049305'
 const INSTAGRAM_ACCESS_TOKEN = process.env.INSTAGRAM_ACCESS_TOKEN
 
+/**
+ * Recursively extracts all values associated with the "code" keys from a given object.
+ *
+ * @param data - The object or array to traverse.
+ * @returns An array containing all values of "code" keys.
+ */
+function extractCodeValues(data: any): any[] {
+  const codes: any[] = [];
+
+  // Helper function to perform recursion
+  function traverse(current: any): void {
+    if (current === null || current === undefined) {
+      // If current is null or undefined, do nothing
+      return;
+    }
+
+    if (Array.isArray(current)) {
+      // If current is an array, iterate through its elements
+      for (const element of current) {
+        traverse(element);
+      }
+    } else if (typeof current === 'object') {
+      // If current is an object, iterate through its key-value pairs
+      for (const [key, value] of Object.entries(current)) {
+        if (key === 'code') {
+          codes.push(value);
+        }
+        // Recursively traverse the value
+        traverse(value);
+      }
+    }
+    // For primitive types (string, number, etc.), do nothing
+  }
+
+  traverse(data);
+  // remove duplicates
+  return Array.from(new Set(codes));
+}
+
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   // https://graph.instagram.com/me?access_token=
@@ -36,9 +76,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const headers = JSON.parse(process.env.INSTAGRAM_HEADERS || '{}')
 
-    // console.log(JSON.stringify(headers))
+    // console.log('headers', JSON.stringify(headers))
 
-    const ig_response = await fetch("https://www.instagram.com/api/v1/fbsearch/web/top_serp/?query=%23NewToWeb3", {
+    // const ig_response = await fetch("https://www.instagram.com/api/v1/fbsearch/web/top_serp/?query=%23NewToWeb3", {
+    const ig_response = await fetch("https://www.instagram.com/api/v1/tags/web_info/?tag_name=newtoweb3", {
       headers,
       "body": null,
       "method": "GET"
@@ -49,9 +90,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const ig_data = await ig_response.json()
-    console.log('ig_data', JSON.stringify(ig_data))
+    // console.log('ig_data', JSON.stringify(ig_data))
 
-    const igIds = ig_data.media_grid.sections.map((section: any) => section.layout_content.medias.map((media: any) => media.media.code)).flat()
+    const igIds: any[] = extractCodeValues(ig_data)
     console.log('igIds', igIds)
 
     if (igIds?.length > 0 && JSON.stringify(ig) !== JSON.stringify(igIds)) {

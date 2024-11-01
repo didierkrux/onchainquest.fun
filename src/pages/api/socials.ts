@@ -5,7 +5,7 @@ import { eventId } from 'config/index'
 
 /*
 ,
-  "igFilter": ["CdgeiXUOz6z", "CiJCgvZLyl2", "Ct2Hn9WyxM2", "CiLGI4HABSy", "Cr-7fy3on2z"],
+  "igFilter": ["CdgeiXUOz6z", "CiJCgvZLyl2", "Ct2Hn9WyxM2", "CiLGI4HABSy", "Cr-7fy3on2z", "CjgP1aUgHpT", "C3p_9kGK5fk"],
   "twitterFilter": [""]
 */
 
