@@ -194,6 +194,20 @@ export default function Onboarding({ event }: { event: Event }) {
         )
       }
     }
+    if (quest.action === 'mint-nft') {
+      quest.completedField = (
+        <Box>
+          <a
+            href={`zerion://browser?url=https%3A%2F%2Fzora.co%2Fcollect%2Fzora%3A0x86c14105d858ac0409b5a8ab88f8899480d9cd88%2F1`}
+            target="_blank"
+          >
+            <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
+              {t('Mint NFT inside Zerion')}
+            </Button>
+          </a>
+        </Box>
+      )
+    }
     if (quest.action === 'swap-tokens') {
       quest.actionField =
         profile?.tasks?.[5]?.isCompleted ?? false ? (

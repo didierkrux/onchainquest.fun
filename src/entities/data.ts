@@ -42,6 +42,7 @@ export type TaskAction =
   | 'swap-tokens'
   | 'poap-picture'
   | 'own-basename'
+  | 'mint-nft'
 
 export type Quest = {
   id: number
