@@ -3,18 +3,16 @@
     {
       "source": "/robots.txt",
       "destination": "/api/robots"
+    },
+    {
+      "source": "/mint",
+      "destination": "/mint.html"
     }
   ],
   "crons": [
     {
       "path": "/api/cron/socials",
       "schedule": "*/10 * * * *"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/mint",
-      "destination": "/mint.html"
     }
   ]
 }
