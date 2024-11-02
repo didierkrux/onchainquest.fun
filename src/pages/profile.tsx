@@ -59,29 +59,30 @@ export default function Profile() {
       },
       body: JSON.stringify({ username, email, avatar, role, taskId: 1 }),
     })
-      .then((res) => res.json())
-      .then((data) => {
+      .then((res) => res.json().then((data) => ({ status: res.status, data })))
+      .then(({ status, data }) => {
         console.log('data', data)
-        if (data?.message) {
-          toast({
-            title: t('Error'),
-            description: ` ${data?.message}`,
-            status: 'error',
-            duration: 10000,
-            isClosable: true,
-            position: isMobile ? 'top' : 'bottom-right',
-          })
-        } else {
+        let feedbackType: 'success' | 'warning' | 'error' = 'error'
+        if (status === 200) {
           setProfile(data)
-          toast({
-            title: t('Success'),
-            description: t('Profile saved successfully.'),
-            status: 'success',
-            duration: 10000,
-            isClosable: true,
-            position: isMobile ? 'top' : 'bottom-right',
-          })
+          feedbackType = 'success'
+        } else if (status === 400) {
+          feedbackType = 'warning'
         }
+        toast({
+          title:
+            feedbackType === 'success'
+              ? t('Success')
+              : feedbackType === 'warning'
+              ? t('Warning')
+              : t('Error'),
+          description:
+            feedbackType === 'success' ? t('Profile saved successfully.') : ` ${data?.message}`,
+          status: feedbackType,
+          duration: 10000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
       })
       .finally(() => {
         setIsSaving(false)

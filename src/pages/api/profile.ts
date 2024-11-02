@@ -76,6 +76,7 @@ export default async function handler(
         .select('*')
         .where('event_id', eventId)
         .whereILike('username', username)
+        .orWhereILike('basename', username)
         .first()
         if (userWithUsername && userWithUsername.address?.toLowerCase() !== address?.toLowerCase()) {
           return res.status(400).json({ message: 'Username already exists' })

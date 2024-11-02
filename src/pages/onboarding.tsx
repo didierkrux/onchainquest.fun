@@ -68,9 +68,9 @@ export default function Onboarding({ event }: { event: Event }) {
         }),
       }
     )
-      .then((res) => res.json().then((data) => ({ status: res.status, body: data })))
-      .then(({ status, body }) => {
-        console.log('data', body)
+      .then((res) => res.json().then((data) => ({ status: res.status, data })))
+      .then(({ status, data }) => {
+        console.log('data', data)
         let feedbackType: 'success' | 'warning' | 'error' = 'error'
         if (status === 200) {
           feedbackType = 'success'
@@ -79,16 +79,21 @@ export default function Onboarding({ event }: { event: Event }) {
         }
 
         toast({
-          title: status === 200 ? t('Success') : status === 400 ? t('Warning') : t('Error'),
-          description: <>{body?.message}</>,
+          title:
+            feedbackType === 'success'
+              ? t('Success')
+              : feedbackType === 'warning'
+              ? t('Warning')
+              : t('Error'),
+          description: <>{data?.message}</>,
           status: feedbackType,
           duration: 10000,
           isClosable: true,
           position: isMobile ? 'top' : 'bottom-right',
         })
 
-        if (status === 200 && body?.tasks) {
-          setProfile(body)
+        if (status === 200 && data?.tasks) {
+          setProfile(data)
         }
       })
       .catch((error) => {
