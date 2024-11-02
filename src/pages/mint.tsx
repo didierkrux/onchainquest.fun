@@ -4,7 +4,7 @@ import Head from 'next/head'
 export default function Mint() {
   useEffect(() => {
     window.location.href =
-      'zerion://browser?url=https%3A%2F%2Fzora.co%2Fcollect%2Fzora%3A0x86c14105d858ac0409b5a8ab88f8899480d9cd88%2F1'
+      'zerion://browser?url=https%3A%2F%2Fzora.co%2Fcollect%2Fbase%3A0x87c3e3bbde274f5a0e27cded29df1f7526de85ec%2F1'
   }, [])
 
   return (
