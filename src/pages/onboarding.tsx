@@ -163,10 +163,10 @@ export default function Onboarding({ event }: { event: Event }) {
         quest.completedField = isCompleted ? (
           <Box display="flex" gap={4}>
             <Link isExternal href={lineLink}>
-              <Button>{t('Join Line group')}</Button>
+              <Button>{t('Join Line')}</Button>
             </Link>
             <Link isExternal href={telegramLink}>
-              <Button>{t('Join Telegram group')}</Button>
+              <Button>{t('Join Telegram')}</Button>
             </Link>
           </Box>
         ) : null
@@ -196,7 +196,7 @@ export default function Onboarding({ event }: { event: Event }) {
             <Link
               isExternal
               href={`zerion://browser?url=${encodeURIComponent(
-                `https://zora.co/collect/${quest.condition}`
+                `https://zora.co/collect/${quest.condition}?referrer=0x767D1AF42CC93E15E72aFCF15477733C66e5460a`
               )}`}
             >
               <Button>{t('Mint NFT inside Zerion')}</Button>
