@@ -10,6 +10,7 @@ import {
   useMediaQuery,
   Badge,
   Divider,
+  Link,
 } from '@chakra-ui/react'
 import { useAppKit } from '@reown/appkit/react'
 import { useAccount } from 'wagmi'
@@ -22,29 +23,6 @@ import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
 import { CheckCircle, Star } from '@phosphor-icons/react/dist/ssr'
 import { Trophy } from '@phosphor-icons/react/dist/ssr'
-import { getMoments } from 'utils/index'
-
-const Moments = ({ eventId }: { eventId: string }) => {
-  const [moments, setMoments] = useState<any[]>([])
-  useEffect(() => {
-    const fetchMoments = async () => {
-      const momentsData = await getMoments(eventId)
-      setMoments(momentsData.data.moments)
-    }
-    fetchMoments()
-  }, [eventId])
-
-  if (!moments.length) return null
-  return (
-    <Box display="flex" flexWrap="wrap" gap={4} justifyContent="center">
-      {moments.map((moment) => {
-        if (moment.media.length > 0) {
-          return <Image key={moment.id} src={moment.media[0].gateways[0].url} />
-        }
-      })}
-    </Box>
-  )
-}
 
 export default function Onboarding({ event }: { event: Event }) {
   const { t } = useTranslation()
@@ -85,35 +63,29 @@ export default function Onboarding({ event }: { event: Event }) {
         }),
       }
     )
-      .then((res) => res.json())
-      .then((data) => {
-        console.log('data', data)
-        if (data?.message) {
-          const feedbackType = data?.txLink ? 'success' : 'error'
-          toast({
-            title: feedbackType === 'success' ? 'Success' : 'Error',
-            description: (
-              <>
-                {data?.message}
-                {/* {data?.txLink && (
-                  <Box color="white !important">
-                    <a href={data?.txLink} target="_blank">
-                      {t('View claiming transaction on BaseScan')}
-                    </a>
-                  </Box>
-                )} */}
-              </>
-            ),
-            status: feedbackType,
-            duration: 10000,
-            isClosable: true,
-            position: isMobile ? 'top' : 'bottom-right',
-          })
-          if (data?.tasks) {
-            setProfile(data)
-          }
+      .then((res) => res.json().then((data) => ({ status: res.status, body: data })))
+      .then(({ status, body }) => {
+        console.log('data', body)
+        let feedbackType: 'success' | 'warning' | 'error' = 'error'
+        if (status === 200) {
+          feedbackType = 'success'
+        } else if (status === 400) {
+          feedbackType = 'warning'
+        }
+
+        toast({
+          title: status === 200 ? t('Success') : status === 400 ? t('Warning') : t('Error'),
+          description: <>{body?.message}</>,
+          status: feedbackType,
+          duration: 10000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+
+        if (body?.tasks) {
+          setProfile(body)
         } else {
-          setProfile(data)
+          setProfile(body)
         }
       })
       .catch((error) => {
@@ -133,21 +105,6 @@ export default function Onboarding({ event }: { event: Event }) {
   }
 
   for (const quest of QUESTS) {
-    // if (quest.action === 'secret-word') {
-    //   quest.actionField = (
-    //     <Box display="flex" gap={4}>
-    //       <Input placeholder="Enter the secret word" />
-    //       <Button
-    //         onClick={() => {
-    //           alert('TODO: Verifying...')
-    //         }}
-    //         isLoading={isLoading === quest.id}
-    //       >
-    //         Verify
-    //       </Button>
-    //     </Box>
-    //   )
-    // }
     if (quest.action === 'claim-tokens') {
       quest.actionField = (
         <Box>
@@ -163,9 +120,9 @@ export default function Onboarding({ event }: { event: Event }) {
       if (profile?.tasks?.[quest.id]?.txLink) {
         quest.completedField = (
           <Box>
-            <a href={profile?.tasks?.[quest.id]?.txLink} target="_blank">
+            <Link isExternal href={profile?.tasks?.[quest.id]?.txLink}>
               {t('View claiming transaction on BaseScan')}
-            </a>
+            </Link>
           </Box>
         )
       }
@@ -179,34 +136,75 @@ export default function Onboarding({ event }: { event: Event }) {
         </Box>
       )
     }
+    if (quest.action === 'click-link') {
+      const lineLink = quest.condition?.split('\n')[0]
+      const telegramLink = quest.condition?.split('\n')[1]
+      if (!profile?.tasks?.[quest.id]?.isCompleted) {
+        quest.actionField = (
+          <Box display="flex" gap={4}>
+            <Link isExternal href={lineLink}>
+              <Button onClick={() => handleAction(quest)}>{t('Join Line group')}</Button>
+            </Link>
+            <Link isExternal href={telegramLink}>
+              <Button onClick={() => handleAction(quest)}>{t('Join Telegram group')}</Button>
+            </Link>
+          </Box>
+        )
+      }
+      quest.completedField = (
+        <Box display="flex" gap={4}>
+          <Link isExternal href={lineLink}>
+            <Button>{t('Join Line group')}</Button>
+          </Link>
+          <Link isExternal href={telegramLink}>
+            <Button>{t('Join Telegram group')}</Button>
+          </Link>
+        </Box>
+      )
+    }
     if (quest.action === 'own-basename') {
       if (profile?.basename) {
         quest.completedField = (
           <Box display="flex" gap={1}>
             <Box>{t('Your Base domain: ')}</Box>
-            <a
-              href={`https://www.base.org/name/${profile?.basename?.split('.')[0]}`}
-              target="_blank"
-            >
+            <Link isExternal href={`https://www.base.org/name/${profile?.basename?.split('.')[0]}`}>
               <Text>{profile?.basename}</Text>
-            </a>
+            </Link>
           </Box>
         )
       }
     }
     if (quest.action === 'mint-nft') {
-      quest.completedField = (
-        <Box>
-          <a
-            href={`zerion://browser?url=https%3A%2F%2Fzora.co%2Fcollect%2Fzora%3A0x86c14105d858ac0409b5a8ab88f8899480d9cd88%2F1`}
-            target="_blank"
+      quest.actionField = (
+        <Box display="flex" gap={4}>
+          <Link
+            isExternal
+            href={`zerion://browser?url=${encodeURIComponent(
+              `https://zora.co/collect/${quest.condition}`
+            )}`}
           >
-            <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
-              {t('Mint NFT inside Zerion')}
-            </Button>
-          </a>
+            <Button onClick={() => handleAction(quest)}>{t('Mint NFT inside Zerion')}</Button>
+          </Link>
+          <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
+            {t('Verify')}
+          </Button>
         </Box>
       )
+      if (profile?.tasks?.[quest.id]?.nftLink) {
+        quest.completedField = (
+          <Box>
+            <Link
+              isExternal
+              href={`https://opensea.io/assets/${profile?.tasks?.[quest.id]?.nftLink?.replace(
+                ':',
+                '/'
+              )}`}
+            >
+              {t('View NFT on OpenSea')}
+            </Link>
+          </Box>
+        )
+      }
     }
     if (quest.action === 'swap-tokens') {
       quest.actionField =
@@ -233,46 +231,6 @@ export default function Onboarding({ event }: { event: Event }) {
           </Box>
         )
     }
-    // if (quest.action === 'poap-picture' && quest.condition) {
-    //   quest.actionField = (
-    //     <Box display="flex" gap={4}>
-    //       <a target="_blank" href={`https://moments.poap.xyz/upload?drop=${quest.condition}`}>
-    //         <Button>{t('Upload a picture')}</Button>
-    //       </a>
-    //       <Button
-    //         onClick={() => {
-    //           // setModalUrl(`https://moments.poap.xyz/drops/${quest.condition}`)
-    //           if (quest.condition) {
-    //             setOpenModal(quest.condition)
-    //           }
-    //         }}
-    //       >
-    //         {t('View gallery')}
-    //       </Button>
-    //     </Box>
-    //   )
-    // }
-    // if (quest.action === 'attest') {
-    //   quest.actionField = (
-    //     <Box display="flex" gap={4}>
-    //       <Button
-    //         onClick={() => {
-    //           alert(`TODO: show QR code and attest me`)
-    //         }}
-    //       >
-    //         Attest Me
-    //       </Button>
-    //       <Button
-    //         onClick={() => {
-    //           alert(`TODO: enter someone's username and attest them`)
-    //         }}
-    //         ml={4}
-    //       >
-    //         Attest Someone
-    //       </Button>
-    //     </Box>
-    //   )
-    // }
   }
 
   return (
@@ -300,7 +258,7 @@ export default function Onboarding({ event }: { event: Event }) {
               <Box w="100%">
                 <Box display="flex" gap={2} justifyContent="space-between" fontSize="18px">
                   <Box display="flex" alignItems="center" gap={2} color="grey" fontWeight="bold">
-                    <Trophy color="orange" size={24} /> Task #{index + 1}
+                    <Trophy color="#FF7614" size={24} /> Task #{index + 1}
                   </Box>
                   <Badge
                     size="xl"
@@ -324,9 +282,9 @@ export default function Onboarding({ event }: { event: Event }) {
                     <React.Fragment key={index}>
                       <span
                         onClick={() => {
-                          if (quest.action === 'click-link') {
-                            handleAction(quest)
-                          }
+                          // if (quest.action === 'click-link') {
+                          //   handleAction(quest)
+                          // }
                         }}
                         dangerouslySetInnerHTML={{ __html: line }}
                       />
@@ -339,46 +297,42 @@ export default function Onboarding({ event }: { event: Event }) {
                     </Box>
                   )}
                 </Box>
-                <Divider my={2} />
-                {((quest?.actionField && !isCompleted) || quest.action === 'swap-tokens') &&
-                  isConnected && (
-                    <Box pt="2" display="flex" justifyContent="flex-end">
-                      {quest?.actionField}
-                    </Box>
+                <Box>
+                  {isConnected && (
+                    <>
+                      <Divider my={2} />
+                      {quest?.actionField && (
+                        <Box pt="2" display="flex" justifyContent="flex-end">
+                          {quest?.actionField}
+                        </Box>
+                      )}
+                      {quest.completedField && (
+                        <Box pt="2" display="flex" justifyContent="flex-end">
+                          {quest.completedField}
+                        </Box>
+                      )}
+                      {isCompleted && (
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          gap={2}
+                          color="green"
+                          fontWeight="bold"
+                          justifyContent="flex-end"
+                          pt="2"
+                        >
+                          <CheckCircle size={24} />
+                          <span>{t('Completed')}</span>
+                        </Box>
+                      )}
+                    </>
                   )}
-                {quest.completedField && (
-                  <Box pt="2" display="flex" justifyContent="flex-end">
-                    {quest.completedField}
-                  </Box>
-                )}
-                {isCompleted && (
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    gap={2}
-                    color="green"
-                    fontWeight="bold"
-                    justifyContent="flex-end"
-                    pt="2"
-                  >
-                    <CheckCircle size={24} />
-                    <span>{t('Completed')}</span>
-                  </Box>
-                )}
+                </Box>
               </Box>
             </CardBody>
           </Card>
         )
       })}
-      {/* <Modal isOpen={!!openModal} onClose={() => setOpenModal(null)} size="full">
-        <ModalContent>
-          <ModalCloseButton color="black" />
-          <ModalHeader>{t('POAP Gallery')}</ModalHeader>
-          <ModalBody w="100vw" h="100vh" p={0}>
-            {openModal && <Moments eventId={openModal} />}
-          </ModalBody>
-        </ModalContent>
-      </Modal> */}
     </Box>
   )
 }

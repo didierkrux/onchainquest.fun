@@ -154,6 +154,33 @@ export async function userHasPoap(address: string, eventId: string): Promise<boo
   }
 }
 
+export async function userHasNft(address: string, network: string, contract: string, tokenId: string): Promise<boolean> {
+  try {
+    let networkUrl = network
+    if (network === 'base') networkUrl = 'base-mainnet'
+    else throw new Error('Unknown network')
+
+    const response = await fetch(`https://${networkUrl}.g.alchemy.com/nft/v3/${process.env.ALCHEMY_API_KEY}/getNFTsForOwner?owner=${address}&contractAddresses[]=${contract}&withMetadata=true`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error fetching NFT ownership');
+    }
+
+    const data = await response.json();
+    console.log('data', data)
+    const nfts = data.ownedNfts;
+    return nfts.some((nft: any) => nft.tokenId === tokenId);
+  } catch (error) {
+    console.error('Error checking NFT ownership:', error);
+    return false;
+  }
+}
+
 export async function getMoments(eventId: string) {
   try {
     const query = `query MyQuery {

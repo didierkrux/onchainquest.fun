@@ -8,7 +8,7 @@ export function Card({
   return (
     <ChakraCard
       variant={'outline'}
-      borderColor={highlighted ? 'orange' : 'grey.400'}
+      borderColor={highlighted ? '#FF7614' : 'grey.400'}
       borderRadius="10px"
       bgColor="transparent"
       {...props}

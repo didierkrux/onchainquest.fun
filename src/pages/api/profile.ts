@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 
 import db from 'utils/db'
 import { eventId } from 'config/index'
-import { calculateScore, userHasPoap, userHasSwappedTokens } from 'utils/index'
+import { calculateScore, userHasPoap, userHasSwappedTokens, userHasNft } from 'utils/index'
 import { getTasks } from 'utils/queries'
 import { TaskAction } from 'entities/data'
 import { getBasename } from 'utils/basenames'
@@ -92,7 +92,7 @@ export default async function handler(
         userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
         console.log('userTasks', userTasks)
       } else {
-        return res.status(400).json({ message: 'You do not have a POAP for this event' })
+        return res.status(400).json({ message: "You don't own this POAP." })
       }
     } else if (taskAction === 'click-link') {
       userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
@@ -113,7 +113,18 @@ export default async function handler(
         userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
         console.log('userTasks', userTasks)
       } else {
-        return res.status(400).json({ message: 'You do not own a .base.eth basename' })
+        return res.status(400).json({ message: "You don't own a .base.eth basename." })
+      }
+    } else if (taskAction === 'mint-nft') {
+      // base:0x87c3e3bbde274f5a0e27cded29df1f7526de85ec/1
+      const [network, contract, tokenId] = taskCondition?.replace(':', '/')?.split('/')
+      // verify ownership
+      const hasNft = await userHasNft(address, network, contract, tokenId)
+      if (hasNft) {
+        userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points, nftLink: taskCondition }
+        console.log('userTasks', userTasks)
+      } else {
+        return res.status(400).json({ message: "You don't own this NFT." })
       }
     } else {
       return res.status(400).json({ message: 'Task not available yet.' })

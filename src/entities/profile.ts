@@ -4,6 +4,7 @@ export type Task = {
   isCompleted: boolean
   txLink?: string
   condition?: string
+  nftLink?: string
 }
 
 export type Tasks = { [key: string]: Task }

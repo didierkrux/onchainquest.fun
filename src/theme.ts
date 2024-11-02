@@ -47,7 +47,7 @@ const theme = extendTheme({
       500: "#3D154C", // deep purple
       600: "#5F177A", // medium purple
     },
-    orange: "#FF7614", // orange
+    // orange: "#FF7614", // orange
     salmon: "#CD577E", // salmon
     background: "#E3D7C9", // light gray
   },

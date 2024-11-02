@@ -33,7 +33,7 @@ export default function Event({ event }: { event: Event }) {
                 display="flex"
                 fontSize="18px"
                 fontWeight="bold"
-                color="orange"
+                color="#FF7614"
                 flexDirection="column"
                 alignItems="start"
               >
@@ -62,7 +62,7 @@ export default function Event({ event }: { event: Event }) {
               <Text fontSize="18px" color="purple.500" fontWeight="bold" mt={2}>
                 {item.title}
               </Text>
-              <Text fontSize="12px" color="orange" fontWeight="bold">
+              <Text fontSize="12px" color="#FF7614" fontWeight="bold">
                 {item.people}
               </Text>
             </Box>
