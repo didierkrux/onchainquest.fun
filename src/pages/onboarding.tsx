@@ -29,19 +29,24 @@ export default function Onboarding({ event }: { event: Event }) {
   const { open } = useAppKit()
   const { address, isConnected } = useAccount()
   const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
+  const [lastAddress, setLastAddress] = useLocalStorage<string | null>('lastAddress', null)
   const [isLoading, setIsLoading] = useState<number | null>(null)
   const toast = useToast()
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
 
   useEffect(() => {
     if (address) {
+      if (address !== lastAddress) {
+        setProfile(null) // Reset profile if address is different
+        setLastAddress(address) // Store the new address
+      }
       fetch(`/api/profile?address=${address}`)
         .then((res) => res.json())
         .then((data) => {
           setProfile(data)
         })
     }
-  }, [address])
+  }, [address, lastAddress])
 
   const QUESTS: Quest[] = event.tasks || []
 
@@ -82,9 +87,7 @@ export default function Onboarding({ event }: { event: Event }) {
           position: isMobile ? 'top' : 'bottom-right',
         })
 
-        if (body?.tasks) {
-          setProfile(body)
-        } else {
+        if (status === 200 && body?.tasks) {
           setProfile(body)
         }
       })
@@ -105,42 +108,44 @@ export default function Onboarding({ event }: { event: Event }) {
   }
 
   for (const quest of QUESTS) {
-    if (quest.action === 'claim-tokens') {
-      quest.actionField = (
-        <Box>
-          <Button
-            onClick={() => handleAction(quest)}
-            isLoading={isLoading === quest.id}
-            loadingText={t('Claiming... (takes ~30 seconds)')}
-          >
-            {t('Claim')}
-          </Button>
-        </Box>
-      )
-      if (profile?.tasks?.[quest.id]?.txLink) {
-        quest.completedField = (
+    if (profile?.tasks) {
+      if (quest.action === 'claim-tokens') {
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        quest.actionField = !isCompleted ? (
           <Box>
-            <Link isExternal href={profile?.tasks?.[quest.id]?.txLink}>
+            <Button
+              onClick={() => handleAction(quest)}
+              isLoading={isLoading === quest.id}
+              loadingText={t('Claiming... (takes ~30 seconds)')}
+            >
+              {t('Claim')}
+            </Button>
+          </Box>
+        ) : null
+        const txLink = profile?.tasks?.[quest.id]?.txLink
+        quest.completedField = txLink ? (
+          <Box>
+            <Link isExternal href={txLink}>
               {t('View claiming transaction on BaseScan')}
             </Link>
           </Box>
-        )
+        ) : null
       }
-    }
-    if (quest.action === 'claim-poap' || quest.action === 'own-basename') {
-      quest.actionField = (
-        <Box>
-          <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
-            {t('Verify')}
-          </Button>
-        </Box>
-      )
-    }
-    if (quest.action === 'click-link') {
-      const lineLink = quest.condition?.split('\n')[0]
-      const telegramLink = quest.condition?.split('\n')[1]
-      if (!profile?.tasks?.[quest.id]?.isCompleted) {
-        quest.actionField = (
+      if (quest.action === 'claim-poap') {
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        quest.actionField = !isCompleted ? (
+          <Box>
+            <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
+              {t('Verify')}
+            </Button>
+          </Box>
+        ) : null
+      }
+      if (quest.action === 'click-link') {
+        const lineLink = quest.condition?.split('\n')[0]
+        const telegramLink = quest.condition?.split('\n')[1]
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        quest.actionField = !isCompleted ? (
           <Box display="flex" gap={4}>
             <Link isExternal href={lineLink}>
               <Button onClick={() => handleAction(quest)}>{t('Join Line group')}</Button>
@@ -149,49 +154,57 @@ export default function Onboarding({ event }: { event: Event }) {
               <Button onClick={() => handleAction(quest)}>{t('Join Telegram group')}</Button>
             </Link>
           </Box>
-        )
+        ) : null
+        quest.completedField = isCompleted ? (
+          <Box display="flex" gap={4}>
+            <Link isExternal href={lineLink}>
+              <Button>{t('Join Line group')}</Button>
+            </Link>
+            <Link isExternal href={telegramLink}>
+              <Button>{t('Join Telegram group')}</Button>
+            </Link>
+          </Box>
+        ) : null
       }
-      quest.completedField = (
-        <Box display="flex" gap={4}>
-          <Link isExternal href={lineLink}>
-            <Button>{t('Join Line group')}</Button>
-          </Link>
-          <Link isExternal href={telegramLink}>
-            <Button>{t('Join Telegram group')}</Button>
-          </Link>
-        </Box>
-      )
-    }
-    if (quest.action === 'own-basename') {
-      if (profile?.basename) {
-        quest.completedField = (
+      if (quest.action === 'own-basename') {
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        quest.actionField = !isCompleted ? (
+          <Box>
+            <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
+              {t('Verify')}
+            </Button>
+          </Box>
+        ) : null
+        quest.completedField = profile?.basename ? (
           <Box display="flex" gap={1}>
             <Box>{t('Your Base domain: ')}</Box>
             <Link isExternal href={`https://www.base.org/name/${profile?.basename?.split('.')[0]}`}>
               <Text>{profile?.basename}</Text>
             </Link>
           </Box>
-        )
+        ) : null
       }
-    }
-    if (quest.action === 'mint-nft') {
-      quest.actionField = (
-        <Box display="flex" gap={4}>
-          <Link
-            isExternal
-            href={`zerion://browser?url=${encodeURIComponent(
-              `https://zora.co/collect/${quest.condition}`
-            )}`}
-          >
-            <Button onClick={() => handleAction(quest)}>{t('Mint NFT inside Zerion')}</Button>
-          </Link>
-          <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
-            {t('Verify')}
-          </Button>
-        </Box>
-      )
-      if (profile?.tasks?.[quest.id]?.nftLink) {
-        quest.completedField = (
+      if (quest.action === 'mint-nft') {
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        quest.actionField = (
+          <Box display="flex" gap={4}>
+            <Link
+              isExternal
+              href={`zerion://browser?url=${encodeURIComponent(
+                `https://zora.co/collect/${quest.condition}`
+              )}`}
+            >
+              <Button>{t('Mint NFT inside Zerion')}</Button>
+            </Link>
+            {!isCompleted && (
+              <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
+                {t('Verify')}
+              </Button>
+            )}
+          </Box>
+        )
+        const nftLink = profile?.tasks?.[quest.id]?.nftLink
+        quest.completedField = nftLink ? (
           <Box>
             <Link
               isExternal
@@ -203,12 +216,11 @@ export default function Onboarding({ event }: { event: Event }) {
               {t('View NFT on OpenSea')}
             </Link>
           </Box>
-        )
+        ) : null
       }
-    }
-    if (quest.action === 'swap-tokens') {
-      quest.actionField =
-        profile?.tasks?.[5]?.isCompleted ?? false ? (
+      if (quest.action === 'swap-tokens') {
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        quest.actionField = (
           <Box display="flex" gap={4}>
             <Button
               onClick={() => {
@@ -217,19 +229,14 @@ export default function Onboarding({ event }: { event: Event }) {
             >
               {t('Swap')}
             </Button>
-            {!profile?.tasks?.[6]?.isCompleted && (
+            {!isCompleted && (
               <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
                 {t('Verify')}
               </Button>
             )}
           </Box>
-        ) : (
-          <Box>
-            <Text textAlign="left">
-              {t('🔒 Requirements: Claim your free tokens (task #6) before swapping')}
-            </Text>
-          </Box>
         )
+      }
     }
   }
 
@@ -251,7 +258,7 @@ export default function Onboarding({ event }: { event: Event }) {
         )}
       </Box>
       {QUESTS.map((quest, index) => {
-        const isCompleted = !!profile?.tasks?.[index.toString()]?.isCompleted
+        const isCompleted = profile?.tasks?.[index.toString()]?.isCompleted ?? false
         return (
           <Card mt={4} key={index} bg={isCompleted ? 'green.50' : 'white'}>
             <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>

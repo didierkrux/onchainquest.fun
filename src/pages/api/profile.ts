@@ -41,7 +41,7 @@ export default async function handler(
     // get tasks + profile
     const data = await db('events')
       .leftJoin('users', 'users.event_id', 'events.id')
-      .select('events.data_en', 'users.tasks')
+      .select('events.data_en', 'users.tasks', 'users.username', 'users.basename')
       .where('events.id', eventId)
       .whereILike('users.address', address)
       .first()
@@ -80,6 +80,8 @@ export default async function handler(
         if (userWithUsername && userWithUsername.address?.toLowerCase() !== address?.toLowerCase()) {
           return res.status(400).json({ message: 'Username already exists' })
         }
+      } else if (!data.username?.length && !data.basename?.length) {
+        return res.status(400).json({ message: 'Username is required' })
       }
       userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
       console.log('userTasks', userTasks)

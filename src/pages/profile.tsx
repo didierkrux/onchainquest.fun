@@ -165,8 +165,8 @@ export default function Profile() {
           position: isMobile ? 'top' : 'bottom-right',
         })
         // Refresh the profile after resetting
-        disconnect()
         setProfile(null)
+        disconnect()
       } else {
         const data = await response.json()
         throw new Error(`Failed to reset profile: ${data.message}`)
@@ -520,8 +520,8 @@ export default function Profile() {
           <Box mt={4} display="flex" gap={4}>
             <Button
               onClick={() => {
-                disconnect()
                 setProfile(null)
+                disconnect()
               }}
             >
               {t('Disconnect')}
