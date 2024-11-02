@@ -8,9 +8,9 @@ import { Card as CardComponent } from 'components/Card'
 export default function Event({ event }: { event: Event }) {
   const { t } = useTranslation()
 
-  const goldSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === 'Gold')
-  const silverSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === 'Silver')
-  const bronzeSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === 'Bronze')
+  const goldSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '1-gold')
+  const silverSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '2-silver')
+  const bronzeSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '3-bronze')
 
   return (
     <Box>

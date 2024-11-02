@@ -384,8 +384,8 @@ export default function Profile() {
                     <Box display="flex" alignItems="center" gap={2} justifyContent="center">
                       <Text fontSize={['2xs', 'sm']} color="gray.500" fontWeight="bold">
                         {t('Balance')}:{' '}
-                        {(Number(balanceData?.value.toString()) / 10 ** 18).toFixed(8)} ETH on Base{' '}
-                        {usdValue && `(~$${usdValue.toFixed(2)} USD)`}
+                        {(Number(balanceData?.value.toString()) / 10 ** 18).toFixed(8)}{' '}
+                        {t('ETH on Base')} {usdValue && `(~$${usdValue.toFixed(2)} USD)`}
                       </Text>
                     </Box>
                   )}

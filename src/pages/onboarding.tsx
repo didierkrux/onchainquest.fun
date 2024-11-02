@@ -153,10 +153,10 @@ export default function Onboarding({ event }: { event: Event }) {
         quest.actionField = !isCompleted ? (
           <Box display="flex" gap={4}>
             <Link isExternal href={lineLink}>
-              <Button onClick={() => handleAction(quest)}>{t('Join Line group')}</Button>
+              <Button onClick={() => handleAction(quest)}>{t('Join Line')}</Button>
             </Link>
             <Link isExternal href={telegramLink}>
-              <Button onClick={() => handleAction(quest)}>{t('Join Telegram group')}</Button>
+              <Button onClick={() => handleAction(quest)}>{t('Join Telegram')}</Button>
             </Link>
           </Box>
         ) : null
