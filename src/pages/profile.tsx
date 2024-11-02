@@ -15,7 +15,7 @@ import {
   Switch,
   Link,
 } from '@chakra-ui/react'
-import { useAccount, useDisconnect, useSignMessage } from 'wagmi'
+import { useAccount, useDisconnect, useSignMessage, useBalance } from 'wagmi'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { useTranslation } from 'react-i18next'
@@ -33,6 +33,7 @@ import SelectTab from 'components/SelectTab'
 export default function Profile() {
   const { t } = useTranslation()
   const { address } = useAccount()
+  const { data: balanceData } = useBalance({ address })
   const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
   const { disconnect } = useDisconnect()
   const [username, setUsername] = useState('')
@@ -49,6 +50,7 @@ export default function Profile() {
   const { onCopy, hasCopied } = useClipboard(profile?.address || '')
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const isSocialCronActive = profile?.isSocialCronActive || false
+  const [usdValue, setUsdValue] = useState<number | null>(null)
 
   const saveProfile = () => {
     setIsSaving(true)
@@ -129,6 +131,21 @@ export default function Profile() {
   useEffect(() => {
     fetchProfile()
   }, [address])
+
+  useEffect(() => {
+    if (balanceData) {
+      const ethValue = Number(balanceData?.value.toString()) / 10 ** 18
+      fetch(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd`)
+        .then((res) => res.json())
+        .then((data) => {
+          const ethToUsd = data.ethereum.usd
+          setUsdValue(ethValue * ethToUsd)
+        })
+        .catch((error) => {
+          console.error('Error fetching USD value:', error)
+        })
+    }
+  }, [balanceData])
 
   const [qrCodeDataURL, setQrCodeDataURL] = useState('')
 
@@ -363,6 +380,15 @@ export default function Profile() {
                     <Avatar src={profileAvatar(profile)} width="40%" />
                     <Image src={qrCodeDataURL} w="40%" h="auto" alt="QR" ml={8} />
                   </Box>
+                  {balanceData && Number(balanceData?.value.toString()) / 10 ** 18 !== 0 && (
+                    <Box display="flex" alignItems="center" gap={2} justifyContent="center">
+                      <Text fontSize={['2xs', 'sm']} color="gray.500" fontWeight="bold">
+                        {t('Balance')}:{' '}
+                        {(Number(balanceData?.value.toString()) / 10 ** 18).toFixed(8)} ETH on Base{' '}
+                        {usdValue && `(~$${usdValue.toFixed(2)} USD)`}
+                      </Text>
+                    </Box>
+                  )}
                 </CardBody>
               </Card>
             </Box>
