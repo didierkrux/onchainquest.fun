@@ -32,16 +32,25 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <NextHead>
           <title>{pageTitle}</title>
           <meta name="description" content={description} />
-          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+          <meta charSet="utf-8" />
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover"
+          />
           {IS_PROD && <link rel="shortcut icon" sizes="512x512" type="image/png" href={appIcon} />}
           <link rel="canonical" href={canonical} />
           <meta name="robots" content={IS_PROD ? 'all' : 'noindex'}></meta>
           {/* Progressive Web App */}
+          <link rel="manifest" crossOrigin="use-credentials" href="/manifest.json" />
           <link rel="apple-touch-icon" href={appIcon} />
           <meta name="apple-mobile-web-app-title" content={eventName} />
           <meta name="apple-mobile-web-app-capable" content="yes" />
-          <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-          <link rel="manifest" crossOrigin="use-credentials" href="/manifest.json" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+          <meta name="application-name" content={eventName} />
+          <meta name="apple-mobile-web-app-title" content={eventName} />
+          <meta name="format-detection" content="telephone=no" />
+          <meta name="mobile-web-app-capable" content="yes" />
+          <meta name="theme-color" content="#000000" />
           {/* Open Graph / Facebook (needs to be < 300kb to work on WhatsApp) */}
           <meta property="og:type" content="website" />
           <meta property="og:url" content={url} />

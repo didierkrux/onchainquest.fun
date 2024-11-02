@@ -12,5 +12,6 @@
     }
   ],
   "scope": "/",
-  "display": "standalone"
+  "display": "standalone",
+  "orientation": "portrait"
 }

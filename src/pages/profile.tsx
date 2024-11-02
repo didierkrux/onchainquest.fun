@@ -508,7 +508,7 @@ export default function Profile() {
                       <Button
                         onClick={handleSyncData}
                         isLoading={isSyncing}
-                        loadingText="Syncing... (~30sec)"
+                        loadingText="Syncing... (~10sec)"
                         colorScheme="red"
                       >
                         Sync Notion data
