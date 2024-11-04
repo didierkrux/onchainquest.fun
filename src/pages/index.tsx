@@ -80,14 +80,27 @@ export default function Event({ event }: { event: Event }) {
       </Heading>
       {event.booths?.map((booth, index) => (
         <CardComponent mt={4} key={index}>
-          <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
-            <Box>
-              <Text as="h2" fontWeight="bold" color="purple.500">
-                {booth.name}
-              </Text>
-              <Text as="h3" mt={4}>
-                {booth.description}
-              </Text>
+          <CardBody
+            p={[3, 5]}
+            display="flex"
+            justifyContent="flex-start"
+            alignItems="center"
+            gap={4}
+          >
+            <Box display="flex" flexDirection="column" alignItems="start">
+              <Box fontSize="32px" fontWeight="bold" color="orange.500" m={2}>
+                {index + 1}
+              </Box>
+            </Box>
+            <Box display="flex" flexDirection="column" alignItems="start" alignSelf="start">
+              <Box>
+                <Text as="h2" fontWeight="bold" color="purple.600">
+                  {booth.name}
+                </Text>
+                <Text as="h3" mt={4}>
+                  {booth.description}
+                </Text>
+              </Box>
             </Box>
           </CardBody>
         </CardComponent>

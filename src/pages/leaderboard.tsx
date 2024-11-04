@@ -82,12 +82,27 @@ export default function Leaderboard({ event }: { event: Event }) {
       <Box>
         {event.prizes.map((prize, index) => (
           <CardComponent mt={4} key={index}>
-            <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
-              <Box>
-                <Heading size="md" color="purple.500">
-                  {prize.name}
-                </Heading>
-                <Text as="h3">{prize.description}</Text>
+            <CardBody
+              p={[3, 5]}
+              display="flex"
+              justifyContent="flex-start"
+              alignItems="center"
+              gap={4}
+            >
+              <Box display="flex" flexDirection="column" alignItems="start">
+                <Box fontSize="32px" fontWeight="bold" color="orange.500" m={2}>
+                  {index + 1}
+                </Box>
+              </Box>
+              <Box display="flex" flexDirection="column" alignItems="start" alignSelf="start">
+                <Box>
+                  <Text as="h2" fontWeight="bold" color="purple.600">
+                    {prize.name}
+                  </Text>
+                  <Text as="h3" mt={4}>
+                    {prize.description}
+                  </Text>
+                </Box>
               </Box>
             </CardBody>
           </CardComponent>
