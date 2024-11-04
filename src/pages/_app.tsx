@@ -50,7 +50,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           <meta name="apple-mobile-web-app-title" content={eventName} />
           <meta name="format-detection" content="telephone=no" />
           <meta name="mobile-web-app-capable" content="yes" />
-          <meta name="theme-color" content="#E3D7C9" />
+          <meta name="theme-color" content="#fbf5ee" />
           {/* Open Graph / Facebook (needs to be < 300kb to work on WhatsApp) */}
           <meta property="og:type" content="website" />
           <meta property="og:url" content={url} />

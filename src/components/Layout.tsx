@@ -32,7 +32,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {isHomepage && (
         <Image w="100vw" src={isMobile ? '/banner-mobile.jpg' : '/banner.jpg'} alt="Banner" />
       )}
-      <main style={{ backgroundColor: '#E3D7C9' }}>
+      <main>
         <Box
           p="4"
           maxW="container.lg"

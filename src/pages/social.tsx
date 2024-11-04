@@ -36,7 +36,9 @@ export default function Social({ event }: { event: Event }) {
 
   return (
     <Box>
-      <Heading as="h1">Instagram</Heading>
+      <Heading as="h1" color="purple.600">
+        Instagram
+      </Heading>
       <Box>
         <Text mt={2}>
           <Link href="https://www.instagram.com/explore/tags/newtoweb3/" isExternal>
@@ -60,7 +62,7 @@ export default function Social({ event }: { event: Event }) {
           )}
         </Box>
       </Box>
-      <Heading as="h1" mt={4}>
+      <Heading as="h1" mt={4} color="purple.600">
         Twitter / X
       </Heading>
       <Box>

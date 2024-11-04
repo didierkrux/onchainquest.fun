@@ -1,16 +1,19 @@
 import { CardProps, Card as ChakraCard } from '@chakra-ui/react'
 
 export function Card({
-  highlighted = true,
+  type = 'default',
   children,
   ...props
-}: { highlighted?: boolean } & CardProps) {
+}: { type?: 'orange' | 'transparent' | 'default' } & CardProps) {
   return (
     <ChakraCard
       variant={'outline'}
-      borderColor={highlighted ? '#FF7614' : 'grey.400'}
+      borderColor={
+        type === 'orange' ? '#FF7614' : type === 'transparent' ? 'transparent' : '#F4EADE'
+      }
+      borderWidth={type === 'orange' ? '1px' : type === 'transparent' ? '0px' : '2px'}
       borderRadius="10px"
-      bgColor="transparent"
+      bgColor={'transparent'}
       {...props}
     >
       {children}

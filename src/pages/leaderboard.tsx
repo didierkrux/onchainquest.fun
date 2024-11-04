@@ -22,6 +22,7 @@ import { Profile } from 'entities/profile'
 import { profileAvatar, profileName, profileRole } from 'utils/index'
 import { Avatar } from 'components/Avatar'
 import { Star } from '@phosphor-icons/react'
+import { Card as CardComponent } from 'components/Card'
 
 export default function Leaderboard({ event }: { event: Event }) {
   const { t } = useTranslation()
@@ -75,10 +76,12 @@ export default function Leaderboard({ event }: { event: Event }) {
 
   return (
     <Box>
-      <Heading as="h1">{t('Prizes')}</Heading>
+      <Heading as="h1" color="purple.600">
+        {t('Prizes')}
+      </Heading>
       <Box>
         {event.prizes.map((prize, index) => (
-          <Card mt={4} key={index}>
+          <CardComponent mt={4} key={index}>
             <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
               <Box>
                 <Heading size="md" color="purple.500">
@@ -87,14 +90,14 @@ export default function Leaderboard({ event }: { event: Event }) {
                 <Text as="h3">{prize.description}</Text>
               </Box>
             </CardBody>
-          </Card>
+          </CardComponent>
         ))}
       </Box>
       {!leaderboard ? (
         <Text>Loading...</Text>
       ) : leaderboard.length > 0 ? (
         <Box>
-          <Heading as="h1" mt={4}>
+          <Heading as="h1" mt={4} color="purple.600">
             {t('Leaderboard')}
           </Heading>
           <Tabs defaultIndex={1} mt={4}>

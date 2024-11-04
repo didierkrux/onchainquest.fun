@@ -12,7 +12,8 @@ const theme = extendTheme({
   styles: {
     global: {
       body: {
-        backgroundColor: "#E3D7C9",
+        background: 'linear-gradient(180deg, #FBF5EE 28%, #FBE6D5 100%)',
+        backgroundColor: '#fbf5ee',
       },
       a: {
         color: "#3182ce",
@@ -49,7 +50,7 @@ const theme = extendTheme({
     },
     // orange: "#FF7614", // orange
     salmon: "#CD577E", // salmon
-    background: "#E3D7C9", // light gray
+    // background: "#fbf5ee", // light gray
   },
 },
   withDefaultColorScheme({ colorScheme: 'purple' })

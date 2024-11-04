@@ -18,9 +18,11 @@ export default function Event({ event }: { event: Event }) {
         <Text>Select language:</Text>
         <LanguageSwitch />
       </Box>
-      <Heading as="h1">{t('Program')}</Heading>
+      <Heading as="h1" color="purple.600">
+        {t('Program')}
+      </Heading>
       {event.program?.map((item, index) => (
-        <CardComponent mt={4} key={index} highlighted={item.highlight}>
+        <CardComponent mt={4} key={index} type={item.highlight ? 'orange' : 'transparent'}>
           <CardBody
             p={[3, 5]}
             display="flex"
@@ -69,15 +71,15 @@ export default function Event({ event }: { event: Event }) {
           </CardBody>
         </CardComponent>
       ))}
-      <Heading as="h1" mt={4}>
+      <Heading as="h1" mt={4} color="purple.600">
         {t('Venue')}
       </Heading>
       {event?.venue?.length > 0 && event?.venue[0]?.image && <Image src={event.venue[0].image} />}
-      <Heading as="h1" mt={4}>
+      <Heading as="h1" mt={4} color="purple.600">
         {t('Booths')}
       </Heading>
       {event.booths?.map((booth, index) => (
-        <Card mt={4} key={index}>
+        <CardComponent mt={4} key={index}>
           <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
             <Box>
               <Text as="h2" fontWeight="bold" color="purple.500">
@@ -88,9 +90,9 @@ export default function Event({ event }: { event: Event }) {
               </Text>
             </Box>
           </CardBody>
-        </Card>
+        </CardComponent>
       ))}
-      <Heading as="h1" mt={4}>
+      <Heading as="h1" mt={4} color="purple.600">
         {t('Sponsors')}
       </Heading>
       <Box display="flex" flexDirection="column" gap={4}>
