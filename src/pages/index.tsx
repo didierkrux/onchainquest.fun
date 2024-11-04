@@ -14,13 +14,10 @@ export default function Event({ event }: { event: Event }) {
 
   return (
     <Box>
-      <Box display="flex" alignItems="center" gap={4} mb={4}>
-        <Text>Select language:</Text>
+      <Box display="flex" justifyContent="center">
         <LanguageSwitch />
       </Box>
-      <Heading as="h1" color="purple.600">
-        {t('Program')}
-      </Heading>
+      <Heading as="h1">{t('Program')}</Heading>
       {event.program?.map((item, index) => (
         <CardComponent mt={4} key={index} type={item.highlight ? 'orange' : 'transparent'}>
           <CardBody
@@ -33,7 +30,7 @@ export default function Event({ event }: { event: Event }) {
             <Box display="flex" flexDirection="column" alignItems="start">
               <Box
                 display="flex"
-                fontSize="18px"
+                fontSize="16px"
                 fontWeight="bold"
                 color="#FF7614"
                 flexDirection="column"
@@ -42,7 +39,7 @@ export default function Event({ event }: { event: Event }) {
                 <Text>{item.time?.split(' → ')[0]}</Text>
                 <Text whiteSpace="nowrap">→ {item.time?.split(' → ')[1]}</Text>
               </Box>
-              <Text fontSize="32px" alignSelf="center" mt="2">
+              <Text fontSize="28px" alignSelf="center" mt="2">
                 {item.emoji}
               </Text>
             </Box>
@@ -54,14 +51,14 @@ export default function Event({ event }: { event: Event }) {
                 gap={2}
                 fontSize="12px"
               >
-                <Text bg={item.locationColor} p="4px 10px" borderRadius="md">
+                <Text bg={item.locationColor} p="3px 8px" borderRadius="4px">
                   {item.location}
                 </Text>
-                <Text bg="#FBF5EE" color="purple.500" p="4px 10px" borderRadius="md">
+                <Text color="purple.500" p="3px 8px">
                   {item.format}
                 </Text>
               </Box>
-              <Text fontSize="18px" color="purple.500" fontWeight="bold" mt={2}>
+              <Text fontSize="19px" color="purple.500" fontWeight="bold" mt={2}>
                 {item.title}
               </Text>
               <Text fontSize="12px" color="#FF7614" fontWeight="bold">
@@ -71,33 +68,38 @@ export default function Event({ event }: { event: Event }) {
           </CardBody>
         </CardComponent>
       ))}
-      <Heading as="h1" mt={4} color="purple.600">
+      <Heading as="h1" mt={4}>
         {t('Venue')}
       </Heading>
       {event?.venue?.length > 0 && event?.venue[0]?.image && <Image src={event.venue[0].image} />}
-      <Heading as="h1" mt={4} color="purple.600">
+      <Heading as="h1" mt={4}>
         {t('Booths')}
       </Heading>
       {event.booths?.map((booth, index) => (
         <CardComponent mt={4} key={index}>
-          <CardBody
-            p={[3, 5]}
-            display="flex"
-            justifyContent="flex-start"
-            alignItems="center"
-            gap={4}
-          >
-            <Box display="flex" flexDirection="column" alignItems="start">
-              <Box fontSize="32px" fontWeight="bold" color="orange.500" m={2}>
+          <CardBody p={[3, 5]} gap={4}>
+            <Box display="flex" alignItems="center">
+              <Box
+                display="flex"
+                fontSize="42px"
+                fontWeight="bold"
+                color="orange.500"
+                w="54px"
+                textAlign="center"
+                justifyContent="center"
+                alignItems="center"
+              >
                 {index + 1}
+              </Box>
+              <Box flex="1">
+                <Text as="h2" fontWeight="bold" fontSize="22px" color="purple.600">
+                  {booth.name}
+                </Text>
               </Box>
             </Box>
             <Box display="flex" flexDirection="column" alignItems="start" alignSelf="start">
-              <Box>
-                <Text as="h2" fontWeight="bold" color="purple.600">
-                  {booth.name}
-                </Text>
-                <Text as="h3" mt={4}>
+              <Box ml="54px">
+                <Text as="h3" mt={3} fontFamily="Inter" color="purple.600">
                   {booth.description}
                 </Text>
               </Box>
@@ -105,7 +107,7 @@ export default function Event({ event }: { event: Event }) {
           </CardBody>
         </CardComponent>
       ))}
-      <Heading as="h1" mt={4} color="purple.600">
+      <Heading as="h1" mt={4}>
         {t('Sponsors')}
       </Heading>
       <Box display="flex" flexDirection="column" gap={4}>

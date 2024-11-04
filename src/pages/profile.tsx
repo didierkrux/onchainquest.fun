@@ -322,9 +322,7 @@ export default function Profile() {
         {profile && profile?.address && (
           <Box>
             <Box>
-              <Heading as="h1" color="purple.600">
-                {t('Profile Card')}
-              </Heading>
+              <Heading as="h1">{t('Profile Card')}</Heading>
               <Card maxW="600px" w="100%" mt={4} mb={4}>
                 <CardBody>
                   <Box
@@ -395,9 +393,7 @@ export default function Profile() {
               </Card>
             </Box>
             <Box w="100%" maxW="600px">
-              <Heading as="h1" color="purple.600">
-                {t('Update Profile')}
-              </Heading>
+              <Heading as="h1">{t('Update Profile')}</Heading>
               <Card mt={4} mb={4}>
                 <CardBody>
                   <Box display="flex" flexDirection="column" gap={4} maxW="400px" mx="auto">
@@ -490,9 +486,7 @@ export default function Profile() {
         )}
         {address && adminWallets.includes(address.toLowerCase()) && (
           <Box w="100%" maxW="600px">
-            <Heading as="h1" color="purple.600">
-              Admin
-            </Heading>
+            <Heading as="h1">Admin</Heading>
             <Card mt={4} mb={4} bg="red.100" color="black">
               <CardBody
                 display="flex"

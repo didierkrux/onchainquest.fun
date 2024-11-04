@@ -21,6 +21,13 @@ const theme = extendTheme({
           textDecoration: "underline",
         },
       },
+      h1: {
+        fontFamily: 'NeueAugenblick !important',
+        color: '#5F177A !important',
+      },
+      h2: {
+        fontFamily: 'Inter !important',
+      },
     },
   },
   components: {

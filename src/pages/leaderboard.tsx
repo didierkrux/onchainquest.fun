@@ -76,9 +76,7 @@ export default function Leaderboard({ event }: { event: Event }) {
 
   return (
     <Box>
-      <Heading as="h1" color="purple.600">
-        {t('Prizes')}
-      </Heading>
+      {/* <Heading as="h1">{t('Prizes')}</Heading>
       <Box>
         {event.prizes.map((prize, index) => (
           <CardComponent mt={4} key={index}>
@@ -96,7 +94,7 @@ export default function Leaderboard({ event }: { event: Event }) {
               </Box>
               <Box display="flex" flexDirection="column" alignItems="start" alignSelf="start">
                 <Box>
-                  <Text as="h2" fontWeight="bold" color="purple.600">
+                  <Text as="h2" fontWeight="bold">
                     {prize.name}
                   </Text>
                   <Text as="h3" mt={4}>
@@ -107,12 +105,12 @@ export default function Leaderboard({ event }: { event: Event }) {
             </CardBody>
           </CardComponent>
         ))}
-      </Box>
+      </Box> */}
       {!leaderboard ? (
         <Text>Loading...</Text>
       ) : leaderboard.length > 0 ? (
         <Box>
-          <Heading as="h1" mt={4} color="purple.600">
+          <Heading as="h1" mt={4}>
             {t('Leaderboard')}
           </Heading>
           <Tabs defaultIndex={1} mt={4}>

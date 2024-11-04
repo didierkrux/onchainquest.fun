@@ -2,6 +2,7 @@ import Web3ModalProvider from 'context'
 import type { AppProps } from 'next/app'
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import NextHead from 'next/head'
+import { Global, css } from '@emotion/react'
 
 import Layout from 'components/Layout'
 import theme from 'theme'
@@ -67,6 +68,18 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           <meta name="twitter:image" content={socialImage} />
         </NextHead>
         <NonSSRWrapper>
+          <Global
+            styles={css`
+              @font-face {
+                font-family: 'NeueAugenblick';
+                src: url(/fonts/NeueAugenblick-ExtraBold.ttf);
+              }
+              @font-face {
+                font-family: 'Inter';
+                src: url(/fonts/Inter-Regular.ttf);
+              }
+            `}
+          />
           <Layout>
             <Component {...pageProps} />
           </Layout>

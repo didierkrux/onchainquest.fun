@@ -248,9 +248,7 @@ export default function Onboarding({ event }: { event: Event }) {
   return (
     <Box>
       <Box display={'flex'} w="100%" gap={4} justifyContent="space-between">
-        <Heading as="h1" color="purple.600">
-          {t('Onboarding tasks')}
-        </Heading>
+        <Heading as="h1">{t('Onboarding tasks')}</Heading>
         {profile?.score && profile?.score > 0 && (
           <Box display="flex" justifyContent="flex-end">
             <Text display="flex" alignItems="end" fontSize="2xl" fontWeight="bold">
