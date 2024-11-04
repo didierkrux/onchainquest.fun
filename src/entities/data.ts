@@ -39,6 +39,7 @@ export type TaskAction =
   | 'secret-word'
   | 'click-link'
   | 'claim-tokens'
+  | 'verify-balance'
   | 'swap-tokens'
   | 'poap-picture'
   | 'own-basename'

@@ -283,3 +283,37 @@ export const calculateScore = (tasks: Tasks, allTasks: Tasks) => {
     return acc
   }, 0)
 }
+
+export async function verifyBalance(address: string, tokenAddress: string, minBalance: string): Promise<boolean> {
+  const alchemyUrl = `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
+
+  try {
+    const response = await fetch(alchemyUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'alchemy_getTokenBalances',
+        params: [address, [tokenAddress]],
+        id: 1,
+      }),
+    });
+
+    const data = await response.json();
+    console.log('Alchemy response:', data);
+
+    if (data.result && data.result.tokenBalances && data.result.tokenBalances.length > 0) {
+      const balanceHex = data.result.tokenBalances[0].tokenBalance;
+      const balance = parseInt(balanceHex, 16) / Math.pow(10, 18);
+      console.log('Balance:', balance);
+      return balance >= parseFloat(minBalance);
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Error checking balance with Alchemy API:', error);
+    return false;
+  }
+}

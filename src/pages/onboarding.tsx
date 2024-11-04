@@ -55,7 +55,7 @@ export default function Onboarding({ event }: { event: Event }) {
     console.log('taskId', taskId)
     setIsLoading(taskId)
     fetch(
-      taskId === 5
+      quest.action === 'claim-tokens'
         ? `/api/claim?address=${address}`
         : `/api/profile?address=${address}&taskId=${taskId}`,
       {
@@ -241,6 +241,16 @@ export default function Onboarding({ event }: { event: Event }) {
             )}
           </Box>
         )
+      }
+      if (quest.action === 'verify-balance') {
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        quest.actionField = !isCompleted ? (
+          <Box>
+            <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
+              {t('Verify')}
+            </Button>
+          </Box>
+        ) : null
       }
     }
   }

@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 
 import db from 'utils/db'
 import { eventId } from 'config/index'
-import { calculateScore, userHasPoap, userHasSwappedTokens, userHasNft } from 'utils/index'
+import { calculateScore, userHasPoap, userHasSwappedTokens, userHasNft, verifyBalance } from 'utils/index'
 import { getTasks } from 'utils/queries'
 import { TaskAction } from 'entities/data'
 import { getBasename } from 'utils/basenames'
@@ -100,6 +100,15 @@ export default async function handler(
     } else if (taskAction === 'click-link') {
       userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
       console.log('userTasks', userTasks)
+    } else if (taskAction === 'verify-balance') {
+      const [tokenAddress, minBalance, tokenName] = taskCondition?.split(',')
+      const userHasEnoughBalance = await verifyBalance(address, tokenAddress, minBalance)
+      if (userHasEnoughBalance) {
+        userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
+        console.log('userTasks', userTasks)
+      } else {
+        return res.status(400).json({ message: `You need to own at least ${minBalance} ${tokenName} on Base.` })
+      }
     } else if (taskAction === 'swap-tokens') {
       const swapCompleted = await userHasSwappedTokens(address, taskCondition)
       console.log('swapCompleted', swapCompleted)
