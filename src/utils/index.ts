@@ -286,7 +286,7 @@ export const calculateScore = (tasks: Tasks, allTasks: Tasks) => {
 }
 
 export async function verifyBalance(address: string, tokenAddress: string, minBalance: string): Promise<boolean> {
-  const alchemyUrl = `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
+  const alchemyUrl = `https://opt-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
 
   try {
     const response = await fetch(alchemyUrl, {

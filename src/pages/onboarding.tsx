@@ -359,7 +359,7 @@ export default function Onboarding({ event }: { event: Event }) {
                   )}
                 </Box>
                 <Box>
-                  {isConnected && (
+                  {isConnected ? (
                     <>
                       {(quest?.actionField || quest?.completedField || isCompleted) && (
                         <Divider my={2} />
@@ -389,7 +389,17 @@ export default function Onboarding({ event }: { event: Event }) {
                         </Box>
                       )}
                     </>
-                  )}
+                  ) : quest.action === 'connect-wallet' ? (
+                    <Box pt="2" display="flex" justifyContent="flex-end">
+                      <Button
+                        onClick={() => {
+                          open({ view: 'Connect' })
+                        }}
+                      >
+                        {t('Connect Wallet')}
+                      </Button>
+                    </Box>
+                  ) : null}
                 </Box>
               </Box>
             </CardBody>

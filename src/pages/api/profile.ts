@@ -107,7 +107,7 @@ export default async function handler(
         userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
         console.log('userTasks', userTasks)
       } else {
-        return res.status(400).json({ message: `You need to own at least ${minBalance} ${tokenName} on Base.` })
+        return res.status(400).json({ message: `You need to own at least ${minBalance} ${tokenName} on Optimism.` })
       }
     } else if (taskAction === 'swap-tokens') {
       const swapCompleted = await userHasSwappedTokens(address, taskCondition)
