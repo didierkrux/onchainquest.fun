@@ -3,6 +3,10 @@
     {
       "source": "/robots.txt",
       "destination": "/api/robots"
+    },
+    {
+      "source": "/deeplink",
+      "destination": "/api/zerion-deeplink"
     }
   ],
   "crons": [
