@@ -110,9 +110,7 @@ export default function Leaderboard({ event }: { event: Event }) {
         <Text>Loading...</Text>
       ) : leaderboard.length > 0 ? (
         <Box>
-          <Heading as="h1" mt={4}>
-            {t('Leaderboard')}
-          </Heading>
+          <Heading as="h1">{t('Leaderboard')}</Heading>
           <Tabs defaultIndex={1} mt={4}>
             <TabList>
               <Tab>{t('All')}</Tab>

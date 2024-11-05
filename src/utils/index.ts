@@ -76,6 +76,7 @@ export async function fetchPotionData(): Promise<Event> {
           image: item.fields.Image,
           action: item.fields.Action,
           condition: item.fields.Condition,
+          lock: item.fields.Lock,
         })),
       prizes: data
         .filter((item: any) => item.fields.Type === 'Prize')
@@ -224,7 +225,7 @@ export async function userHasSwappedTokens(address: string, tokenAddress: string
     console.log('tokenAddress', tokenAddress);
 
     const oneInchBaseAddress = '0xe37e799d5077682fa0a244d46e5649f71457bd09';
-    const twentyDaysAgo = Math.floor(Date.now() / 1000) - 20 * 24 * 60 * 60; // 20 days ago in seconds
+    const thirtyDaysAgo = Math.floor(Date.now() / 1000) - 30 * 24 * 60 * 60; // 30 days ago in seconds
 
     const response = await fetch(`https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`, {
       method: 'POST',
@@ -261,7 +262,7 @@ export async function userHasSwappedTokens(address: string, tokenAddress: string
         const isTokenTransfer = transfer?.rawContract?.address?.toLowerCase() === tokenAddress?.toLowerCase();
         console.log('isTokenTransfer', isTokenTransfer);
         console.log('transferTimestamp', transferTimestamp);
-        const isRecentTransfer = transferTimestamp >= twentyDaysAgo;
+        const isRecentTransfer = transferTimestamp >= thirtyDaysAgo;
         console.log('isRecentTransfer', isRecentTransfer);
 
         return isRecentTransfer && isTokenTransfer;

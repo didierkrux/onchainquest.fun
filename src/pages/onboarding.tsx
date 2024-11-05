@@ -18,11 +18,10 @@ import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import React from 'react'
 import { useLocalStorage } from 'usehooks-ts'
+import { Trophy, CheckCircle, Star, Lock } from '@phosphor-icons/react/dist/ssr'
 
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
-import { CheckCircle, Star } from '@phosphor-icons/react/dist/ssr'
-import { Trophy } from '@phosphor-icons/react/dist/ssr'
 
 export default function Onboarding({ event }: { event: Event }) {
   const { t } = useTranslation()
@@ -115,18 +114,28 @@ export default function Onboarding({ event }: { event: Event }) {
   for (const quest of QUESTS) {
     if (profile?.tasks) {
       if (quest.action === 'claim-tokens') {
+        const isLocked = quest.lock ? !profile?.tasks?.[quest.lock]?.isCompleted ?? false : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
-        quest.actionField = !isCompleted ? (
-          <Box>
-            <Button
-              onClick={() => handleAction(quest)}
-              isLoading={isLoading === quest.id}
-              loadingText={t('Claiming... (takes ~30 seconds)')}
-            >
-              {t('Claim')}
-            </Button>
+        quest.actionField = (
+          <Box display="flex" gap={4}>
+            {quest.lock && isLocked ? (
+              <Box display="flex" alignItems="center" gap={2}>
+                {t(`Complete task #${parseInt(quest.lock) + 1} first to unlock this.`)}
+                <Lock size={28} color="gray" />
+              </Box>
+            ) : !isCompleted ? (
+              <Box>
+                <Button
+                  onClick={() => handleAction(quest)}
+                  isLoading={isLoading === quest.id}
+                  loadingText={t('Claiming... (takes ~30 seconds)')}
+                >
+                  {t('Claim')}
+                </Button>
+              </Box>
+            ) : null}
           </Box>
-        ) : null
+        )
         const txLink = profile?.tasks?.[quest.id]?.txLink
         quest.completedField = txLink ? (
           <Box>
@@ -224,28 +233,42 @@ export default function Onboarding({ event }: { event: Event }) {
         ) : null
       }
       if (quest.action === 'swap-tokens') {
+        const isLocked = quest.lock ? !profile?.tasks?.[quest.lock]?.isCompleted ?? false : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = (
           <Box display="flex" gap={4}>
-            <Button
-              onClick={() => {
-                open({ view: 'Account' })
-              }}
-            >
-              {t('Swap')}
-            </Button>
-            {!isCompleted && (
-              <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
-                {t('Verify')}
-              </Button>
+            {quest.lock && isLocked ? (
+              <Box display="flex" alignItems="center" gap={2}>
+                {t(`Complete task #${parseInt(quest.lock) + 1} first to unlock this.`)}
+                <Lock size={28} color="gray" />
+              </Box>
+            ) : (
+              <>
+                <Button
+                  onClick={() => {
+                    open({ view: 'Account' })
+                  }}
+                >
+                  {t('Swap')}
+                </Button>
+                {!isCompleted && (
+                  <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
+                    {t('Verify')}
+                  </Button>
+                )}
+              </>
             )}
           </Box>
         )
       }
+
       if (quest.action === 'verify-balance') {
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = !isCompleted ? (
-          <Box>
+          <Box display="flex" gap={4}>
+            <Link isExternal href={`zerion://browser?url=${encodeURIComponent(`https://yodl.me`)}`}>
+              <Button>{t('Open yodl inside Zerion')}</Button>
+            </Link>
             <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
               {t('Verify')}
             </Button>
@@ -274,8 +297,9 @@ export default function Onboarding({ event }: { event: Event }) {
       </Box>
       {QUESTS.map((quest, index) => {
         const isCompleted = profile?.tasks?.[index.toString()]?.isCompleted ?? false
+        const isLocked = quest.lock ? !profile?.tasks?.[quest.lock]?.isCompleted ?? false : false
         return (
-          <Card mt={4} key={index} bg={isCompleted ? 'green.50' : 'white'}>
+          <Card mt={4} key={index} bg={isLocked ? 'gray.300' : isCompleted ? 'green.50' : 'white'}>
             <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
               <Box w="100%">
                 <Box display="flex" gap={2} justifyContent="space-between" fontSize="18px">
@@ -322,13 +346,15 @@ export default function Onboarding({ event }: { event: Event }) {
                 <Box>
                   {isConnected && (
                     <>
-                      <Divider my={2} />
+                      {(quest?.actionField || quest?.completedField || isCompleted) && (
+                        <Divider my={2} />
+                      )}
                       {quest?.actionField && (
                         <Box pt="2" display="flex" justifyContent="flex-end">
                           {quest?.actionField}
                         </Box>
                       )}
-                      {quest.completedField && (
+                      {quest?.completedField && (
                         <Box pt="2" display="flex" justifyContent="flex-end">
                           {quest.completedField}
                         </Box>
