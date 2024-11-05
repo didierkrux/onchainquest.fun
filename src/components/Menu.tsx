@@ -161,7 +161,7 @@ const Menu = () => {
       bottom={isMobile ? 0 : 'auto'}
       left={0}
       right={0}
-      bg={newVersionAvailable ? 'white.300' : '#3D154C'}
+      bg={'#3D154C'}
       boxShadow={isMobile ? '0 -1px 2px rgba(0, 0, 0, 0.1)' : 'none'}
       zIndex={10}
       pb={isMobile && pwa ? '16px' : '0'}
@@ -174,8 +174,8 @@ const Menu = () => {
               alignItems="center"
               gap={2}
               justifyContent="center"
-              bg="white.300"
-              color="gray.900"
+              bg="#3D154C"
+              color="white"
               p={4}
               w="100%"
               h="100%"
@@ -183,7 +183,9 @@ const Menu = () => {
               <SquaresFour />
               {t('New app version available!')}
               {' · '}
-              <Link onClick={() => window.location.reload()}>{t('Refresh')}</Link>
+              <Link onClick={() => window.location.reload()} color="#C06FDB !important">
+                {t('Refresh')}
+              </Link>
             </Box>
           ) : (
             <>
