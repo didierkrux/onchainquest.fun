@@ -19,7 +19,7 @@ export default function Event({ event }: { event: Event }) {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="center" gap={4}>
+      <Box display="flex" justifyContent="center" gap={4} m={4}>
         {(isAndroid || isIOS) && pwa === false && (
           <Button leftIcon={<Info size={22} />} onClick={() => setShowInstallPWA(true)}>
             Install
