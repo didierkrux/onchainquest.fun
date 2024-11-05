@@ -12,7 +12,7 @@ import {
   Image,
 } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
-import { Export, PlusCircle } from '@phosphor-icons/react'
+import { Export, PlusCircle, PlusSquare } from '@phosphor-icons/react'
 
 import { isAndroid, isIOS } from 'react-device-detect'
 import { eventName } from 'config/index'
@@ -59,10 +59,7 @@ const InstallPWA: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       window.deferredPrompt.prompt()
       window.deferredPrompt.userChoice.then((choiceResult: any) => {
         if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the A2HS prompt')
           handleCloseClick()
-        } else {
-          console.log('User dismissed the A2HS prompt')
         }
         window.deferredPrompt = null
       })
@@ -83,7 +80,7 @@ const InstallPWA: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
         background="linear-gradient(180deg, #FBF5EE 28%, #FBE6D5 100%)"
         borderRadius="16px"
       >
-        <ModalHeader>{t('Install this app for a better experience.')}</ModalHeader>
+        <ModalHeader fontSize="18px">{t('Install this app for a better experience.')}</ModalHeader>
         <ModalCloseButton />
         <ModalBody mb={4}>
           <Box
@@ -106,7 +103,7 @@ const InstallPWA: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
               ml={2}
             >
               <Box w="100%" display="flex" alignItems="center" justifyContent="center" px={2}>
-                <Image src="/app-icon.png" alt="App icon" borderRadius="16px" />
+                <Image src="/app-icon.png" alt={t('App icon')} borderRadius="16px" />
               </Box>
               <Text fontSize="11px" fontWeight="bold" mt={2} color="white">
                 {eventName}
@@ -118,19 +115,31 @@ const InstallPWA: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
               <Box display="flex" alignItems="center" gap={2}>
                 <Box>
                   <Button onClick={handleInstallClick} leftIcon={<PlusCircle size={22} />}>
-                    Install
+                    {t('Install')}
                   </Button>
                 </Box>
-                <Text>👈 Click & accept the prompt!</Text>
+                <Text>👈 {t('Click & accept the prompt!')}</Text>
               </Box>
             ) : isIOS ? (
-              <Box display="ruby" alignItems="center">
-                iOS Instructions: Open this website in <b>Safari</b>, press <Export size={22} />,
-                then "Add to home screen"
+              <Box display="content" alignItems="center">
+                {t('iOS Instructions: Open this website in ')}
+                <b>Safari</b>
+                {t(', press ')}
+                <Box as="span" display="inline-flex" style={{ position: 'relative', top: '4px' }}>
+                  <Export size={22} />
+                </Box>
+                {t(', then "Add to home screen" ')}
+                <Box as="span" display="inline-flex" style={{ position: 'relative', top: '4px' }}>
+                  <PlusSquare size={22} />
+                </Box>
               </Box>
             ) : (
-              <Text display="ruby" alignItems="center">
-                Instructions: press <Export />, then "Add to home screen"
+              <Text display="content" alignItems="center">
+                {t('Instructions: press ')}
+                <Box as="span" display="inline-flex" style={{ position: 'relative', top: '4px' }}>
+                  <Export size={22} />
+                </Box>
+                {t(', then "Add to home screen"')}
               </Text>
             )}
           </Box>
