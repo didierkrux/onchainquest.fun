@@ -37,7 +37,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {isHomepage && (
         <Image w="100vw" src={isMobile ? '/banner-mobile.jpg' : '/banner.jpg'} alt="Banner" />
       )}
-      <main style={{ minHeight: '100vh' }}>
+      <main
+        style={{
+          minHeight: '100vh',
+          background: 'linear-gradient(180deg, #FBF5EE 28%, #FBE6D5 100%)',
+        }}
+      >
         <Box
           p="4"
           maxW="container.lg"

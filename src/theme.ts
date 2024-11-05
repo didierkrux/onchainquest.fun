@@ -12,7 +12,6 @@ const theme = extendTheme({
   styles: {
     global: {
       body: {
-        background: 'linear-gradient(180deg, #FBF5EE 28%, #FBE6D5 100%)',
         backgroundColor: '#fbf5ee',
       },
       a: {
