@@ -14,6 +14,7 @@ import {
   FormLabel,
   Switch,
   Link,
+  Divider,
 } from '@chakra-ui/react'
 import { useAccount, useDisconnect, useSignMessage, useBalance } from 'wagmi'
 import { useEffect, useState } from 'react'
@@ -455,6 +456,12 @@ export default function Profile() {
                     </Box>
                     {!profile?.emailOK && (
                       <Box mb={4}>
+                        <Divider my={2} />
+                        <Text mb="2" fontSize="sm">
+                          {t(
+                            'Stay in the loop! Enter your email to receive the latest event updates and resources from the organizers.'
+                          )}
+                        </Text>
                         <Box gap={4} display="flex" alignItems="center">
                           <Text>{t('Email: ')}</Text>
                           <Input
@@ -463,9 +470,6 @@ export default function Profile() {
                             onChange={(e) => setEmail(e.target.value)}
                           />
                         </Box>
-                        <Text ml="16" mt="1">
-                          {t('* email only shared with organizers')}
-                        </Text>
                       </Box>
                     )}
                     <Box display="flex" justifyContent="center">

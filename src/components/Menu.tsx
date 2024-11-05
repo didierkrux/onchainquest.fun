@@ -81,7 +81,7 @@ const Menu = () => {
   const { isConnected } = useAccount()
   const { open } = useAppKit()
   const { open: isOpen } = useAppKitState()
-  const [pwa] = useLocalStorage('pwa', false)
+  const [pwa] = useLocalStorage<boolean | null>('pwa', null)
   const [profile] = useLocalStorage<Profile | null>('profile', null)
   const [appDeploymentId, setAppDeploymentId] = useLocalStorage('app-deployment-id', '')
   const [latestDeploymentId, setLatestDeploymentId] = useState(appDeploymentId)

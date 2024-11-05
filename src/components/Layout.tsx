@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import Menu from 'components/Menu'
 import { useEventData } from 'hooks/useEventData'
 import { useLocalStorage } from 'usehooks-ts'
+import InstallPWA from 'components/InstallPWA'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -14,11 +15,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { t } = useTranslation()
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const { event, isLoading, error } = useEventData()
-  const [pwa, setPwa] = useLocalStorage('pwa', false)
+  const [pwa, setPwa] = useLocalStorage<boolean | null>('pwa', null)
+  const [showInstallPWA, setShowInstallPWA] = useLocalStorage('showInstallPWA', false)
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.search.includes('pwa=true')) {
       setPwa(true)
+    } else if (typeof window !== 'undefined') {
+      setPwa(window.matchMedia('(display-mode: standalone)').matches)
+      setShowInstallPWA(true)
     }
   }, [setPwa])
 
@@ -61,6 +66,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Box textAlign="center" py={10}>
               <Text>{t('No event data available.')}</Text>
             </Box>
+          )}
+          {pwa === false && showInstallPWA === true && (
+            <InstallPWA onClose={() => setShowInstallPWA(false)} />
           )}
         </Box>
       </main>

@@ -1,5 +1,8 @@
-import { Box, Heading, Text, Image, CardBody, Link, Card } from '@chakra-ui/react'
+import { Box, Heading, Text, Image, CardBody, Link, Card, Button } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
+import { useLocalStorage } from 'usehooks-ts'
+import { Info } from '@phosphor-icons/react'
+import { isAndroid, isIOS } from 'react-device-detect'
 
 import LanguageSwitch from 'components/LanguageSwitch'
 import { Event } from 'entities/data'
@@ -7,6 +10,8 @@ import { Card as CardComponent } from 'components/Card'
 
 export default function Event({ event }: { event: Event }) {
   const { t } = useTranslation()
+  const [pwa] = useLocalStorage<boolean | null>('pwa', null)
+  const [, setShowInstallPWA] = useLocalStorage('showInstallPWA', false)
 
   const goldSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '1-gold')
   const silverSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '2-silver')
@@ -14,7 +19,12 @@ export default function Event({ event }: { event: Event }) {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="center">
+      <Box display="flex" justifyContent="center" gap={4}>
+        {(isAndroid || isIOS) && pwa === false && (
+          <Button leftIcon={<Info size={22} />} onClick={() => setShowInstallPWA(true)}>
+            Install
+          </Button>
+        )}
         <LanguageSwitch />
       </Box>
       <Heading as="h1">{t('Program')}</Heading>

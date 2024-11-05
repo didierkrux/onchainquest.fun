@@ -36,6 +36,7 @@
     "pg": "^8.13.0",
     "qrcode": "^1.5.4",
     "react": "18.2.0",
+    "react-device-detect": "^2.2.3",
     "react-dom": "18.2.0",
     "react-i18next": "^15.0.2",
     "react-social-media-embed": "^2.5.17",
