@@ -42,16 +42,16 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           <link rel="canonical" href={canonical} />
           <meta name="robots" content={IS_PROD ? 'all' : 'noindex'}></meta>
           {/* Progressive Web App */}
-          <link rel="manifest" crossOrigin="use-credentials" href="/manifest.json" />
+          <link rel="manifest" href="/manifest.json" crossOrigin="use-credentials" />
           <link rel="apple-touch-icon" href={appIcon} />
           <meta name="apple-mobile-web-app-title" content={eventName} />
           <meta name="apple-mobile-web-app-capable" content="yes" />
-          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
           <meta name="application-name" content={eventName} />
-          <meta name="apple-mobile-web-app-title" content={eventName} />
           <meta name="format-detection" content="telephone=no" />
           <meta name="mobile-web-app-capable" content="yes" />
           <meta name="theme-color" content="#fbf5ee" />
+          <meta name="msapplication-navbutton-color" content="#fbf5ee" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="default" />
           {/* Open Graph / Facebook (needs to be < 300kb to work on WhatsApp) */}
           <meta property="og:type" content="website" />
           <meta property="og:url" content={url} />
