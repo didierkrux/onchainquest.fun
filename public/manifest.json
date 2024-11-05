@@ -1,7 +1,7 @@
 {
   "name": "New to Web3",
   "short_name": "New to Web3",
-  "theme_color": "#000000",
+  "theme_color": "#fbf5ee",
   "background_color": "#000000",
   "start_url": "/?pwa=true",
   "icons": [

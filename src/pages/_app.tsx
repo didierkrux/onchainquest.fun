@@ -70,6 +70,13 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <NonSSRWrapper>
           <Global
             styles={css`
+              html,
+              body {
+                padding-top: env(safe-area-inset-top);
+                padding-right: env(safe-area-inset-right);
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-left: env(safe-area-inset-left);
+              }
               @font-face {
                 font-family: 'NeueAugenblick';
                 src: url(/fonts/NeueAugenblick-ExtraBold.ttf);
