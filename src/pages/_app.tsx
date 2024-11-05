@@ -3,6 +3,7 @@ import type { AppProps } from 'next/app'
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import NextHead from 'next/head'
 import { Global, css } from '@emotion/react'
+import { useEffect } from 'react'
 
 import Layout from 'components/Layout'
 import theme from 'theme'
@@ -25,6 +26,17 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const description = eventDescription
   const appIcon = `${DOMAIN_URL}/app-icon.png?v=1`
   const canonical = url?.split('?')[0]
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    router.events.on('routeChangeComplete', handleRouteChange)
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange)
+    }
+  }, [router.events])
 
   return (
     <Web3ModalProvider>
@@ -75,7 +87,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
                 margin: 0;
                 padding: 0;
                 height: 100%;
-                overflow-x: hidden;
+                /* overflow-x: hidden; */
                 padding-top: env(safe-area-inset-top);
                 padding-right: env(safe-area-inset-right);
                 padding-bottom: env(safe-area-inset-bottom);

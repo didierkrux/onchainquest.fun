@@ -154,6 +154,12 @@ const Menu = () => {
   const newVersionAvailable =
     latestDeploymentId && latestDeploymentId !== '' && latestDeploymentId !== appDeploymentId
 
+  const handleMenuClick = (href: string) => {
+    if (pathname === href) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
   return (
     <Box
       as="nav"
@@ -201,7 +207,11 @@ const Menu = () => {
                     alignItems="center"
                   >
                     <NextLink href={item.href} style={{ width: '100%', height: '100%' }}>
-                      <MenuItem label={item.label} isActive={isActive}>
+                      <MenuItem
+                        label={item.label}
+                        isActive={isActive}
+                        onClick={() => handleMenuClick(item.href)}
+                      >
                         <item.icon size={24} />
                       </MenuItem>
                     </NextLink>
