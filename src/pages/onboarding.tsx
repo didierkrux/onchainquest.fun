@@ -184,8 +184,15 @@ export default function Onboarding({ event }: { event: Event }) {
       }
       if (quest.action === 'own-basename') {
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        const baseLink = quest.condition
         quest.actionField = !isCompleted ? (
-          <Box>
+          <Box display="flex" gap={4}>
+            <Link
+              isExternal
+              href={`zerion://browser?url=${encodeURIComponent(baseLink as string)}`}
+            >
+              <Button>{t('Open Base inside Zerion')}</Button>
+            </Link>
             <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
               {t('Verify')}
             </Button>
