@@ -72,10 +72,24 @@ export default function MyApp({ Component, pageProps }: AppProps) {
             styles={css`
               html,
               body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                overflow-x: hidden;
                 padding-top: env(safe-area-inset-top);
                 padding-right: env(safe-area-inset-right);
                 padding-bottom: env(safe-area-inset-bottom);
                 padding-left: env(safe-area-inset-left);
+              }
+              #__next {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+              }
+              main {
+                flex: 1;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
               }
               @font-face {
                 font-family: 'NeueAugenblick';
