@@ -120,7 +120,9 @@ export default function Onboarding({ event }: { event: Event }) {
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t(`Complete task #${parseInt(quest.lock) + 1} first to unlock this.`)}
+                {t('Complete task {{taskNumber}} first to unlock this.', {
+                  taskNumber: parseInt(quest.lock) + 1,
+                })}
                 <Lock size={28} color="gray" />
               </Box>
             ) : !isCompleted ? (
@@ -239,7 +241,9 @@ export default function Onboarding({ event }: { event: Event }) {
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t(`Complete task #${parseInt(quest.lock) + 1} first to unlock this.`)}
+                {t('Complete task {{taskNumber}} first to unlock this.', {
+                  taskNumber: parseInt(quest.lock) + 1,
+                })}
                 <Lock size={28} color="gray" />
               </Box>
             ) : (
@@ -299,7 +303,11 @@ export default function Onboarding({ event }: { event: Event }) {
         const isCompleted = profile?.tasks?.[index.toString()]?.isCompleted ?? false
         const isLocked = quest.lock ? !profile?.tasks?.[quest.lock]?.isCompleted ?? false : false
         return (
-          <Card mt={4} key={index} bg={isLocked ? 'gray.300' : isCompleted ? 'green.50' : 'white'}>
+          <Card
+            mt={4}
+            key={index}
+            bg={isConnected && isLocked ? 'gray.300' : isCompleted ? 'green.50' : 'white'}
+          >
             <CardBody display="flex" justifyContent="space-between" alignItems="center" gap={4}>
               <Box w="100%">
                 <Box display="flex" gap={2} justifyContent="space-between" fontSize="18px">
