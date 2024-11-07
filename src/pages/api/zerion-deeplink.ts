@@ -9,7 +9,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   const encodedUrl = encodeURIComponent(url as string)
-  const zerionUrl = `zerion://browser?url=${encodedUrl}`
+  const userAgent = req.headers['user-agent'] || ''
+  let redirectUrl = ''
 
-  res.redirect(zerionUrl)
+  if (/android/i.test(userAgent)) {
+    redirectUrl = `intent://browser?url=${encodedUrl}#Intent;scheme=zerion;package=io.zerion.android;end`
+  } else {
+    redirectUrl = `zerion://browser?url=${encodedUrl}`
+  }
+
+  res.redirect(redirectUrl)
 }
