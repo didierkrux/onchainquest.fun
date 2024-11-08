@@ -543,6 +543,14 @@ export default function Profile() {
                     </Box>
                   </Box>
                 )}
+                <Button
+                  onClick={handleResetProfile}
+                  isLoading={isResetting}
+                  loadingText="Resetting..."
+                  colorScheme="red"
+                >
+                  {t('Reset my profile')}
+                </Button>
               </CardBody>
             </Card>
           </Box>
