@@ -55,10 +55,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // TEMP
     let receipt = null
     let safeTxHash = null
-    if (badgeCompleted === true) {
-      receipt = { transactionHash: '0x9b285098404a71f1a09ec3e91582417d191fa372bf04a3416f1f5038abdbb20f' }
-    // if (badgeCompleted === false) {
-    // return res.status(400).json({ ...profileData, message: 'You have not claimed the POAP event yet' });
+    // if (badgeCompleted === true) {
+    //   receipt = { transactionHash: '0x9b285098404a71f1a09ec3e91582417d191fa372bf04a3416f1f5038abdbb20f' }
+    if (badgeCompleted === false) {
+      return res.status(400).json({ ...profileData, message: 'You have not claimed the POAP event yet (Task #3)' });
     } else {
 
     const addressToLower = (address as string).toLowerCase();
