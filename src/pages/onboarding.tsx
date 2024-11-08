@@ -187,10 +187,7 @@ export default function Onboarding({ event }: { event: Event }) {
         const baseLink = quest.condition
         quest.actionField = !isCompleted ? (
           <Box display="flex" gap={4}>
-            <Link
-              isExternal
-              href={`zerion://browser?url=${encodeURIComponent(baseLink as string)}`}
-            >
+            <Link isExternal href={`https://newtoweb3.io/deeplink?url=${baseLink as string}`}>
               <Button>{t('Open Base inside Zerion')}</Button>
             </Link>
             <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
@@ -213,9 +210,7 @@ export default function Onboarding({ event }: { event: Event }) {
           <Box display="flex" gap={4}>
             <Link
               isExternal
-              href={`zerion://browser?url=${encodeURIComponent(
-                `https://zora.co/collect/${quest.condition}?referrer=0x767D1AF42CC93E15E72aFCF15477733C66e5460a`
-              )}`}
+              href={`https://newtoweb3.io/deeplink?url=https://zora.co/collect/${quest.condition}?referrer=0x767D1AF42CC93E15E72aFCF15477733C66e5460a`}
             >
               <Button>{t('Mint NFT inside Zerion')}</Button>
             </Link>
@@ -277,7 +272,7 @@ export default function Onboarding({ event }: { event: Event }) {
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = !isCompleted ? (
           <Box display="flex" gap={4}>
-            <Link isExternal href={`zerion://browser?url=${encodeURIComponent(`https://yodl.me`)}`}>
+            <Link isExternal href="https://newtoweb3.io/deeplink?url=https://yodl.me">
               <Button>{t('Open yodl inside Zerion')}</Button>
             </Link>
             <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
