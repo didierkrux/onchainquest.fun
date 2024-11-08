@@ -557,14 +557,14 @@ export default function Profile() {
             >
               {t('Disconnect')}
             </Button>
-            <Button
+            {/* <Button
               onClick={handleResetProfile}
               isLoading={isResetting}
               loadingText="Resetting..."
               colorScheme="red"
             >
               {t('Reset my profile')}
-            </Button>
+            </Button> */}
           </Box>
         )}
       </Box>
