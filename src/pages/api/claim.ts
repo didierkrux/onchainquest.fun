@@ -8,7 +8,10 @@ import { DOMAIN_URL, adminWallets, eventId } from 'config';
 import db from 'utils/db';
 import { calculateScore } from 'utils/index';
 import { getTasks } from 'utils/queries';
-const RPC_URL = 'https://mainnet.base.org';
+
+const RPC_URL = process.env.ALCHEMY_API_KEY
+  ? `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
+  : 'https://mainnet.base.org';
 
 const OWNER_ADDRESS = process.env.OWNER_ADDRESS as string;
 const PRIVATE_KEY = process.env.PRIVATE_KEY as string;
