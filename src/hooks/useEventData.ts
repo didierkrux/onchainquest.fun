@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { useLocalStorage } from 'usehooks-ts'
 
 import { Event, EventData } from 'entities/data'
+import { eventId } from 'config'
 
 export function useEventData() {
   const { i18n } = useTranslation()
@@ -16,7 +17,7 @@ export function useEventData() {
   const fetchData = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch('/api/event')
+      const response = await fetch(`/api/event?id=${eventId}`)
       const data = await response.json()
       setEventData(data)
       setError(null)

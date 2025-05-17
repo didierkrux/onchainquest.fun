@@ -30,11 +30,16 @@ export async function fetchPotionData(eventId: number): Promise<Event> {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-    const data: any = (await response.json()).filter((item: any) => item.fields.Event.startsWith(`${eventId}.`))
+    const allData: any = await response.json()
+    console.log('allData', allData)
+
+    const eventData: any = allData.filter((item: any) => item.fields.Event?.startsWith(`${eventId}.`))
+    console.log('eventData', eventData)
 
     const transformedData: Event = {
-      program: data
+      program: eventData
         .filter((item: any) => item.fields.Type === 'Program')
+        .sort((a: any, b: any) => a.fields.Order - b.fields.Order)
         .map((item: any) => ({
           emoji: item.fields.Emoji,
           title: item.fields.Label,
@@ -45,8 +50,9 @@ export async function fetchPotionData(eventId: number): Promise<Event> {
           format: item.fields.Format,
           people: item.fields.People,
         })),
-      sponsors: data
+      sponsors: eventData
         .filter((item: any) => item.fields.Type === 'Sponsor')
+        .sort((a: any, b: any) => a.fields.Order - b.fields.Order)
         .map((item: any) => ({
           name: item.fields.Label,
           // description: replaceLinks(item.fields.Description),
@@ -54,20 +60,23 @@ export async function fetchPotionData(eventId: number): Promise<Event> {
           image: item.fields.Image || '',
           link: item.fields.Link || '',
         })),
-      venue: data
+      venue: eventData
         .filter((item: any) => item.fields.Type === 'Venue')
+        .sort((a: any, b: any) => a.fields.Order - b.fields.Order)
         .map((item: any) => ({
           name: item.fields.Label,
           image: item.fields.Image || '',
         })),
-      booths: data
+      booths: eventData
         .filter((item: any) => item.fields.Type === 'Booth')
+        .sort((a: any, b: any) => a.fields.Order - b.fields.Order)
         .map((item: any) => ({
           name: item.fields.Label,
           description: replaceLinks(item.fields.Description),
         })),
-      tasks: data
+      tasks: eventData
         .filter((item: any) => item.fields.Type === 'Task')
+        .sort((a: any, b: any) => a.fields.Order - b.fields.Order)
         .map((item: any, index: number) => ({
           id: index,
           name: item.fields.Label,
@@ -78,7 +87,7 @@ export async function fetchPotionData(eventId: number): Promise<Event> {
           condition: item.fields.Condition,
           lock: item.fields.Lock,
         })),
-      prizes: data
+      prizes: eventData
         .filter((item: any) => item.fields.Type === 'Prize')
         .map((item: any) => ({
           name: item.fields.Label,
