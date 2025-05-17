@@ -12,9 +12,11 @@ export const LanguageDescription: LanguageDescriptionType = Object.fromEntries(
   }).sort((a, b) => a[1].localeCompare(b[1]))
 )
 
-const LanguageSwitch = (): React.ReactElement => {
+const LanguageSwitch = ({ eventLanguage }: { eventLanguage: string[] }): React.ReactElement => {
   const { i18n } = useTranslation()
-  const languages = Object.keys(LanguageDescription) as LanguageType[]
+  const languages = Object.keys(LanguageDescription).filter((lang): lang is LanguageType =>
+    eventLanguage?.includes(lang)
+  )
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
   useEffect(() => {
