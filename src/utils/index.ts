@@ -2,7 +2,7 @@ import OpenAI from 'openai'
 
 import { Event } from 'entities/data'
 import { Profile, Task, Tasks } from 'entities/profile'
-import { potionUrl } from 'config'
+import { eventId, potionUrl } from 'config'
 import db from './db'
 
 export function shortAddress(address: string) {
@@ -21,7 +21,7 @@ export function profileRole(profile: Profile) {
   return profile.role === 'mentor' ? '🧑‍🏫' : '🧑‍🎓'
 }
 
-export async function fetchPotionData(): Promise<Event> {
+export async function fetchPotionData(eventId: number): Promise<Event> {
   // force all links in new tab
   const replaceLinks = (string: string) => string?.replaceAll('<a ', '<a target="_blank" ').replaceAll('<a target="_blank" href="https://newtoweb3.io/profile"', '<a href="/profile"')
 
@@ -30,7 +30,7 @@ export async function fetchPotionData(): Promise<Event> {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-    const data: any = await response.json()
+    const data: any = (await response.json()).filter((item: any) => item.fields.Event.startsWith(`${eventId}.`))
 
     const transformedData: Event = {
       program: data

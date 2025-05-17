@@ -1,4 +1,5 @@
-export const eventId = 1
+// default event id
+export const eventId = 2
 
 export const eventName = 'New to Web3'
 

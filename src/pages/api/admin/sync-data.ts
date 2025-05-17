@@ -4,7 +4,7 @@ import { verifyMessage } from 'viem'
 
 import { fetchPotionData, translateData } from 'utils/index'
 import db from 'utils/db'
-import { adminSignatureMessage, adminWallets } from 'config/index'
+import { adminSignatureMessage, adminWallets, eventId } from 'config/index'
 
 export const maxDuration = 90 // 90 seconds
 
@@ -35,10 +35,10 @@ export default async function handler(
       return res.status(403).json({ message: 'Invalid signature' })
     }
 
-    const data = await fetchPotionData()
+    const data = await fetchPotionData(eventId)
     console.log('data', data)
     // save to db
-    await db('events').update({ data_en: data })
+    await db('events').update({ data_en: data }).where('id', eventId)
     res.status(200).json({ message: 'English data synced successfully' })
 
     // const translatedData = await translateData(data, 'Thai')
