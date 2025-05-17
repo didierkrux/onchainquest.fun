@@ -6,6 +6,7 @@ import Menu from 'components/Menu'
 import { useEventData } from 'hooks/useEventData'
 import { useLocalStorage } from 'usehooks-ts'
 import InstallPWA from 'components/InstallPWA'
+import { eventId } from 'config'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -35,7 +36,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Menu />
       </header>
       {isHomepage && (
-        <Image w="100vw" src={isMobile ? '/banner-mobile.jpg' : '/banner.jpg'} alt="Banner" />
+        <Image
+          w="100vw"
+          src={isMobile ? `/banner_mobile_${eventId}.jpg` : `/banner_${eventId}.jpg`}
+          alt="Banner"
+        />
       )}
       <main
         style={{
@@ -49,7 +54,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           mx="auto"
           mb={isMobile ? `calc(60px + ${pwa ? '16px' : '0px'})` : 0}
         >
-          {event !== null && event?.program?.length > 0 ? (
+          {event !== null ? (
             React.Children.map(children, (child) => {
               if (React.isValidElement(child)) {
                 return React.cloneElement(child as React.ReactElement<any>, { event })
