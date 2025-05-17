@@ -1,8 +1,9 @@
 import { fetchPotionData } from '../utils/index';
+import { eventId } from '../config';
 
 async function main() {
   try {
-    const data: any = await fetchPotionData();
+    const data: any = await fetchPotionData(eventId);
     console.log('Potion data:', JSON.stringify(data, null, 2));
     // Extract and save data to data.json
     const fs = require('fs');
