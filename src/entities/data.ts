@@ -74,6 +74,11 @@ export interface Event {
   venue: VenueItem[]
   prizes: Prize[]
   tasks: Quest[]
+  config?: {
+    eventId: number
+    eventName: string
+    eventLanguage: string[]
+  }
 }
 
 export interface EventData {

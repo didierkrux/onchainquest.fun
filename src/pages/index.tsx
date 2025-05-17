@@ -17,6 +17,9 @@ export default function Event({ event }: { event: Event }) {
   const silverSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '2-silver')
   const bronzeSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '3-bronze')
 
+  if (!event) return <></>
+  console.log('event', event)
+
   return (
     <Box>
       <Box display="flex" justifyContent="center" gap={4} m={4}>
@@ -25,7 +28,9 @@ export default function Event({ event }: { event: Event }) {
             Install
           </Button>
         )}
-        <LanguageSwitch />
+        {event?.config?.eventLanguage && event.config.eventLanguage.length > 0 && (
+          <LanguageSwitch eventLanguage={event.config.eventLanguage} />
+        )}
       </Box>
       <Heading as="h1">{t('Program')}</Heading>
       {event.program?.map((item, index) => (
@@ -78,13 +83,17 @@ export default function Event({ event }: { event: Event }) {
           </CardBody>
         </CardComponent>
       ))}
-      <Heading as="h1" mt={4}>
-        {t('Venue')}
-      </Heading>
+      {event?.venue?.length > 0 && (
+        <Heading as="h1" mt={4}>
+          {t('Venue')}
+        </Heading>
+      )}
       {event?.venue?.length > 0 && event?.venue[0]?.image && <Image src={event.venue[0].image} />}
-      <Heading as="h1" mt={4}>
-        {t('Booths')}
-      </Heading>
+      {event.booths?.length > 0 && (
+        <Heading as="h1" mt={4}>
+          {t('Booths')}
+        </Heading>
+      )}
       {event.booths?.map((booth, index) => (
         <CardComponent mt={4} key={index}>
           <CardBody p={[3, 5]} gap={4}>
@@ -117,66 +126,74 @@ export default function Event({ event }: { event: Event }) {
           </CardBody>
         </CardComponent>
       ))}
-      <Heading as="h1" mt={4}>
-        {t('Sponsors')}
-      </Heading>
+      {event.sponsors?.length > 0 && (
+        <Heading as="h1" mt={4}>
+          {t('Sponsors')}
+        </Heading>
+      )}
       <Box display="flex" flexDirection="column" gap={4}>
-        <Box mt="10">
-          <Text fontWeight="bold" textTransform="uppercase" textAlign="center">
-            {t('Powered by')}
-          </Text>
-          <Box display="flex" flexWrap="wrap" justifyContent="center">
-            {goldSponsors?.map((sponsor, index) => (
-              <Box key={index} mt="8" width="60%" h="auto">
-                <Link isExternal href={sponsor.link} display="contents">
-                  <Image src={sponsor.image} alt={sponsor.name} />
-                </Link>
-              </Box>
-            ))}
+        {goldSponsors?.length > 0 && (
+          <Box mt="10">
+            <Text fontWeight="bold" textTransform="uppercase" textAlign="center">
+              {t('Powered by')}
+            </Text>
+            <Box display="flex" flexWrap="wrap" justifyContent="center">
+              {goldSponsors?.map((sponsor, index) => (
+                <Box key={index} mt="8" width="60%" h="auto">
+                  <Link isExternal href={sponsor.link} display="contents">
+                    <Image src={sponsor.image} alt={sponsor.name} />
+                  </Link>
+                </Box>
+              ))}
+            </Box>
           </Box>
-        </Box>
-        <Box mt="10">
-          <Text fontWeight="bold" textTransform="uppercase" textAlign="center">
-            {t('Supported by')}
-          </Text>
-          <Box display="flex" flexWrap="wrap">
-            {silverSponsors?.map((sponsor, index) => (
-              <Box
-                key={index}
-                mt="8"
-                width="50%"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Link isExternal href={sponsor.link} display="contents">
-                  <Image src={sponsor.image} alt={sponsor.name} width="60%" h="auto" />
-                </Link>
-              </Box>
-            ))}
+        )}
+        {silverSponsors?.length > 0 && (
+          <Box mt="10">
+            <Text fontWeight="bold" textTransform="uppercase" textAlign="center">
+              {t('Supported by')}
+            </Text>
+            <Box display="flex" flexWrap="wrap">
+              {silverSponsors?.map((sponsor, index) => (
+                <Box
+                  key={index}
+                  mt="8"
+                  width="50%"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Link isExternal href={sponsor.link} display="contents">
+                    <Image src={sponsor.image} alt={sponsor.name} width="60%" h="auto" />
+                  </Link>
+                </Box>
+              ))}
+            </Box>
           </Box>
-        </Box>
-        <Box mt="10">
-          <Text fontWeight="bold" textTransform="uppercase" textAlign="center">
-            {t('Community partners')}
-          </Text>
-          <Box display="flex" flexWrap="wrap">
-            {bronzeSponsors?.map((sponsor, index) => (
-              <Box
-                key={index}
-                mt="8"
-                width="50%"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Link isExternal href={sponsor.link} display="contents">
-                  <Image src={sponsor.image} alt={sponsor.name} width="60%" h="auto" />
-                </Link>
-              </Box>
-            ))}
+        )}
+        {bronzeSponsors?.length > 0 && (
+          <Box mt="10">
+            <Text fontWeight="bold" textTransform="uppercase" textAlign="center">
+              {t('Community partners')}
+            </Text>
+            <Box display="flex" flexWrap="wrap">
+              {bronzeSponsors?.map((sponsor, index) => (
+                <Box
+                  key={index}
+                  mt="8"
+                  width="50%"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Link isExternal href={sponsor.link} display="contents">
+                    <Image src={sponsor.image} alt={sponsor.name} width="60%" h="auto" />
+                  </Link>
+                </Box>
+              ))}
+            </Box>
           </Box>
-        </Box>
+        )}
       </Box>
     </Box>
   )
