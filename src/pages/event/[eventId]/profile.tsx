@@ -530,7 +530,7 @@ export default function ProfilePage() {
                     </Button>
                   )}
                 </Box>
-                {adminSignature && (
+                {/* {adminSignature && (
                   <Box display="flex" alignItems="center" gap={4}>
                     <FormControl display="flex" alignItems="center">
                       <FormLabel htmlFor="social-cron" mb="0">
@@ -548,7 +548,7 @@ export default function ProfilePage() {
                       </Link>
                     </Box>
                   </Box>
-                )}
+                )} */}
                 <Button
                   onClick={handleResetProfile}
                   isLoading={isResetting}
