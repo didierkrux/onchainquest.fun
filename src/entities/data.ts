@@ -80,7 +80,7 @@ export interface Event {
   venue: VenueItem[]
   prizes: Prize[]
   tasks: Quest[]
-  config: Config
+  config?: Config
 }
 
 export interface EventData {
