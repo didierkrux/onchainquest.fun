@@ -24,6 +24,7 @@ import { useLocalStorage } from 'usehooks-ts'
 import { verifyMessage } from 'viem'
 import twemoji from '@twemoji/api'
 import { Check, CopySimple, Star } from '@phosphor-icons/react'
+import { useRouter } from 'next/router'
 
 import { Profile } from 'entities/profile'
 import { profileName, profileAvatar, profileRole } from 'utils/index'
@@ -52,10 +53,13 @@ export default function ProfilePage() {
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const isSocialCronActive = profile?.isSocialCronActive || false
   const [usdValue, setUsdValue] = useState<number | null>(null)
+  const router = useRouter()
+  const { eventId } = router.query
 
   const saveProfile = () => {
+    if (!eventId) return
     setIsSaving(true)
-    fetch(`/api/profile?address=${address}`, {
+    fetch(`/api/profile?address=${address}&eventId=${eventId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -105,8 +109,8 @@ export default function ProfilePage() {
   }
 
   const fetchProfile = () => {
-    if (address) {
-      fetch(`/api/profile?address=${address}`)
+    if (address && eventId) {
+      fetch(`/api/profile?address=${address}&eventId=${eventId}`)
         .then((res) => res.json())
         .then((data) => {
           setProfile(data)
@@ -131,7 +135,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     fetchProfile()
-  }, [address])
+  }, [address, eventId])
 
   useEffect(() => {
     if (balanceData) {
@@ -169,11 +173,13 @@ export default function ProfilePage() {
   }, [address])
 
   const handleResetProfile = async () => {
-    if (!address) return
+    if (!address || !eventId) return
 
     setIsResetting(true)
     try {
-      const response = await fetch(`/api/admin/reset-my-profile?address=${address}`)
+      const response = await fetch(
+        `/api/admin/reset-my-profile?address=${address}&eventId=${eventId}`
+      )
       if (response.ok) {
         toast({
           title: t('Success'),
@@ -224,7 +230,7 @@ export default function ProfilePage() {
   }
 
   const toggleSocialCron = async (isSocialCronActive: boolean) => {
-    if (!address || !adminSignature) return
+    if (!address || !adminSignature || !eventId) return
     console.log('toggleSocialCron', isSocialCronActive)
 
     try {
@@ -233,7 +239,7 @@ export default function ProfilePage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ address, isSocialCronActive, adminSignature }),
+        body: JSON.stringify({ address, isSocialCronActive, adminSignature, eventId }),
       })
         .then((res) => res.json())
         .then(() => {
@@ -253,7 +259,7 @@ export default function ProfilePage() {
   }
 
   const handleSyncData = async () => {
-    if (!address || !adminSignature) return
+    if (!address || !adminSignature || !eventId) return
 
     setIsSyncing(true)
     try {
@@ -265,7 +271,7 @@ export default function ProfilePage() {
 
       if (isValid) {
         const response = await fetch(
-          `/api/admin/sync-data?signature=${adminSignature}&address=${address}`
+          `/api/admin/sync-data?signature=${adminSignature}&address=${address}&eventId=${eventId}`
         )
         if (response.ok) {
           toast({

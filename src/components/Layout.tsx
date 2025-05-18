@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react'
 import { Box, useMediaQuery, Spinner, Text, Image } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
+import { useRouter } from 'next/router'
 
 import Menu from 'components/Menu'
 import { useEventData } from 'hooks/useEventData'
 import { useLocalStorage } from 'usehooks-ts'
 import InstallPWA from 'components/InstallPWA'
-import { eventId } from 'config'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -18,6 +18,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { event, isLoading, error } = useEventData()
   const [pwa, setPwa] = useLocalStorage<boolean | null>('pwa', null)
   const [showInstallPWA, setShowInstallPWA] = useLocalStorage('showInstallPWA', false)
+  const router = useRouter()
+  const { eventId } = router.query
+
+  console.log('eventId', eventId)
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.search.includes('pwa=true')) {
@@ -28,14 +32,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   }, [setPwa])
 
-  const isHomepage = typeof window !== 'undefined' && window.location.pathname === '/'
+  const isHomepage =
+    typeof window !== 'undefined' && window.location.pathname?.split('/').length === 3
 
   return (
     <Box>
       <header>
         <Menu />
       </header>
-      {isHomepage && (
+      {isHomepage && eventId && (
         <Image
           w="100vw"
           src={isMobile ? `/banner_mobile_${eventId}.jpg` : `/banner_${eventId}.jpg`}

@@ -4,7 +4,6 @@ import { useRouter } from 'next/router'
 import { useLocalStorage } from 'usehooks-ts'
 
 import { Event, EventData } from 'entities/data'
-import { eventId } from 'config'
 
 export function useEventData() {
   const { i18n } = useTranslation()
@@ -14,7 +13,7 @@ export function useEventData() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
-  const fetchData = async () => {
+  const fetchData = async (eventId: string) => {
     setIsLoading(true)
     try {
       const response = await fetch(`/api/event?id=${eventId}`)
@@ -31,19 +30,25 @@ export function useEventData() {
 
   useEffect(() => {
     if (router.isReady) {
-      fetchData()
+      const eventId = router.query.eventId as string
+      if (eventId) {
+        fetchData(eventId)
+      }
     }
     if (router.route === '/404') {
       console.log('404 detected: redirecting to /')
       router.push('/')
     }
-  }, [router.isReady, router.route])
+  }, [router.isReady, router.query.eventId])
 
   useEffect(() => {
     if (router.isReady && (router.route === '/' || router.route === '/onboarding')) {
-      fetchData()
+      const eventId = router.query.eventId as string
+      if (eventId) {
+        fetchData(eventId)
+      }
     }
-  }, [router.isReady, router.route])
+  }, [router.isReady, router.route, router.query.eventId])
 
   useEffect(() => {
     if (i18n.language && eventData && eventData?.data_en) {

@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import db from 'utils/db'
-import { eventId } from 'config/index'
 
 /*
 ,
@@ -11,6 +10,12 @@ import { eventId } from 'config/index'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    const { eventId } = req.query
+
+    if (!eventId || typeof eventId !== 'string') {
+      return res.status(400).json({ message: 'Event ID is required' })
+    }
+
     const { socials: { ig, igFilter, twitter, twitterFilter } } = await db('events')
       .select('socials')
       .where('id', eventId)

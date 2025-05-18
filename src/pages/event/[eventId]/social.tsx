@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { InstagramEmbed, XEmbed } from 'react-social-media-embed'
 import { useLocalStorage } from 'usehooks-ts'
+import { useRouter } from 'next/router'
 
 import { Event } from 'entities/data'
 
@@ -15,11 +16,15 @@ export default function SocialPage({ event }: { event: Event }) {
   const { t } = useTranslation()
   const [instagramPosts, setInstagramPosts] = useLocalStorage<string[]>('instagramPosts', [])
   const [twitterPosts, setTwitterPosts] = useLocalStorage<string[]>('twitterPosts', [])
+  const router = useRouter()
+  const { eventId } = router.query
 
   useEffect(() => {
     const fetchSocials = async () => {
+      if (!eventId) return
+
       try {
-        const response = await fetch('/api/socials')
+        const response = await fetch(`/api/socials?eventId=${eventId}`)
         if (!response.ok) {
           throw new Error('Network response was not ok')
         }
@@ -32,14 +37,18 @@ export default function SocialPage({ event }: { event: Event }) {
     }
 
     fetchSocials()
-  }, [setInstagramPosts, setTwitterPosts])
+  }, [eventId, setInstagramPosts, setTwitterPosts])
 
   return (
     <Box>
-      <Heading as="h1">Event recap</Heading>
-      <Box py={4} display="flex" justifyContent="center">
-        <InstagramEmbed url={`https://www.instagram.com/p/DHKBb4_TrIk`} width="600px" />
-      </Box>
+      {eventId === '1' && (
+        <>
+          <Heading as="h1">Event recap</Heading>
+          <Box py={4} display="flex" justifyContent="center">
+            <InstagramEmbed url={`https://www.instagram.com/p/DHKBb4_TrIk`} width="600px" />
+          </Box>
+        </>
+      )}
       <Heading as="h1">Instagram</Heading>
       <Box>
         <Text mt={2}>

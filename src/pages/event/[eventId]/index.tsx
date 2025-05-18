@@ -18,7 +18,6 @@ export default function EventPage({ event }: { event: Event }) {
   const bronzeSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '3-bronze')
 
   if (!event) return <></>
-  console.log('event', event)
 
   return (
     <Box>

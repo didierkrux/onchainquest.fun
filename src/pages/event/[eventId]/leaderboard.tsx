@@ -16,6 +16,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
 import { useLocalStorage } from 'usehooks-ts'
+import { useRouter } from 'next/router'
 
 import { Event } from 'entities/data'
 import { Profile } from 'entities/profile'
@@ -28,15 +29,19 @@ export default function Leaderboard({ event }: { event: Event }) {
   const { t } = useTranslation()
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const [leaderboard, setLeaderboard] = useLocalStorage<Profile[] | null>('leaderboard', null)
+  const router = useRouter()
+  const { eventId } = router.query
 
   useEffect(() => {
-    fetch('/api/leaderboard')
+    if (!eventId) return
+
+    fetch(`/api/leaderboard?eventId=${eventId}`)
       .then((res) => res.json())
       .then((data) => setLeaderboard(data))
       .catch((error) => {
         console.error('Error fetching leaderboard:', error)
       })
-  }, [])
+  }, [eventId])
 
   const filterByRole = (role: string) => {
     return leaderboard?.filter((user) => (user.role || 'explorer') === role) || []

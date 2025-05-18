@@ -2,13 +2,18 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import db from 'utils/db'
-import { eventId } from 'config'
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
   try {
+    const { eventId } = req.query
+
+    if (!eventId || typeof eventId !== 'string') {
+      return res.status(400).json({ message: 'Event ID is required' })
+    }
+
     const leaderboard = await db('users')
       .select('*')
       .where('event_id', eventId)

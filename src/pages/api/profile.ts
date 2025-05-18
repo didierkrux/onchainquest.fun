@@ -2,7 +2,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import db from 'utils/db'
-import { eventId } from 'config/index'
 import { calculateScore, userHasPoap, userHasSwappedTokens, userHasNft, verifyBalance } from 'utils/index'
 import { getTasks } from 'utils/queries'
 import { TaskAction } from 'entities/data'
@@ -13,7 +12,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
-  const { address } = req.query
+  const { address, eventId } = req.query
   const { username, avatar, role, email, taskId } = req.body
   console.log('req.query', req.query)
   console.log('req.body', req.body)
@@ -29,9 +28,18 @@ export default async function handler(
     return res.status(400).json({ message: 'Invalid address' })
   }
 
+  if (!eventId || typeof eventId !== 'string') {
+    return res.status(400).json({ message: 'Event ID is required' })
+  }
+
+  const eventIdNum = parseInt(eventId, 10)
+  if (isNaN(eventIdNum)) {
+    return res.status(400).json({ message: 'Invalid Event ID format' })
+  }
+
   const { socials: { isSocialCronActive } } = await db('events')
     .select('socials')
-    .where('id', eventId)
+    .where('id', eventIdNum)
     .first()
 
   console.log('isSocialCronActive', isSocialCronActive)
@@ -42,7 +50,7 @@ export default async function handler(
     const data = await db('events')
       .leftJoin('users', 'users.event_id', 'events.id')
       .select('events.data_en', 'users.tasks', 'users.username', 'users.basename')
-      .where('events.id', eventId)
+      .where('events.id', eventIdNum)
       .whereILike('users.address', address)
       .first()
 
@@ -74,7 +82,7 @@ export default async function handler(
       if (username?.length > 0) {
       const userWithUsername = await db('users')
         .select('*')
-        .where('event_id', eventId)
+        .where('event_id', eventIdNum)
         .whereILike('username', username)
         .orWhereILike('basename', username)
         .first()
@@ -149,7 +157,7 @@ export default async function handler(
     console.log('Saving profile', profileToSave)
     try {
       const updatedProfile = await db('users')
-        .where('event_id', eventId)
+        .where('event_id', eventIdNum)
         .whereILike('address', address)
         .update(profileToSave)
         .returning('*')
@@ -171,19 +179,19 @@ export default async function handler(
     try {
       let profile = await db('users')
       .select('*')
-      .where('event_id', eventId)
+        .where('event_id', eventIdNum)
       .whereILike('address', address)
       .first()
 
       if (!profile) {
         // task 0: connect-wallet
-        const tasks = await getTasks(eventId)
+        const tasks = await getTasks(eventIdNum)
         const taskAction = 'connect-wallet'
         const taskId = Object.values(tasks).findIndex((task: any) => task.action === taskAction)
         console.log('taskId', taskId)
         const userTasks = { [taskId]: { id: taskId, isCompleted: true, points: tasks[taskId].points } }
         const score = calculateScore(userTasks, tasks)
-        const profileToSave = { event_id: eventId, address, score, tasks: userTasks }
+        const profileToSave = { event_id: eventIdNum, address, score, tasks: userTasks }
         console.log('Saving profile', profileToSave)
 
         profile = await db('users')
@@ -199,14 +207,14 @@ export default async function handler(
           console.log('updating basename', basename)
           const userTasks = profile.tasks || {} // Ensure userTasks is an object
           console.log('userTasks', userTasks)
-          const tasks = await getTasks(eventId)
+          const tasks = await getTasks(eventIdNum)
           const taskAction = 'own-basename'
           const taskId = Object.values(tasks).findIndex((task: any) => task.action === taskAction)
           console.log('taskId', taskId)
           userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: tasks[taskId].points }
           const score = calculateScore(userTasks, tasks)
           profile = await db('users')
-            .where('event_id', eventId)
+            .where('event_id', eventIdNum)
             .whereILike('address', address)
             .update({ basename, tasks: userTasks, score })
             .returning('*')
@@ -218,7 +226,7 @@ export default async function handler(
         if (basename_avatar) {
           console.log('updating basename_avatar', basename_avatar)
           profile = await db('users')
-            .where('event_id', eventId)
+            .where('event_id', eventIdNum)
             .whereILike('address', address)
             .update({ basename_avatar })
             .returning('*')
