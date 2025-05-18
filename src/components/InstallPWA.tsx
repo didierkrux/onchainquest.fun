@@ -18,50 +18,40 @@ import { isAndroid, isIOS } from 'react-device-detect'
 import { eventName } from 'config/index'
 import { useLocalStorage } from 'usehooks-ts'
 
-declare global {
-  interface Window {
-    deferredPrompt: any
-  }
+interface InstallPWAProps {
+  onClose?: () => void
 }
 
-const InstallPWA: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
+const InstallPWA: React.FC<InstallPWAProps> = ({ onClose }) => {
   const { t } = useTranslation()
   const [showPopup, setShowPopup] = useState(false)
-  const [installPrompt, setInstallPrompt] = useState(false)
   const [showInstallPWA] = useLocalStorage('showInstallPWA', false)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
 
   useEffect(() => {
-    const handleBeforeInstallPrompt = (e: any) => {
+    const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
-      window.deferredPrompt = e
-      setInstallPrompt(true)
+      setDeferredPrompt(e)
     }
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     if ((isAndroid || isIOS) && showInstallPWA === true) {
       setShowPopup(true)
     }
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     }
   }, [showInstallPWA])
 
-  useEffect(() => {
-    if (window.deferredPrompt) {
-      setInstallPrompt(true)
-    }
-  }, [])
-
   const handleInstallClick = () => {
-    // Logic to trigger the PWA installation prompt
-    if (window.deferredPrompt) {
-      window.deferredPrompt.prompt()
-      window.deferredPrompt.userChoice.then((choiceResult: any) => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt()
+      deferredPrompt.userChoice.then((choiceResult: any) => {
         if (choiceResult.outcome === 'accepted') {
           handleCloseClick()
         }
-        window.deferredPrompt = null
       })
     }
   }
@@ -111,7 +101,7 @@ const InstallPWA: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
             </Box>
           </Box>
           <Box>
-            {installPrompt ? (
+            {deferredPrompt ? (
               <Box display="flex" alignItems="center" gap={2}>
                 <Box>
                   <Button onClick={handleInstallClick} leftIcon={<PlusCircle size={22} />}>
