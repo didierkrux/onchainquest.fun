@@ -25,7 +25,7 @@ import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import styled from '@emotion/styled'
 
-import { MENU } from 'config'
+import { MENU, eventId } from 'config'
 import { useLocalStorage } from 'usehooks-ts'
 import { profileAvatar } from 'utils'
 import { Profile } from 'entities/profile'
@@ -86,32 +86,37 @@ const Menu = () => {
   const [appDeploymentId, setAppDeploymentId] = useLocalStorage('app-deployment-id', '')
   const [latestDeploymentId, setLatestDeploymentId] = useState(appDeploymentId)
 
-  const { pathname } = useRouter()
+  const { pathname, query } = useRouter()
+  const currentEventId = (query.eventId as string) || eventId
 
   const MENU_ITEMS = [
     {
       label: t('Event'),
       icon: CalendarCheck,
-      href: MENU[0].href,
+      href: '/event/[eventId]',
+      path: '',
     },
     {
       label: t('Social'),
       icon: InstagramLogo,
-      href: MENU[1].href,
+      href: '/event/[eventId]/social',
+      path: '/social',
     },
     {
       label: t('Onboarding'),
       icon: ListChecks,
-      href: MENU[2].href,
+      href: '/event/[eventId]/onboarding',
+      path: '/onboarding',
     },
     {
       label: t('Leaderboard'),
       icon: Ranking,
-      href: MENU[3].href,
+      href: '/event/[eventId]/leaderboard',
+      path: '/leaderboard',
     },
   ]
 
-  const isProfileActive = pathname === MENU[4].href
+  const isProfileActive = pathname?.split('/')[3] === 'profile'
 
   useEffect(() => {
     const fetchDeploymentId = async (loadType: string) => {
@@ -196,7 +201,7 @@ const Menu = () => {
           ) : (
             <>
               {MENU_ITEMS.map((item) => {
-                const isActive = pathname === item.href
+                const isActive = pathname?.split('/')[3] === item.path?.split('/')[1]
                 return (
                   <Box
                     key={item.href}
@@ -206,11 +211,15 @@ const Menu = () => {
                     justifyContent="center"
                     alignItems="center"
                   >
-                    <NextLink href={item.href} style={{ width: '100%', height: '100%' }}>
+                    <NextLink
+                      href={item.href}
+                      as={`/event/${currentEventId}${item.path}`}
+                      style={{ width: '100%', height: '100%' }}
+                    >
                       <MenuItem
                         label={item.label}
                         isActive={isActive}
-                        onClick={() => handleMenuClick(item.href)}
+                        onClick={() => handleMenuClick(`/event/${currentEventId}${item.path}`)}
                       >
                         <item.icon size={24} />
                       </MenuItem>
@@ -225,7 +234,11 @@ const Menu = () => {
               <Popover isOpen={!isConnected && isProfileActive && !isOpen}>
                 <PopoverTrigger>
                   <Box w="100%" h="100%" display="flex" justifyContent="center" alignItems="center">
-                    <NextLink href={MENU[4].href} style={{ width: '100%', height: '100%' }}>
+                    <NextLink
+                      href={MENU[4].href}
+                      as={`/event/${currentEventId}/profile`}
+                      style={{ width: '100%', height: '100%' }}
+                    >
                       <MenuItem
                         label={isConnected ? t('Profile') : t('Connect')}
                         isActive={isProfileActive}

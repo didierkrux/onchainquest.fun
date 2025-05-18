@@ -24,23 +24,23 @@ if (!projectId) {
 export const MENU = [
   {
     label: 'Event',
-    href: `/event/${eventId}`,
+    href: '/event/[eventId]',
   },
   {
     label: 'Social',
-    href: `/event/${eventId}/social`,
+    href: '/event/[eventId]/social',
   },
   {
     label: 'Onboarding',
-    href: `/event/${eventId}/onboarding`,
+    href: '/event/[eventId]/onboarding',
   },
   {
     label: 'Leaderboard',
-    href: `/event/${eventId}/leaderboard`,
+    href: '/event/[eventId]/leaderboard',
   },
   {
     label: 'Profile',
-    href: `/event/${eventId}/profile`,
+    href: '/event/[eventId]/profile',
   },
 ]
 
