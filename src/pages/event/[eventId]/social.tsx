@@ -49,63 +49,71 @@ export default function SocialPage({ event }: { event: Event }) {
           </Box>
         </>
       )} */}
-      <Heading as="h1">Instagram</Heading>
-      <Box>
-        <Text mt={2}>
-          <Link href="https://www.instagram.com/explore/tags/newtoweb3/" isExternal>
-            {t('View all #NewToWeb3 posts on Instagram')}
-          </Link>
-        </Text>
-        <Box
-          display="grid"
-          gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))"
-          gap={4}
-          mt={4}
-        >
-          {instagramPosts.length > 0 ? (
-            instagramPosts.map((post, index) => (
-              <Box key={index}>
-                <InstagramEmbed url={`https://www.instagram.com/p/${post}`} width="100%" />
-              </Box>
-            ))
-          ) : (
-            <Text>No posts found</Text>
-          )}
-        </Box>
-      </Box>
-      <Heading as="h1" mt={4}>
-        Twitter
-      </Heading>
-      <Box>
-        <Text mt={2}>
-          <Link href="https://x.com/hashtag/NewToWeb3?src=hashtag_click&f=live" isExternal>
-            {t('View all #NewToWeb3 posts on Twitter')}
-          </Link>
-        </Text>
-        <Box
-          display="grid"
-          gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))"
-          gap={4}
-          mt={4}
-        >
-          {twitterPosts.length > 0 ? (
-            twitterPosts.map((post, index) => (
-              <Box key={index}>
-                <XEmbed
-                  url={`https://x.com/i/${post}`}
-                  width="100%"
-                  twitterTweetEmbedProps={{
-                    tweetId: post.split('/')[2],
-                    options: { conversation: 'none' },
-                  }}
-                />
-              </Box>
-            ))
-          ) : (
-            <Text>No posts found</Text>
-          )}
-        </Box>
-      </Box>
+      {instagramPosts.length > 0 && (
+        <>
+          <Heading as="h1">Instagram</Heading>
+          <Box>
+            <Text mt={2}>
+              <Link href="https://www.instagram.com/explore/tags/newtoweb3/" isExternal>
+                {t('View all #NewToWeb3 posts on Instagram')}
+              </Link>
+            </Text>
+            <Box
+              display="grid"
+              gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))"
+              gap={4}
+              mt={4}
+            >
+              {instagramPosts.length > 0 ? (
+                instagramPosts.map((post, index) => (
+                  <Box key={index}>
+                    <InstagramEmbed url={`https://www.instagram.com/p/${post}`} width="100%" />
+                  </Box>
+                ))
+              ) : (
+                <Text>No posts found</Text>
+              )}
+            </Box>
+          </Box>
+        </>
+      )}
+      {twitterPosts.length > 0 && (
+        <>
+          <Heading as="h1" mt={4}>
+            Twitter
+          </Heading>
+          <Box>
+            <Text mt={2}>
+              <Link href="https://x.com/hashtag/NewToWeb3?src=hashtag_click&f=live" isExternal>
+                {t('View all #NewToWeb3 posts on Twitter')}
+              </Link>
+            </Text>
+            <Box
+              display="grid"
+              gridTemplateColumns="repeat(auto-fill, minmax(300px, 1fr))"
+              gap={4}
+              mt={4}
+            >
+              {twitterPosts.length > 0 ? (
+                twitterPosts.map((post, index) => (
+                  <Box key={index}>
+                    <XEmbed
+                      url={`https://x.com/i/${post}`}
+                      width="100%"
+                      twitterTweetEmbedProps={{
+                        tweetId: post.split('/')[2],
+                        options: { conversation: 'none' },
+                      }}
+                    />
+                  </Box>
+                ))
+              ) : (
+                <Text>No posts found</Text>
+              )}
+            </Box>
+          </Box>
+        </>
+      )}
     </Box>
   )
 }
