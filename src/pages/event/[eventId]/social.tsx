@@ -41,14 +41,14 @@ export default function SocialPage({ event }: { event: Event }) {
 
   return (
     <Box>
-      {eventId === '1' && (
+      {/* {eventId === '1' && (
         <>
           <Heading as="h1">Event recap</Heading>
           <Box py={4} display="flex" justifyContent="center">
             <InstagramEmbed url={`https://www.instagram.com/p/DHKBb4_TrIk`} width="600px" />
           </Box>
         </>
-      )}
+      )} */}
       <Heading as="h1">Instagram</Heading>
       <Box>
         <Text mt={2}>
