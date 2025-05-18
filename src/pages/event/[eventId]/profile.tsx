@@ -31,7 +31,7 @@ import { adminSignatureMessage, adminWallets } from 'config'
 import { Avatar } from 'components/Avatar'
 import SelectTab from 'components/SelectTab'
 
-export default function Profile() {
+export default function ProfilePage() {
   const { t } = useTranslation()
   const { address } = useAccount()
   const { data: balanceData } = useBalance({ address })
@@ -565,14 +565,6 @@ export default function Profile() {
             >
               {t('Disconnect')}
             </Button>
-            {/* <Button
-              onClick={handleResetProfile}
-              isLoading={isResetting}
-              loadingText="Resetting..."
-              colorScheme="red"
-            >
-              {t('Reset my profile')}
-            </Button> */}
           </Box>
         )}
       </Box>

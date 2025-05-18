@@ -11,7 +11,7 @@ interface IGMedia {
   media_url: string
 }
 
-export default function Social({ event }: { event: Event }) {
+export default function SocialPage({ event }: { event: Event }) {
   const { t } = useTranslation()
   const [instagramPosts, setInstagramPosts] = useLocalStorage<string[]>('instagramPosts', [])
   const [twitterPosts, setTwitterPosts] = useLocalStorage<string[]>('twitterPosts', [])
