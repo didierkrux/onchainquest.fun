@@ -23,7 +23,16 @@ import { useTranslation } from 'react-i18next'
 import { useLocalStorage } from 'usehooks-ts'
 import { verifyMessage } from 'viem'
 import twemoji from '@twemoji/api'
-import { Check, CopySimple, Star } from '@phosphor-icons/react'
+import {
+  ArrowsClockwise,
+  ArrowsLeftRight,
+  Check,
+  CopySimple,
+  LockKey,
+  SignOut,
+  Star,
+  Trash,
+} from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
 
 import { Profile } from 'entities/profile'
@@ -33,7 +42,7 @@ import { Avatar } from 'components/Avatar'
 import SelectTab from 'components/SelectTab'
 
 export default function ProfilePage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { address } = useAccount()
   const { data: balanceData } = useBalance({ address })
   const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
@@ -520,12 +529,13 @@ export default function ProfilePage() {
                         isLoading={isSyncing}
                         loadingText="Syncing... (~10sec)"
                         colorScheme="red"
+                        leftIcon={<ArrowsClockwise />}
                       >
                         Sync Notion data
                       </Button>
                     </Box>
                   ) : (
-                    <Button onClick={handleAdminSignature} colorScheme="red">
+                    <Button onClick={handleAdminSignature} colorScheme="red" leftIcon={<LockKey />}>
                       Verify signature
                     </Button>
                   )}
@@ -549,11 +559,29 @@ export default function ProfilePage() {
                     </Box>
                   </Box>
                 )} */}
+                {adminSignature && (
+                  <Box display="flex" alignItems="center" gap={4}>
+                    <Link href={`/event/${eventId === '1' ? '2' : '1'}`}>
+                      <Button
+                        whiteSpace="nowrap"
+                        colorScheme="red"
+                        leftIcon={<ArrowsLeftRight />}
+                        onClick={() => {
+                          // force changing language to english before switching event
+                          i18n.changeLanguage('en')
+                        }}
+                      >
+                        switch event
+                      </Button>
+                    </Link>
+                  </Box>
+                )}
                 <Button
                   onClick={handleResetProfile}
                   isLoading={isResetting}
                   loadingText="Resetting..."
                   colorScheme="red"
+                  leftIcon={<Trash />}
                 >
                   {t('Reset my profile')}
                 </Button>
@@ -568,6 +596,7 @@ export default function ProfilePage() {
                 setProfile(null)
                 disconnect()
               }}
+              leftIcon={<SignOut />}
             >
               {t('Disconnect')}
             </Button>
