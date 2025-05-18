@@ -19,6 +19,8 @@ export default function EventPage({ event }: { event: Event }) {
 
   if (!event) return <></>
 
+  console.log('event', event)
+
   return (
     <Box>
       <Box display="flex" justifyContent="center" gap={4} m={4}>
@@ -27,7 +29,7 @@ export default function EventPage({ event }: { event: Event }) {
             Install
           </Button>
         )}
-        {event?.config?.eventLanguage && event.config.eventLanguage.length > 0 && (
+        {event?.config?.eventLanguage && event.config.eventLanguage.length > 1 && (
           <LanguageSwitch eventLanguage={event.config.eventLanguage} />
         )}
       </Box>

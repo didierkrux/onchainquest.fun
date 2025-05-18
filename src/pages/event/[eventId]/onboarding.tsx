@@ -39,7 +39,7 @@ export default function Onboarding({ event }: { event: Event }) {
         setProfile(null) // Reset profile if address is different
         setLastAddress(address) // Store the new address
       }
-      fetch(`/api/profile?address=${address}`)
+      fetch(`/api/profile?address=${address}&eventId=${event.config?.eventId}`)
         .then((res) => res.json())
         .then((data) => {
           setProfile(data)
@@ -56,7 +56,7 @@ export default function Onboarding({ event }: { event: Event }) {
     fetch(
       quest.action === 'claim-tokens'
         ? `/api/claim?address=${address}`
-        : `/api/profile?address=${address}&taskId=${taskId}`,
+        : `/api/profile?address=${address}&taskId=${taskId}&eventId=${event.config?.eventId}`,
       {
         method: 'POST',
         headers: {

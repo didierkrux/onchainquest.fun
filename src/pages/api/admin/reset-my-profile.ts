@@ -1,17 +1,20 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import db from 'utils/db'
-import { eventId } from 'config/index'
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
   try {
-    const { address } = req.query
+    const { address, eventId } = req.query
 
     if (!address || typeof address !== 'string') {
       return res.status(400).json({ message: 'Invalid address' })
+    }
+
+    if (!eventId || typeof eventId !== 'string') {
+      return res.status(400).json({ message: 'Invalid eventId' })
     }
 
     // const { signature, address } = req.query

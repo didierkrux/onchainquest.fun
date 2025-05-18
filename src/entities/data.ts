@@ -67,6 +67,12 @@ export const Empty = {
   tasks: [],
 }
 
+export interface Config {
+  eventId: number
+  eventName: string
+  eventLanguage: string[]
+}
+
 export interface Event {
   program: ProgramItem[]
   sponsors: Sponsor[]
@@ -74,14 +80,11 @@ export interface Event {
   venue: VenueItem[]
   prizes: Prize[]
   tasks: Quest[]
-  config?: {
-    eventId: number
-    eventName: string
-    eventLanguage: string[]
-  }
+  config: Config
 }
 
 export interface EventData {
   data_en: Event
   data_tr: Event
+  config: Config
 }
