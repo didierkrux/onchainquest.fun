@@ -158,27 +158,24 @@ export default function Onboarding({ event }: { event: Event }) {
         ) : null
       }
       if (quest.action === 'click-link') {
-        const lineLink = quest.condition?.split('\n')[0]
-        const telegramLink = quest.condition?.split('\n')[1]
+        const links = quest.condition?.split('\n')
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        const buttons = quest.button?.split('\n')
+        const Links = links?.map((link, index) => {
+          return (
+            <Link isExternal href={link}>
+              <Button onClick={() => handleAction(quest)}>{buttons?.[index]}</Button>
+            </Link>
+          )
+        })
         quest.actionField = !isCompleted ? (
           <Box display="flex" gap={4}>
-            <Link isExternal href={lineLink}>
-              <Button onClick={() => handleAction(quest)}>{t('Join Line')}</Button>
-            </Link>
-            <Link isExternal href={telegramLink}>
-              <Button onClick={() => handleAction(quest)}>{t('Join Telegram')}</Button>
-            </Link>
+            {Links}
           </Box>
         ) : null
         quest.completedField = isCompleted ? (
           <Box display="flex" gap={4}>
-            <Link isExternal href={lineLink}>
-              <Button>{t('Join Line')}</Button>
-            </Link>
-            <Link isExternal href={telegramLink}>
-              <Button>{t('Join Telegram')}</Button>
-            </Link>
+            {Links}
           </Box>
         ) : null
       }

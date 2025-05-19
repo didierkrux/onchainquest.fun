@@ -56,6 +56,7 @@ export type Quest = {
   actionField?: React.ReactNode
   completedField?: React.ReactNode
   lock?: string
+  button?: string
 }
 
 export const Empty = {

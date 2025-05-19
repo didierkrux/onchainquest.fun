@@ -86,6 +86,7 @@ export async function fetchPotionData(eventId: number): Promise<Event> {
           action: item.fields.Action,
           condition: item.fields.Condition,
           lock: item.fields.Lock,
+          button: item.fields.Button,
         })),
       prizes: eventData
         .filter((item: any) => item.fields.Type === 'Prize')
