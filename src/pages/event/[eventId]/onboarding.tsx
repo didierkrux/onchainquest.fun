@@ -58,7 +58,7 @@ export default function Onboarding({ event }: { event: Event }) {
     setIsLoading(taskId)
     fetch(
       quest.action === 'claim-tokens'
-        ? `/api/claim?address=${address}`
+        ? `/api/claim?address=${address}&eventId=${event.config?.eventId}`
         : `/api/profile?address=${address}&taskId=${taskId}&eventId=${event.config?.eventId}`,
       {
         method: 'POST',
@@ -117,14 +117,16 @@ export default function Onboarding({ event }: { event: Event }) {
   for (const quest of QUESTS) {
     if (profile?.tasks) {
       if (quest.action === 'claim-tokens') {
-        const isLocked = quest.lock ? !profile?.tasks?.[quest.lock]?.isCompleted ?? false : false
+        const isLocked = quest.lock
+          ? !profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false
+          : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = (
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
                 {t('Complete task {{taskNumber}} first to unlock this.', {
-                  taskNumber: parseInt(quest.lock) + 1,
+                  taskNumber: quest.lock,
                 })}
                 <Lock size={28} color="gray" />
               </Box>
@@ -237,14 +239,16 @@ export default function Onboarding({ event }: { event: Event }) {
         ) : null
       }
       if (quest.action === 'swap-tokens') {
-        const isLocked = quest.lock ? !profile?.tasks?.[quest.lock]?.isCompleted ?? false : false
+        const isLocked = quest.lock
+          ? !profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false
+          : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = (
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
                 {t('Complete task {{taskNumber}} first to unlock this.', {
-                  taskNumber: parseInt(quest.lock) + 1,
+                  taskNumber: quest.lock,
                 })}
                 <Lock size={28} color="gray" />
               </Box>
@@ -303,7 +307,9 @@ export default function Onboarding({ event }: { event: Event }) {
       </Box>
       {QUESTS.map((quest, index) => {
         const isCompleted = profile?.tasks?.[index.toString()]?.isCompleted ?? false
-        const isLocked = quest.lock ? !profile?.tasks?.[quest.lock]?.isCompleted ?? false : false
+        const isLocked = quest.lock
+          ? !profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false
+          : false
         return (
           <Card
             mt={4}
