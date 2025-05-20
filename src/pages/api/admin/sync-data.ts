@@ -4,7 +4,7 @@ import { verifyMessage } from 'viem'
 
 import { fetchPotionData, translateData } from 'utils/index'
 import db from 'utils/db'
-import { adminSignatureMessage, adminWallets, eventId } from 'config/index'
+import { adminSignatureMessage, adminWallets } from 'config/index'
 
 export const maxDuration = 90 // 90 seconds
 
@@ -13,7 +13,7 @@ export default async function handler(
   res: NextApiResponse
 ): Promise<void> {
   try {
-    const { signature, address } = req.query
+    const { signature, address, eventId } = req.query
 
     if (!signature || !address || typeof signature !== 'string' || typeof address !== 'string') {
       return res.status(400).json({ message: 'Invalid signature or address' })
@@ -35,10 +35,10 @@ export default async function handler(
       return res.status(403).json({ message: 'Invalid signature' })
     }
 
-    const data = await fetchPotionData(eventId)
+    const data = await fetchPotionData(parseInt(eventId as string))
     console.log('data', data)
     // save to db
-    await db('events').update({ data_en: data }).where('id', eventId)
+    await db('events').update({ data_en: data }).where('id', parseInt(eventId as string))
     res.status(200).json({ message: 'English data synced successfully' })
 
     // const translatedData = await translateData(data, 'Thai')
