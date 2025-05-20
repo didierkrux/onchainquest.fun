@@ -20,7 +20,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const menuIndex = router.pathname ? MENU.findIndex((item) => item.href === router.pathname) : 0
   const label = MENU[menuIndex]?.label || ''
   const title = label ? t(label) : ''
-  const socialImage = `${DOMAIN_URL}/social.jpg`
+  const socialImage = `${DOMAIN_URL}/social.jpg?v=1`
   const url = `${DOMAIN_URL}${router.pathname}`
   const pageTitle = title ? `${title} | ${eventName}` : eventName
   const description = eventDescription
