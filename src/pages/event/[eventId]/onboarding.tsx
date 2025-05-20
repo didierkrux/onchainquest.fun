@@ -13,13 +13,14 @@ import {
   Link,
 } from '@chakra-ui/react'
 import { useAppKit } from '@reown/appkit/react'
-import { useAccount } from 'wagmi'
+import { useAccount, useBalance, useSendTransaction } from 'wagmi'
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import React from 'react'
 import { useLocalStorage } from 'usehooks-ts'
 import { Trophy, CheckCircle, Star, Lock } from '@phosphor-icons/react/dist/ssr'
 import { useRouter } from 'next/router'
+import { parseEther } from 'viem'
 
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
@@ -28,6 +29,7 @@ export default function Onboarding({ event }: { event: Event }) {
   const { t } = useTranslation()
   const { open } = useAppKit()
   const { address, isConnected } = useAccount()
+  const { sendTransaction } = useSendTransaction()
   const router = useRouter()
   const { eventId } = router.query
   const [profile, setProfile] = useLocalStorage<Profile | null>(`profile-${eventId}`, null)
@@ -114,6 +116,38 @@ export default function Onboarding({ event }: { event: Event }) {
       })
   }
 
+  const handleSendTokens = async () => {
+    try {
+      const hash = await sendTransaction({
+        to: '0x767D1AF42CC93E15E72aFCF15477733C66e5460a',
+        value: parseEther('0.00001'),
+      })
+      console.log('Transaction hash:', hash)
+    } catch (error: any) {
+      console.error('Error sending transaction:', error)
+      // Handle user rejection specifically
+      if (error?.code === 4001) {
+        toast({
+          title: t('Transaction Cancelled'),
+          description: t('You rejected the transaction in your wallet.'),
+          status: 'warning',
+          duration: 5000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+      } else {
+        toast({
+          title: t('Error'),
+          description: error?.message || t('Failed to send transaction'),
+          status: 'error',
+          duration: 10000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+      }
+    }
+  }
+
   for (const quest of QUESTS) {
     if (profile?.tasks) {
       if (quest.action === 'claim-tokens') {
@@ -148,6 +182,44 @@ export default function Onboarding({ event }: { event: Event }) {
           <Box>
             <Link isExternal href={txLink}>
               {t('View claiming transaction on BaseScan')}
+            </Link>
+          </Box>
+        ) : null
+      }
+      if (quest.action === 'send-tokens') {
+        const isLocked = quest.lock
+          ? !profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false
+          : false
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        quest.actionField = (
+          <Box display="flex" gap={4}>
+            {quest.lock && isLocked ? (
+              <Box display="flex" alignItems="center" gap={2}>
+                {t('Complete task {{taskNumber}} first to unlock this.', {
+                  taskNumber: quest.lock,
+                })}
+                <Lock size={28} color="gray" />
+              </Box>
+            ) : !isCompleted ? (
+              <Box display="flex" gap={4}>
+                <Button
+                  onClick={handleSendTokens}
+                  loadingText={t('Sending... (takes ~30 seconds)')}
+                >
+                  {t('Send')}
+                </Button>
+                <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
+                  {t('Verify')}
+                </Button>
+              </Box>
+            ) : null}
+          </Box>
+        )
+        const txLink = profile?.tasks?.[quest.id]?.txLink
+        quest.completedField = txLink ? (
+          <Box>
+            <Link isExternal href={txLink}>
+              {t('View sending transaction on BaseScan')}
             </Link>
           </Box>
         ) : null

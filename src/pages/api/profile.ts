@@ -2,7 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import db from 'utils/db'
-import { calculateScore, userHasPoap, userHasSwappedTokens, userHasNft, verifyBalance } from 'utils/index'
+import { calculateScore, userHasPoap, userHasSwappedTokens, userHasNft, verifyBalance, verifyTokenSend } from 'utils/index'
 import { getTasks } from 'utils/queries'
 import { TaskAction } from 'entities/data'
 import { getBasename } from 'utils/basenames'
@@ -145,6 +145,16 @@ export default async function handler(
         console.log('userTasks', userTasks)
       } else {
         return res.status(400).json({ message: "You don't own this NFT." })
+      }
+    } else if (taskAction === 'send-tokens') {
+      const targetAddress = '0x767D1AF42CC93E15E72aFCF15477733C66e5460a';
+      const amount = '0.00001';
+      const hasSentTokens = await verifyTokenSend(address, targetAddress, amount);
+      if (hasSentTokens) {
+        userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
+        console.log('userTasks', userTasks)
+      } else {
+        return res.status(400).json({ message: "You haven't sent 0.00001 ETH to the specified address yet." })
       }
     } else {
       return res.status(400).json({ message: 'Task not available yet.' })

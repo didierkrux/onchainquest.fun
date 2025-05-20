@@ -328,3 +328,49 @@ export async function verifyBalance(address: string, tokenAddress: string, minBa
     return false;
   }
 }
+
+export async function verifyTokenSend(address: string, targetAddress: string, amount: string): Promise<boolean> {
+  try {
+    const response = await fetch(`https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'alchemy_getAssetTransfers',
+        params: [
+          {
+            fromAddress: address,
+            toAddress: targetAddress,
+            category: ['external'],
+            withMetadata: true,
+            excludeZeroValue: false,
+            maxCount: '0x14', // Get last 20 transactions
+            fromBlock: '0x0',
+            toBlock: 'latest',
+            order: 'desc',
+          },
+        ],
+      }),
+    });
+
+    const data = await response.json();
+    console.log('Alchemy response:', data);
+
+    if (data.result && data.result.transfers) {
+      console.log('data.result.transfers', data.result.transfers);
+
+      return data.result.transfers.some((transfer: any) => {
+        // The value is already in ETH, no need to convert from wei
+        return transfer.value === parseFloat(amount);
+      });
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Error checking token send:', error);
+    return false;
+  }
+}
