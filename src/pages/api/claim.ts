@@ -4,7 +4,7 @@ import SafeApiKit from '@safe-global/api-kit';
 import Safe from '@safe-global/protocol-kit';
 import { MetaTransactionData } from '@safe-global/safe-core-sdk-types';
 
-import { DOMAIN_URL, adminWallets, eventId } from 'config';
+import { DOMAIN_URL, adminWallets } from 'config';
 import db from 'utils/db';
 import { calculateScore } from 'utils/index';
 import { getTasks } from 'utils/queries';
@@ -29,7 +29,7 @@ export const maxDuration = 90 // 90 seconds
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { address } = req.query;
+    const { address, eventId } = req.query;
 
     if (!address) {
       return res.status(400).json({ message: 'Recipient address is required' });
@@ -40,10 +40,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     //   return res.status(400).json({ message: 'Address is not an admin' });
     // }
 
-    const tasks = await getTasks(eventId)
+    const tasks = await getTasks(parseInt(eventId as string))
+    console.log('tasks', tasks)
 
-    // check if user has already claimed tokens
-    const profile = await fetch(`${DOMAIN_URL}/api/profile?address=${address}&taskId=2`)
+    // check if user has already claimed tokens (Task #2 = force POAP validation)
+    const profile = await fetch(`${DOMAIN_URL}/api/profile?address=${address}&taskId=2&eventId=${eventId}`)
     const profileData = await profile.json()
     console.log('profileData', profileData)
     const taskIdClaimTokens = Object.values(tasks).findIndex((task: any) => task.action === 'claim-tokens')
@@ -54,25 +55,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const taskCondition = tasks[taskIdClaimTokens].condition
     console.log('taskCondition', taskCondition)
     const taskIdClaimPOAP = Object.values(tasks).findIndex((task: any) => task.condition === taskCondition)
+    console.log('taskIdClaimPOAP', taskIdClaimPOAP)
     const badgeCompleted = profileData?.tasks?.[taskIdClaimPOAP]?.isCompleted ?? false
+    console.log('badgeCompleted', badgeCompleted)
     // TEMP
     let receipt = null
     let safeTxHash = null
     // if (badgeCompleted === true) {
     //   receipt = { transactionHash: '0x9b285098404a71f1a09ec3e91582417d191fa372bf04a3416f1f5038abdbb20f' }
     if (badgeCompleted === false) {
-      return res.status(400).json({ ...profileData, message: 'You have not claimed the POAP event yet (Task #3)' });
+      return res.status(400).json({ ...profileData, message: `You have not claimed the POAP event yet (Task #${taskIdClaimPOAP + 1})` });
     } else {
 
     const addressToLower = (address as string).toLowerCase();
 
     const destination = addressToLower;
-    const ethAmount = ethers.parseUnits('0.000555', 'ether').toString();
-    const usdcAmount = ethers.parseUnits('2', 6).toString(); // USDC has 6 decimals
+      const ethAmount = ethers.parseUnits('0.00001', 'ether').toString();
+      // const usdcAmount = ethers.parseUnits('2', 6).toString(); // USDC has 6 decimals
     // const usdgloAmount = ethers.parseUnits('1', 18).toString(); // USDGLO has 18 decimals
 
     const erc20Abi = ['function transfer(address to, uint256 amount) returns (bool)'];
-    const usdcInterface = new ethers.Interface(erc20Abi);
+      // const usdcInterface = new ethers.Interface(erc20Abi);
       // const usdgloInterface = new ethers.Interface(erc20Abi);
 
     const safeTransactionData: MetaTransactionData[] = [
@@ -81,11 +84,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: '0x',
         value: ethAmount,
       },
-      {
-        to: USDC_ADDRESS,
-        data: usdcInterface.encodeFunctionData('transfer', [destination, usdcAmount]),
-        value: '0',
-      },
+      // {
+      //   to: USDC_ADDRESS,
+      //   data: usdcInterface.encodeFunctionData('transfer', [destination, usdcAmount]),
+      //   value: '0',
+      // },
       // {
       //   to: USDGLO_ADDRESS,
       //   data: usdgloInterface.encodeFunctionData('transfer', [destination, usdgloAmount]),
@@ -143,7 +146,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const profileToSave = { score, tasks: userTasks }
       const [profile] = await db('users')
         .update(profileToSave)
-        .where('event_id', eventId)
+        .where('event_id', parseInt(eventId as string))
         .whereILike('address', address)
         .returning('*')
 
