@@ -4,11 +4,13 @@ import { useRouter } from 'next/router'
 import { useLocalStorage } from 'usehooks-ts'
 
 import { Config, Event, EventData } from 'entities/data'
+import { eventId as defaultEventId } from 'config'
 
 export function useEventData() {
   const { i18n } = useTranslation()
   const router = useRouter()
-  const [event, setEvent] = useLocalStorage<Event | null>('event', null)
+  const eventId = router.query.eventId as string
+  const [event, setEvent] = useLocalStorage<Event | null>(`event-${eventId}`, null)
   const [eventData, setEventData] = useState<EventData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -37,8 +39,12 @@ export function useEventData() {
       }
     }
     if (router.route === '/404') {
-      console.log('404 detected: redirecting to /')
-      router.push('/')
+      console.log('404 detected: /event/defaultEventId')
+      router.push(`/event/${defaultEventId}`)
+    }
+    if (router.route === '/') {
+      console.log('redirecting to /event/defaultEventId')
+      router.push(`/event/${defaultEventId}`)
     }
   }, [router.isReady, router.query.eventId])
 

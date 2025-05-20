@@ -28,9 +28,12 @@ import { Card as CardComponent } from 'components/Card'
 export default function Leaderboard({ event }: { event: Event }) {
   const { t } = useTranslation()
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
-  const [leaderboard, setLeaderboard] = useLocalStorage<Profile[] | null>('leaderboard', null)
   const router = useRouter()
   const { eventId } = router.query
+  const [leaderboard, setLeaderboard] = useLocalStorage<Profile[] | null>(
+    `leaderboard-${eventId}`,
+    null
+  )
 
   useEffect(() => {
     if (!eventId) return

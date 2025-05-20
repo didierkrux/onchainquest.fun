@@ -45,7 +45,9 @@ export default function ProfilePage() {
   const { t, i18n } = useTranslation()
   const { address } = useAccount()
   const { data: balanceData } = useBalance({ address })
-  const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
+  const router = useRouter()
+  const { eventId } = router.query
+  const [profile, setProfile] = useLocalStorage<Profile | null>(`profile-${eventId}`, null)
   const { disconnect } = useDisconnect()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -62,8 +64,6 @@ export default function ProfilePage() {
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const isSocialCronActive = profile?.isSocialCronActive || false
   const [usdValue, setUsdValue] = useState<number | null>(null)
-  const router = useRouter()
-  const { eventId } = router.query
 
   const saveProfile = () => {
     if (!eventId) return

@@ -14,10 +14,13 @@ interface IGMedia {
 
 export default function SocialPage({ event }: { event: Event }) {
   const { t } = useTranslation()
-  const [instagramPosts, setInstagramPosts] = useLocalStorage<string[]>('instagramPosts', [])
-  const [twitterPosts, setTwitterPosts] = useLocalStorage<string[]>('twitterPosts', [])
   const router = useRouter()
   const { eventId } = router.query
+  const [instagramPosts, setInstagramPosts] = useLocalStorage<string[]>(
+    `instagramPosts-${eventId}`,
+    []
+  )
+  const [twitterPosts, setTwitterPosts] = useLocalStorage<string[]>(`twitterPosts-${eventId}`, [])
 
   useEffect(() => {
     const fetchSocials = async () => {

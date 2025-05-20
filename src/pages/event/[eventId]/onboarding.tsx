@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react'
 import React from 'react'
 import { useLocalStorage } from 'usehooks-ts'
 import { Trophy, CheckCircle, Star, Lock } from '@phosphor-icons/react/dist/ssr'
+import { useRouter } from 'next/router'
 
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
@@ -27,8 +28,10 @@ export default function Onboarding({ event }: { event: Event }) {
   const { t } = useTranslation()
   const { open } = useAppKit()
   const { address, isConnected } = useAccount()
-  const [profile, setProfile] = useLocalStorage<Profile | null>('profile', null)
-  const [lastAddress, setLastAddress] = useLocalStorage<string | null>('lastAddress', null)
+  const router = useRouter()
+  const { eventId } = router.query
+  const [profile, setProfile] = useLocalStorage<Profile | null>(`profile-${eventId}`, null)
+  const [lastAddress, setLastAddress] = useLocalStorage<string | null>(`lastAddress`, null)
   const [isLoading, setIsLoading] = useState<number | null>(null)
   const toast = useToast()
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
