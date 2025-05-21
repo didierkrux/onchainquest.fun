@@ -37,6 +37,7 @@ export default function Onboarding({ event }: { event: Event }) {
   const [isLoading, setIsLoading] = useState<number | null>(null)
   const toast = useToast()
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
+  const [subnameInput, setSubnameInput] = useState('')
 
   useEffect(() => {
     if (address) {
@@ -60,7 +61,9 @@ export default function Onboarding({ event }: { event: Event }) {
     setIsLoading(taskId)
     fetch(
       quest.action === 'claim-tokens'
-        ? `/api/claim?address=${address}&eventId=${event.config?.eventId}`
+        ? `/api/claim-tokens?address=${address}&eventId=${event.config?.eventId}`
+        : quest.action === 'claim-subname'
+        ? `/api/claim-subname?address=${address}&eventId=${event.config?.eventId}&subname=${subnameInput}`
         : `/api/profile?address=${address}&taskId=${taskId}&eventId=${event.config?.eventId}`,
       {
         method: 'POST',
@@ -69,6 +72,7 @@ export default function Onboarding({ event }: { event: Event }) {
         },
         body: JSON.stringify({
           taskId: quest.id,
+          subname: quest.action === 'claim-subname' ? subnameInput : undefined,
         }),
       }
     )
@@ -354,6 +358,52 @@ export default function Onboarding({ event }: { event: Event }) {
             <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
               {t('Verify')}
             </Button>
+          </Box>
+        ) : null
+      }
+      if (quest.action === 'claim-subname') {
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        quest.actionField = !isCompleted ? (
+          <Box display="flex" gap={4} alignItems="center">
+            <input
+              type="text"
+              value={subnameInput}
+              onChange={(e) => setSubnameInput(e.target.value)}
+              placeholder={t('Enter subname')}
+              style={{
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid #E2E8F0',
+                width: '200px',
+              }}
+            />
+            <Button
+              onClick={() => {
+                if (!subnameInput) {
+                  toast({
+                    title: t('Error'),
+                    description: t('Please enter a subname'),
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                    position: isMobile ? 'top' : 'bottom-right',
+                  })
+                  return
+                }
+                handleAction(quest)
+              }}
+              isLoading={isLoading === quest.id}
+            >
+              {t('Claim')}
+            </Button>
+          </Box>
+        ) : null
+        quest.completedField = profile?.subname ? (
+          <Box display="flex" gap={1}>
+            <Box>{t('Your subname: ')}</Box>
+            <Link isExternal href={`https://www.base.org/name/${profile?.subname}`}>
+              <Text>{profile?.subname}</Text>
+            </Link>
           </Box>
         ) : null
       }

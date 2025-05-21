@@ -45,7 +45,7 @@ export type TaskAction =
   | 'poap-picture'
   | 'own-basename'
   | 'mint-nft'
-
+  | 'claim-subname'
 export type Quest = {
   id: number
   name: string

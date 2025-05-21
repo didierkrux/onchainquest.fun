@@ -21,4 +21,5 @@ export type Profile = {
   isSocialCronActive?: boolean
   email?: string
   emailOK?: boolean
+  subname?: string
 }
