@@ -49,7 +49,7 @@ export const modal = createAppKit({
     socials: [],
     swaps: true,
   },
-  networks,
+  networks: [base],
 })
 
 export default function Web3ModalProvider({
