@@ -1107,7 +1107,7 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
 
-"@reown/appkit-adapter-wagmi@^1.7.6":
+"@reown/appkit-adapter-wagmi@^1.7.4":
   version "1.7.6"
   resolved "https://registry.yarnpkg.com/@reown/appkit-adapter-wagmi/-/appkit-adapter-wagmi-1.7.6.tgz#ad138720c2c952e54822e184df0dc5632bdc5136"
   integrity sha512-IQd9AacNSh54viOzdQlq/7ToSgXIU9kQ6Xw05k/mDHLRo3VLvE3sLIafLl0LzlbWgzgSZK9+Pt0HXtnyvVzGjQ==
@@ -1302,7 +1302,7 @@
     valtio "1.13.2"
     viem ">=2.23.11"
 
-"@reown/appkit@1.7.6", "@reown/appkit@^1.7.6":
+"@reown/appkit@1.7.6", "@reown/appkit@^1.7.4":
   version "1.7.6"
   resolved "https://registry.yarnpkg.com/@reown/appkit/-/appkit-1.7.6.tgz#35693397a320719f2b2263418bf076fa9d7a0e84"
   integrity sha512-9E9b4w245AMr8+YhCYB/c5O3Fl6XbA2adeypvWuNNUMnoolNRIWyQ45+QTKJiXJaAVknPC6G4P7ym0NYIgc8ww==
@@ -1524,7 +1524,7 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.76.0.tgz#3b4d5d34ce307ba0cf7d1a3e90d7adcdc6c46be0"
   integrity sha512-FN375hb8ctzfNAlex5gHI6+WDXTNpe0nbxp/d2YJtnP+IBM6OUm7zcaoCW6T63BawGOYZBbKC0iPvr41TteNVg==
 
-"@tanstack/react-query@^5.76.1":
+"@tanstack/react-query@^5.75.5":
   version "5.76.1"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.76.1.tgz#ac8a19f99dfec1452a44fe22d46680c396c21152"
   integrity sha512-YxdLZVGN4QkT5YT1HKZQWiIlcgauIXEIsMOTSjvyD5wLYK8YVvKZUPAysMqossFJJfDpJW3pFn7WNZuPOqq+fw==
