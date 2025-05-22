@@ -6,7 +6,7 @@ import { DOMAIN_URL } from 'config';
 import db from 'utils/db';
 import { calculateScore } from 'utils/index';
 import { getTasks } from 'utils/queries';
-import { eventId as currentEventId } from 'config'
+import { eventId as currentEventId, ENS_DOMAIN } from 'config'
 
 const RPC_URL = process.env.ALCHEMY_API_KEY
   ? `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
@@ -18,7 +18,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY as string;
 const L2_RESOLVER_ADDRESS = '0xe42cfac25e82e3b77fefc740a934e11f03957c17';
 
 // Parent node for newtoweb3.eth
-const PARENT_NODE = namehash('newtoweb3.eth');
+const PARENT_NODE = namehash(ENS_DOMAIN);
 
 const RESERVED_SUBNAMES = [
   'ornella',
@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Verify the signature
-    const message = `Claim subname ${subname}.newtoweb3.eth for address ${address}`
+    const message = `Claim subname ${subname}.${ENS_DOMAIN} for address ${address}`
     const isValid = await verifyMessage({
       address: address as `0x${string}`,
       message,
@@ -105,7 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ], signer);
 
       // Calculate subnode namehash
-      const subnodeNamehash = namehash(`${subname}.newtoweb3.eth`);
+      const subnodeNamehash = namehash(`${subname}.${ENS_DOMAIN}`);
 
       // Prepare resolver calls
       const data = [

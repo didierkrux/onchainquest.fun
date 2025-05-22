@@ -3,6 +3,8 @@ export const eventId = 2
 
 export const eventName = 'New to Web3'
 
+export const ENS_DOMAIN = 'newtoweb3.eth'
+
 export const eventDescription = '"New to Web3? Start Here" is a day of activities to get you from 0 to 1 in Web3'
 
 export const adminWallets = [

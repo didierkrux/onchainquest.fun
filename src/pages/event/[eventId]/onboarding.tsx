@@ -25,6 +25,7 @@ import { useSignMessage } from 'wagmi'
 
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
+import { ENS_DOMAIN } from 'config'
 
 export default function Onboarding({ event }: { event: Event }) {
   const { t } = useTranslation()
@@ -78,7 +79,7 @@ export default function Onboarding({ event }: { event: Event }) {
         }
 
         // Create message to sign
-        const message = `Claim subname ${subnameInput}.newtoweb3.eth for address ${address}`
+        const message = `Claim subname ${subnameInput}.${ENS_DOMAIN} for address ${address}`
 
         // Get signature
         const signature = await signMessageAsync({ message })
@@ -472,8 +473,10 @@ export default function Onboarding({ event }: { event: Event }) {
             {profile?.subname && (
               <Box display="flex" gap={1}>
                 <Box>{t('Your subname: ')}</Box>
-                <Link isExternal href={`https://app.ens.domains/${profile?.subname}.newtoweb3.eth`}>
-                  <Text>{profile?.subname}.newtoweb3.eth</Text>
+                <Link isExternal href={`https://app.ens.domains/${profile?.subname}.${ENS_DOMAIN}`}>
+                  <Text>
+                    {profile?.subname}.{ENS_DOMAIN}
+                  </Text>
                 </Link>
               </Box>
             )}

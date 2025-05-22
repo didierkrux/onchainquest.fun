@@ -37,7 +37,7 @@ import { useRouter } from 'next/router'
 
 import { Profile } from 'entities/profile'
 import { profileName, profileAvatar, profileRole } from 'utils/index'
-import { adminSignatureMessage, adminWallets } from 'config'
+import { adminSignatureMessage, adminWallets, ENS_DOMAIN } from 'config'
 import { Avatar } from 'components/Avatar'
 import SelectTab from 'components/SelectTab'
 
@@ -419,10 +419,10 @@ export default function ProfilePage() {
                         <Text>
                           {profile?.subname ? (
                             <a
-                              href={`https://app.ens.domains/${profile?.subname}.newtoweb3.eth`}
+                              href={`https://app.ens.domains/${profile?.subname}.${ENS_DOMAIN}`}
                               target="_blank"
                             >
-                              <Text>{`${profile?.subname}.newtoweb3.eth`}</Text>
+                              <Text>{`${profile?.subname}.${ENS_DOMAIN}`}</Text>
                             </a>
                           ) : (
                             <a

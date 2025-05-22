@@ -2,7 +2,7 @@ import OpenAI from 'openai'
 
 import { Event } from 'entities/data'
 import { Profile, Task, Tasks } from 'entities/profile'
-import { eventId, potionUrl } from 'config'
+import { eventId, potionUrl, ENS_DOMAIN } from 'config'
 import db from './db'
 
 export function shortAddress(address: string) {
@@ -10,7 +10,7 @@ export function shortAddress(address: string) {
 }
 
 export function profileName(profile: Profile) {
-  return profile.subname ? `${profile.subname}.newtoweb3.eth` : (profile.basename ? profile.basename : (profile.username ? `@${profile.username}` : shortAddress(profile.address)))
+  return profile.subname ? `${profile.subname}.${ENS_DOMAIN}` : (profile.basename ? profile.basename : (profile.username ? `@${profile.username}` : shortAddress(profile.address)))
 }
 
 export function profileAvatar(profile: Profile) {
