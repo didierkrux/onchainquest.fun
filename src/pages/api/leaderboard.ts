@@ -19,7 +19,12 @@ export default async function handler(
       .where('event_id', eventId)
       .orderBy('score', 'desc')
 
-    res.status(200).json(leaderboard)
+    // remove duplicates
+    const uniqueLeaderboard = leaderboard.filter((value, index, self) =>
+      index === self.findIndex((t) => t.address === value.address)
+    )
+
+    res.status(200).json(uniqueLeaderboard)
   } catch (error) {
     console.error('Error fetching leaderboard:', error)
     res.status(500).json({ message: 'Internal server error' })
