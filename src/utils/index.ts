@@ -10,7 +10,7 @@ export function shortAddress(address: string) {
 }
 
 export function profileName(profile: Profile) {
-  return profile.basename ? profile.basename : (profile.username ? `@${profile.username}` : shortAddress(profile.address))
+  return profile.subname ? `${profile.subname}.newtoweb3.eth` : (profile.basename ? profile.basename : (profile.username ? `@${profile.username}` : shortAddress(profile.address)))
 }
 
 export function profileAvatar(profile: Profile) {
