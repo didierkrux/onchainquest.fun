@@ -232,7 +232,7 @@ export default function Onboarding({ event }: { event: Event }) {
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t('Complete task {{taskNumber}} first to unlock this.', {
+                {t('Complete task #{{taskNumber}} first to unlock this.', {
                   taskNumber: quest.lock,
                 })}
                 <Lock size={28} color="gray" />
@@ -268,7 +268,7 @@ export default function Onboarding({ event }: { event: Event }) {
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t('Complete task {{taskNumber}} first to unlock this.', {
+                {t('Complete task #{{taskNumber}} first to unlock this.', {
                   taskNumber: quest.lock,
                 })}
                 <Lock size={28} color="gray" />
@@ -392,7 +392,7 @@ export default function Onboarding({ event }: { event: Event }) {
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t('Complete task {{taskNumber}} first to unlock this.', {
+                {t('Complete task #{{taskNumber}} first to unlock this.', {
                   taskNumber: quest.lock,
                 })}
                 <Lock size={28} color="gray" />
@@ -431,42 +431,56 @@ export default function Onboarding({ event }: { event: Event }) {
         ) : null
       }
       if (quest.action === 'claim-subname') {
+        const isLocked = quest.lock
+          ? !profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false
+          : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
-        quest.actionField = !isCompleted ? (
+        quest.actionField = (
           <Box display="flex" gap={4} alignItems="center">
-            <input
-              type="text"
-              value={subnameInput}
-              onChange={(e) => setSubnameInput(e.target.value)}
-              placeholder={t('Enter subname')}
-              style={{
-                padding: '8px',
-                borderRadius: '4px',
-                border: '1px solid #E2E8F0',
-                width: '200px',
-              }}
-            />
-            <Button
-              onClick={() => {
-                if (!subnameInput) {
-                  toast({
-                    title: t('Error'),
-                    description: t('Please enter a subname'),
-                    status: 'error',
-                    duration: 5000,
-                    isClosable: true,
-                    position: isMobile ? 'top' : 'bottom-right',
-                  })
-                  return
-                }
-                handleAction(quest)
-              }}
-              isLoading={isLoading === quest.id}
-            >
-              {t('Claim')}
-            </Button>
+            {quest.lock && isLocked ? (
+              <Box display="flex" alignItems="center" gap={2}>
+                {t('Complete task #{{taskNumber}} first to unlock this.', {
+                  taskNumber: quest.lock,
+                })}
+                <Lock size={28} color="gray" />
+              </Box>
+            ) : !isCompleted ? (
+              <>
+                <input
+                  type="text"
+                  value={subnameInput}
+                  onChange={(e) => setSubnameInput(e.target.value)}
+                  placeholder={t('Enter subname')}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '4px',
+                    border: '1px solid #E2E8F0',
+                    width: '200px',
+                  }}
+                />
+                <Button
+                  onClick={() => {
+                    if (!subnameInput) {
+                      toast({
+                        title: t('Error'),
+                        description: t('Please enter a subname'),
+                        status: 'error',
+                        duration: 5000,
+                        isClosable: true,
+                        position: isMobile ? 'top' : 'bottom-right',
+                      })
+                      return
+                    }
+                    handleAction(quest)
+                  }}
+                  isLoading={isLoading === quest.id}
+                >
+                  {t('Claim')}
+                </Button>
+              </>
+            ) : null}
           </Box>
-        ) : null
+        )
         const txLink = profile?.tasks?.[quest.id]?.txLink
         quest.completedField = (
           <Box display="flex" flexDirection="column" gap={2}>
