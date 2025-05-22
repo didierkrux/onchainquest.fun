@@ -6,6 +6,7 @@ import { DOMAIN_URL } from 'config';
 import db from 'utils/db';
 import { calculateScore } from 'utils/index';
 import { getTasks } from 'utils/queries';
+import { eventId as currentEventId } from 'config'
 
 const RPC_URL = process.env.ALCHEMY_API_KEY
   ? `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
@@ -27,6 +28,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!address || !subname || !signature || !eventId) {
       return res.status(400).json({ message: 'Recipient address, subname, and signature are required' });
+    }
+
+    if (parseInt(eventId as string) !== currentEventId) {
+      return res.status(400).json({ message: 'Event task is not available' });
     }
 
     // Verify the signature
