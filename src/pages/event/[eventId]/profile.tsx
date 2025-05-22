@@ -68,12 +68,12 @@ export default function ProfilePage() {
   const saveProfile = () => {
     if (!eventId) return
     setIsSaving(true)
-    fetch(`/api/profile?address=${address}&eventId=${eventId}`, {
+    fetch(`/api/profile?address=${address}&eventId=${eventId}&taskId=1`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username, email, avatar, role, taskId: 1 }),
+      body: JSON.stringify({ username, email, avatar, role }),
     })
       .then((res) => res.json().then((data) => ({ status: res.status, data })))
       .then(({ status, data }) => {
