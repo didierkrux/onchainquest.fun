@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import fs from 'fs'
 import path from 'path'
+import db from 'utils/db'
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { name } = req.query
 
   if (!name) {
@@ -12,10 +13,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     // Read the default avatar image
     const imagePath = path.join(process.cwd(), 'public', 'default-avatar.png')
-    const imageBuffer = fs.readFileSync(imagePath)
+    let imageBuffer = fs.readFileSync(imagePath)
+    let contentType = 'image/png'
+
+    // get subname from db
+    const profile = await db('users').where('subname', name).first()
+    if (profile?.avatar) {
+      // download avatar from url (subname is an url)
+      const response = await fetch(profile.avatar)
+      if (!response.ok) throw new Error(`Failed to fetch avatar: ${response.status}`)
+      const avatarBuffer = await response.arrayBuffer()
+      imageBuffer = Buffer.from(avatarBuffer)
+      contentType = 'image/svg+xml'
+    }
 
     // Set appropriate headers
-    res.setHeader('Content-Type', 'image/png')
+    res.setHeader('Content-Type', contentType)
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
     res.setHeader('Pragma', 'no-cache')
     res.setHeader('Expires', '0')
