@@ -12,8 +12,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
-  const { address, eventId } = req.query
-  const { username, avatar, role, email, taskId } = req.body
+  const { address, eventId, taskId } = req.query
+  const { username, avatar, role, email } = req.body
   console.log('req.query', req.query)
   console.log('req.body', req.body)
   console.log('req.method', req.method)
@@ -23,7 +23,8 @@ export default async function handler(
   console.log('role', role)
   console.log('email', email)
   console.log('taskId', taskId)
-
+  const taskIdNum = parseInt(taskId as string, 10)
+  console.log('taskIdNum', taskIdNum)
   if (!address || typeof address !== 'string') {
     return res.status(400).json({ message: 'Invalid address' })
   }
@@ -45,7 +46,7 @@ export default async function handler(
   console.log('isSocialCronActive', isSocialCronActive)
 
   // Include task 7 (own-basename) in the POST method handling
-  if (req.method === 'POST' && taskId && taskId >= 0) {
+  if (req.method === 'POST' && taskIdNum >= 0) {
     // get tasks + profile
     const data = await db('events')
       .leftJoin('users', 'users.event_id', 'events.id')
@@ -65,15 +66,15 @@ export default async function handler(
     const userTasks = data?.tasks || {} // Ensure userTasks is an object
     console.log('tasks', tasks)
     console.log('userTasks', userTasks)
-    if (!(taskId in tasksArray)) {
+    if (!(taskIdNum in tasksArray)) {
       return res.status(400).json({ message: 'Invalid task' })
     }
-    const taskAction: TaskAction = tasks[taskId].action
+    const taskAction: TaskAction = tasks[taskIdNum].action
     console.log('taskAction', taskAction)
-    const taskCondition = tasks[taskId].condition
+    const taskCondition = tasks[taskIdNum].condition
     console.log('taskCondition', taskCondition)
 
-    const taskToSave = tasks[taskId]
+    const taskToSave = tasks[taskIdNum]
     console.log('taskToSave', taskToSave)
 
     // update profile (username + avatar)
@@ -92,7 +93,7 @@ export default async function handler(
       } else if (!data.username?.length && !data.basename?.length) {
         return res.status(400).json({ message: 'Username is required' })
       }
-      userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
+      userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
       console.log('userTasks', userTasks)
     } else if (taskAction === 'claim-poap') {
       const poapId = taskCondition
@@ -100,19 +101,19 @@ export default async function handler(
       const hasPoap = await userHasPoap(address, poapId)
       console.log('hasPoap', hasPoap)
       if (hasPoap) {
-        userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
+        userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
         console.log('userTasks', userTasks)
       } else {
         return res.status(400).json({ message: "You don't own this POAP." })
       }
     } else if (taskAction === 'click-link') {
-      userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
+      userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
       console.log('userTasks', userTasks)
     } else if (taskAction === 'verify-balance') {
       const [tokenAddress, minBalance, tokenName] = taskCondition?.split(',')
       const userHasEnoughBalance = await verifyBalance(address, tokenAddress, minBalance)
       if (userHasEnoughBalance) {
-        userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
+        userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
         console.log('userTasks', userTasks)
       } else {
         return res.status(400).json({ message: `You need to own at least ${minBalance} ${tokenName} on Optimism.` })
@@ -121,7 +122,7 @@ export default async function handler(
       const swapCompleted = await userHasSwappedTokens(address, taskCondition)
       console.log('swapCompleted', swapCompleted)
       if (swapCompleted) {
-        userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
+        userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
         console.log('userTasks', userTasks)
       } else {
         return res.status(400).json({ message: 'You have not swapped your tokens yet' })
@@ -130,7 +131,7 @@ export default async function handler(
       // Handle the 'own-basename' task here
       const basename = await getBasename(address as `0x${string}`)
       if (basename?.endsWith('.base.eth')) {
-        userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
+        userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
         console.log('userTasks', userTasks)
       } else {
         return res.status(400).json({ message: "You don't own a .base.eth basename." })
@@ -141,7 +142,7 @@ export default async function handler(
       // verify ownership
       const hasNft = await userHasNft(address, network, contract, tokenId)
       if (hasNft) {
-        userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points, nftLink: taskCondition }
+        userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points, nftLink: taskCondition }
         console.log('userTasks', userTasks)
       } else {
         return res.status(400).json({ message: "You don't own this NFT." })
@@ -151,7 +152,7 @@ export default async function handler(
       const amount = '0.00001';
       const hasSentTokens = await verifyTokenSend(address, targetAddress, amount);
       if (hasSentTokens) {
-        userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskToSave.points }
+        userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
         console.log('userTasks', userTasks)
       } else {
         return res.status(400).json({ message: "You haven't sent 0.00001 ETH to the specified address yet." })
@@ -204,6 +205,7 @@ export default async function handler(
         const profileToSave = { event_id: eventIdNum, address, score, tasks: userTasks }
         console.log('Saving profile', profileToSave)
 
+        // TODO: fix bug where users get created multiple times
         profile = await db('users')
           .insert(profileToSave)
           .returning('*')
