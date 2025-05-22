@@ -20,6 +20,13 @@ const L2_RESOLVER_ADDRESS = '0xe42cfac25e82e3b77fefc740a934e11f03957c17';
 // Parent node for newtoweb3.eth
 const PARENT_NODE = namehash('newtoweb3.eth');
 
+const RESERVED_SUBNAMES = [
+  'ornella',
+  'didier',
+  'dj',
+  'd',
+]
+
 export const maxDuration = 90 // 90 seconds
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -48,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // check if subname is already taken
     const subnameTaken = await db('users').where('subname', subname).first()
-    if (subnameTaken) {
+    if (subnameTaken || RESERVED_SUBNAMES.includes(subname as string)) {
       return res.status(400).json({ message: 'Subname already taken' })
     }
 
