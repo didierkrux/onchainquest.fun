@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { ethers } from 'ethers';
-import { namehash } from 'viem';
+import { namehash, verifyMessage } from 'viem';
 
 import { DOMAIN_URL } from 'config';
 import db from 'utils/db';
@@ -23,17 +23,40 @@ export const maxDuration = 90 // 90 seconds
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { address, eventId, subname } = req.query;
+    const { address, eventId, subname, signature } = req.query;
 
-    if (!address || !subname) {
-      return res.status(400).json({ message: 'Recipient address and subname are required' });
+    if (!address || !subname || !signature || !eventId) {
+      return res.status(400).json({ message: 'Recipient address, subname, and signature are required' });
+    }
+
+    // Verify the signature
+    const message = `Claim subname ${subname}.newtoweb3.eth for address ${address}`
+    const isValid = await verifyMessage({
+      address: address as `0x${string}`,
+      message,
+      signature: signature as `0x${string}`,
+    })
+
+    if (!isValid) {
+      return res.status(403).json({ message: 'Invalid signature' })
+    }
+
+    // check if subname is already taken
+    const subnameTaken = await db('users').where('subname', subname).first()
+    if (subnameTaken) {
+      return res.status(400).json({ message: 'Subname already taken' })
     }
 
     const tasks = await getTasks(parseInt(eventId as string))
     // console.log('tasks', tasks)
 
     // check if user has already claimed subname (Task #2 = force POAP validation)
-    const profile = await fetch(`${DOMAIN_URL}/api/profile?address=${address}&taskId=2&eventId=${eventId}`)
+    const profile = await fetch(`${DOMAIN_URL}/api/profile?address=${address}&taskId=2&eventId=${eventId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
     const profileData = await profile.json()
     // console.log('profileData', profileData)
     const taskIdClaimSubname = Object.values(tasks).findIndex((task: any) => task.action === 'claim-subname')
@@ -45,10 +68,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // console.log('taskCondition', taskCondition)
     const taskIdClaimPOAP = Object.values(tasks).findIndex((task: any) => task.condition === taskCondition)
     // console.log('taskIdClaimPOAP', taskIdClaimPOAP)
-    const badgeCompleted = profileData?.tasks?.[taskIdClaimPOAP]?.isCompleted ?? false
-    // console.log('badgeCompleted', badgeCompleted)
+    const poapCompleted = profileData?.tasks?.[taskIdClaimPOAP]?.isCompleted ?? false
+    // console.log('poapCompleted', poapCompleted)
 
-    if (badgeCompleted === false) {
+    if (poapCompleted === false) {
       return res.status(400).json({ ...profileData, message: `You have not claimed the POAP event yet (Task #${taskIdClaimPOAP + 1})` });
     }
 
@@ -102,8 +125,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         subnodeNamehash
       });
 
-      // Comment out actual transaction for now
-      /*
       // Send transaction
       const tx = await resolverContract.createSubnode(
         PARENT_NODE,
@@ -125,7 +146,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const taskId = Object.values(tasks).findIndex((task: any) => task.action === taskAction);
           userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: tasks[taskId].points, txLink };
           const score = calculateScore(userTasks, tasks)
-          const profileToSave = { score, tasks: userTasks }
+          const profileToSave = { score, tasks: userTasks, subname: subname }
           const [profile] = await db('users')
             .update(profileToSave)
             .where('event_id', eventId)
@@ -149,7 +170,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       } else {
         return res.status(400).json({ message: 'Transaction failed' });
       }
-      */
 
       // Return success response with transaction details
       return res.status(200).json({

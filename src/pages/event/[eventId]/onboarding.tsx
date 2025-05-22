@@ -21,6 +21,7 @@ import { useLocalStorage } from 'usehooks-ts'
 import { Trophy, CheckCircle, Star, Lock } from '@phosphor-icons/react/dist/ssr'
 import { useRouter } from 'next/router'
 import { parseEther } from 'viem'
+import { useSignMessage } from 'wagmi'
 
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
@@ -38,6 +39,7 @@ export default function Onboarding({ event }: { event: Event }) {
   const toast = useToast()
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const [subnameInput, setSubnameInput] = useState('')
+  const { signMessageAsync } = useSignMessage()
 
   useEffect(() => {
     if (address) {
@@ -55,34 +57,42 @@ export default function Onboarding({ event }: { event: Event }) {
 
   const QUESTS: Quest[] = event.tasks || []
 
-  const handleAction = (quest: Quest) => {
+  const handleAction = async (quest: Quest) => {
     const taskId = quest.id
     console.log('taskId', taskId)
     setIsLoading(taskId)
-    fetch(
-      quest.action === 'claim-tokens'
-        ? `/api/claim-tokens?address=${address}&eventId=${event.config?.eventId}`
-        : quest.action === 'claim-subname'
-        ? `/api/claim-subname?address=${address}&eventId=${event.config?.eventId}&subname=${subnameInput}`
-        : `/api/profile?address=${address}&taskId=${taskId}&eventId=${event.config?.eventId}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          taskId: quest.id,
-          subname: quest.action === 'claim-subname' ? subnameInput : undefined,
-        }),
-      }
-    )
-      .then((res) => res.json().then((data) => ({ status: res.status, data })))
-      .then(({ status, data }) => {
-        console.log('data', data)
+
+    try {
+      if (quest.action === 'claim-subname') {
+        if (!subnameInput) {
+          toast({
+            title: t('Error'),
+            description: t('Please enter a subname'),
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+            position: isMobile ? 'top' : 'bottom-right',
+          })
+          setIsLoading(null)
+          return
+        }
+
+        // Create message to sign
+        const message = `Claim subname ${subnameInput}.newtoweb3.eth for address ${address}`
+
+        // Get signature
+        const signature = await signMessageAsync({ message })
+
+        // Call API with signature
+        const response = await fetch(
+          `/api/claim-subname?address=${address}&eventId=${event.config?.eventId}&subname=${subnameInput}&signature=${signature}`
+        )
+        const data = await response.json()
+
         let feedbackType: 'success' | 'warning' | 'error' = 'error'
-        if (status === 200) {
+        if (response.status === 200) {
           feedbackType = 'success'
-        } else if (status === 400) {
+        } else if (response.status === 400) {
           feedbackType = 'warning'
         }
 
@@ -100,24 +110,82 @@ export default function Onboarding({ event }: { event: Event }) {
           position: isMobile ? 'top' : 'bottom-right',
         })
 
-        if (status === 200 && data?.tasks) {
+        if (response.status === 200 && data?.tasks) {
           setProfile(data)
         }
-      })
-      .catch((error) => {
-        console.error('Error in transaction process:', error)
-        toast({
-          title: 'Error',
-          description: error.message,
-          status: 'error',
-          duration: 10000,
-          isClosable: true,
-          position: isMobile ? 'top' : 'bottom-right',
-        })
-      })
-      .finally(() => {
         setIsLoading(null)
+        return
+      }
+
+      // Handle other actions
+      fetch(
+        quest.action === 'claim-tokens'
+          ? `/api/claim-tokens?address=${address}&eventId=${event.config?.eventId}`
+          : `/api/profile?address=${address}&taskId=${taskId}&eventId=${event.config?.eventId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            taskId: quest.id,
+          }),
+        }
+      )
+        .then((res) => res.json().then((data) => ({ status: res.status, data })))
+        .then(({ status, data }) => {
+          console.log('data', data)
+          let feedbackType: 'success' | 'warning' | 'error' = 'error'
+          if (status === 200) {
+            feedbackType = 'success'
+          } else if (status === 400) {
+            feedbackType = 'warning'
+          }
+
+          toast({
+            title:
+              feedbackType === 'success'
+                ? t('Success')
+                : feedbackType === 'warning'
+                ? t('Warning')
+                : t('Error'),
+            description: <>{data?.message}</>,
+            status: feedbackType,
+            duration: 10000,
+            isClosable: true,
+            position: isMobile ? 'top' : 'bottom-right',
+          })
+
+          if (status === 200 && data?.tasks) {
+            setProfile(data)
+          }
+        })
+        .catch((error) => {
+          console.error('Error in transaction process:', error)
+          toast({
+            title: t('Error'),
+            description: error.message,
+            status: 'error',
+            duration: 10000,
+            isClosable: true,
+            position: isMobile ? 'top' : 'bottom-right',
+          })
+        })
+        .finally(() => {
+          setIsLoading(null)
+        })
+    } catch (error) {
+      console.error('Error in transaction process:', error)
+      toast({
+        title: t('Error'),
+        description: error instanceof Error ? error.message : 'Failed to process request',
+        status: 'error',
+        duration: 10000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
       })
+      setIsLoading(null)
+    }
   }
 
   const handleSendTokens = async () => {
@@ -398,14 +466,26 @@ export default function Onboarding({ event }: { event: Event }) {
             </Button>
           </Box>
         ) : null
-        quest.completedField = profile?.subname ? (
-          <Box display="flex" gap={1}>
-            <Box>{t('Your subname: ')}</Box>
-            <Link isExternal href={`https://www.base.org/name/${profile?.subname}`}>
-              <Text>{profile?.subname}</Text>
-            </Link>
+        const txLink = profile?.tasks?.[quest.id]?.txLink
+        quest.completedField = (
+          <Box display="flex" flexDirection="column" gap={2}>
+            {profile?.subname && (
+              <Box display="flex" gap={1}>
+                <Box>{t('Your subname: ')}</Box>
+                <Link isExternal href={`https://app.ens.domains/${profile?.subname}.newtoweb3.eth`}>
+                  <Text>{profile?.subname}.newtoweb3.eth</Text>
+                </Link>
+              </Box>
+            )}
+            {txLink && (
+              <Box display="flex" gap={1}>
+                <Link isExternal href={txLink}>
+                  {t('View minting transaction on BaseScan')}
+                </Link>
+              </Box>
+            )}
           </Box>
-        ) : null
+        )
       }
     }
   }
