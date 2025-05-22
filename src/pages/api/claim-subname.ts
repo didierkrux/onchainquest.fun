@@ -51,6 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // console.log('tasks', tasks)
 
     // check if user has already claimed subname (Task #2 = force POAP validation)
+    // TODO: check if user has already claimed subname for another event
     const profile = await fetch(`${DOMAIN_URL}/api/profile?address=${address}&taskId=2&eventId=${eventId}`, {
       method: 'POST',
       headers: {

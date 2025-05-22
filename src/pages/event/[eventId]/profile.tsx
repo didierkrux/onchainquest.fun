@@ -413,23 +413,37 @@ export default function ProfilePage() {
               <Card mt={4} mb={4}>
                 <CardBody>
                   <Box display="flex" flexDirection="column" gap={4} maxW="400px" mx="auto">
-                    <Box display="flex" gap={4} mb={4} alignItems="center">
-                      <Text>{t('Username: ')}</Text>
-                      {profile?.basename ? (
-                        <a
-                          href={`https://www.base.org/name/${profile?.basename?.split('.')[0]}`}
-                          target="_blank"
-                        >
-                          <Text>{profile?.basename}</Text>
-                        </a>
-                      ) : (
+                    {profile?.subname || profile?.basename ? (
+                      <Box display="flex" gap={4} mb={4} alignItems="center">
+                        <Text>{t('ENS: ')}</Text>
+                        <Text>
+                          {profile?.subname ? (
+                            <a
+                              href={`https://app.ens.domains/${profile?.subname}.newtoweb3.eth`}
+                              target="_blank"
+                            >
+                              <Text>{`${profile?.subname}.newtoweb3.eth`}</Text>
+                            </a>
+                          ) : (
+                            <a
+                              href={`https://www.base.org/name/${profile?.basename?.split('.')[0]}`}
+                              target="_blank"
+                            >
+                              <Text>{profile?.basename}</Text>
+                            </a>
+                          )}
+                        </Text>
+                      </Box>
+                    ) : (
+                      <Box display="flex" gap={4} mb={4} alignItems="center">
+                        <Text>{t('Username: ')}</Text>
                         <Input
                           placeholder="Choose a username"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
                         />
-                      )}
-                    </Box>
+                      </Box>
+                    )}
                     <Box display="flex" gap={4} mb={4} alignItems="center">
                       <Text>{t('Avatar: ')}</Text>
                       {profile?.basename_avatar ? (
