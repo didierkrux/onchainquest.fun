@@ -628,7 +628,10 @@ export default function Onboarding({ event }: { event: Event }) {
                       )}
                     </>
                   ) : quest.action === 'connect-wallet' ? (
-                    <Box pt="2" display="flex" justifyContent="flex-end">
+                    <Box pt="2" display="flex" justifyContent="flex-end" gap={4}>
+                      <a href="https://link.zerion.io/a11o6IN0jqb" target="_blank">
+                        <Button>{t('Install Wallet')}</Button>
+                      </a>
                       <Button
                         onClick={() => {
                           open({ view: 'Connect' })
