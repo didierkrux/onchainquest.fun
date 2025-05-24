@@ -37,6 +37,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: 'Recipient address, subname, and signature are required' });
     }
 
+    const subnameToLower = (subname as string).toLowerCase()
+
     if (parseInt(eventId as string) !== currentEventId) {
       return res.status(400).json({ message: 'Event task is not available' });
     }
@@ -54,8 +56,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // check if subname is already taken
-    const subnameTaken = await db('users').where('subname', subname).first()
-    if (subnameTaken || RESERVED_SUBNAMES.includes(subname as string)) {
+    const subnameTaken = await db('users').where('subname', subnameToLower).first()
+    if (subnameTaken || RESERVED_SUBNAMES.includes(subnameToLower)) {
       return res.status(400).json({ message: 'Subname already taken' })
     }
 
@@ -105,7 +107,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ], signer);
 
       // Calculate subnode namehash
-      const subnodeNamehash = namehash(`${subname}.${ENS_DOMAIN}`);
+      const subnodeNamehash = namehash(`${subnameToLower}.${ENS_DOMAIN}`);
 
       // Prepare resolver calls
       const data = [
@@ -124,7 +126,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         resolverContract.interface.encodeFunctionData('setText', [
           subnodeNamehash,
           'avatar',
-          `https://newtoweb3.io/api/avatar/${subname}`
+          `https://newtoweb3.io/api/avatar/${subnameToLower}`
         ])
       ];
 
@@ -132,7 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('Transaction details:', {
         to: L2_RESOLVER_ADDRESS,
         parentNode: PARENT_NODE,
-        subname,
+        subname: subnameToLower,
         owner: destination,
         data,
         subnodeNamehash
@@ -141,7 +143,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Send transaction
       const tx = await resolverContract.createSubnode(
         PARENT_NODE,
-        subname,
+        subnameToLower,
         destination,
         data
       );
@@ -159,7 +161,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const taskId = Object.values(tasks).findIndex((task: any) => task.action === taskAction);
           userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: tasks[taskId].points, txLink };
           const score = calculateScore(userTasks, tasks)
-          const profileToSave = { score, tasks: userTasks, subname: subname }
+          const profileToSave = { score, tasks: userTasks, subname: subnameToLower }
           const [profile] = await db('users')
             .update(profileToSave)
             .where('event_id', eventId)
@@ -190,7 +192,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         details: {
           to: L2_RESOLVER_ADDRESS,
           parentNode: PARENT_NODE,
-          subname,
+          subname: subnameToLower,
           owner: destination,
           subnodeNamehash
         }
