@@ -298,14 +298,28 @@ export default function Onboarding({ event }: { event: Event }) {
         ) : null
       }
       if (quest.action === 'claim-poap') {
+        const isLocked = quest.lock
+          ? !profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false
+          : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
-        quest.actionField = !isCompleted ? (
-          <Box>
-            <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
-              {t('Verify')}
-            </Button>
+        quest.actionField = (
+          <Box display="flex" gap={4}>
+            {quest.lock && isLocked ? (
+              <Box display="flex" alignItems="center" gap={2}>
+                {t('Complete task #{{taskNumber}} first to unlock this.', {
+                  taskNumber: quest.lock,
+                })}
+                <Lock size={28} color="gray" />
+              </Box>
+            ) : !isCompleted ? (
+              <Box>
+                <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
+                  {t('Verify')}
+                </Button>
+              </Box>
+            ) : null}
           </Box>
-        ) : null
+        )
       }
       if (quest.action === 'click-link') {
         const links = quest.condition?.split('\n')
