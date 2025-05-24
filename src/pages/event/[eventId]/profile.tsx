@@ -444,6 +444,16 @@ export default function ProfilePage() {
                         />
                       </Box>
                     )}
+                    {profile?.subname && !username && (
+                      <Box display="flex" gap={4} mb={4} alignItems="center">
+                        <Text>{t('Username: ')}</Text>
+                        <Input
+                          placeholder="Choose a username"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                        />
+                      </Box>
+                    )}
                     <Box display="flex" gap={4} mb={4} alignItems="center">
                       <Text>{t('Avatar: ')}</Text>
                       {profile?.basename_avatar ? (
