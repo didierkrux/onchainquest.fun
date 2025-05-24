@@ -54,7 +54,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false)
   const [avatar, setAvatar] = useState('')
   const [avatarEmoji, setAvatarEmoji] = useState('')
-  const [role, setRole] = useState(profile?.role || 'explorer')
+  const [role, setRole] = useState<'explorer' | 'mentor'>('explorer')
   const [isResetting, setIsResetting] = useState(false)
   const toast = useToast()
   const [adminSignature, setAdminSignature] = useLocalStorage('admin-signature', '')
@@ -483,15 +483,13 @@ export default function ProfilePage() {
                     </Box>
                     <Box display="flex" gap={4} mb={4} alignItems="center" minH="42px">
                       <Text>{t('Role: ')}</Text>
-                      {role !== '' ? (
-                        <SelectTab
-                          tabLabels={tabLabels}
-                          selectedIndex={selectedRoleIndex}
-                          onTabChange={(index: number) =>
-                            setRole(index === 0 ? 'explorer' : 'mentor')
-                          }
-                        />
-                      ) : null}
+                      <SelectTab
+                        tabLabels={tabLabels}
+                        selectedIndex={selectedRoleIndex}
+                        onTabChange={(index: number) =>
+                          setRole(index === 0 ? 'explorer' : 'mentor')
+                        }
+                      />
                     </Box>
                     {!profile?.emailOK && (
                       <Box mb={4}>
