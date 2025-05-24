@@ -11,6 +11,7 @@ import {
   Badge,
   Divider,
   Link,
+  useClipboard,
 } from '@chakra-ui/react'
 import { useAppKit } from '@reown/appkit/react'
 import { useAccount, useBalance, useSendTransaction } from 'wagmi'
@@ -18,7 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import React from 'react'
 import { useLocalStorage } from 'usehooks-ts'
-import { Trophy, CheckCircle, Star, Lock } from '@phosphor-icons/react/dist/ssr'
+import { Trophy, CheckCircle, Star, Lock, Check, CopySimple } from '@phosphor-icons/react/dist/ssr'
 import { useRouter } from 'next/router'
 import { parseEther } from 'viem'
 import { useSignMessage } from 'wagmi'
@@ -43,6 +44,7 @@ export default function Onboarding({ event }: { event: Event }) {
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const [subnameInput, setSubnameInput] = useState('')
   const { signMessageAsync } = useSignMessage()
+  const { onCopy, hasCopied } = useClipboard(profile?.address || '')
 
   useEffect(() => {
     if (address) {
@@ -320,7 +322,17 @@ export default function Onboarding({ event }: { event: Event }) {
                 <Lock size={28} color="gray" />
               </Box>
             ) : !isCompleted ? (
-              <Box>
+              <Box display="flex" flexDirection="column" gap={2} alignItems="flex-end">
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Text fontSize={['2xs', 'sm']} color="gray.500">
+                    {profile?.address}
+                  </Text>
+                  {hasCopied ? (
+                    <Check width={20} />
+                  ) : (
+                    <CopySimple width={20} onClick={onCopy} cursor="pointer" />
+                  )}
+                </Box>
                 <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
                   {t('Verify')}
                 </Button>
