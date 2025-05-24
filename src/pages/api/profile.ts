@@ -104,7 +104,7 @@ export default async function handler(
         userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
         console.log('userTasks', userTasks)
       } else {
-        return res.status(400).json({ message: "You don't own this POAP." })
+        return res.status(400).json({ message: "You don't own this POAP yet. Tap your phone to the black IYK 🛜 POAP disk to claim it." })
       }
     } else if (taskAction === 'click-link') {
       userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
