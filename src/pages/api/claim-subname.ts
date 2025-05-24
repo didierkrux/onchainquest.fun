@@ -118,7 +118,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         resolverContract.interface.encodeFunctionData('setAddr(bytes32,uint256,bytes)', [
           subnodeNamehash,
           8453,
-          ethers.zeroPadValue(destination, 32)
+          destination
         ]),
         // setText for avatar
         resolverContract.interface.encodeFunctionData('setText', [
