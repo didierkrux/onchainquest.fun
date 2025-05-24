@@ -460,18 +460,22 @@ export default function Onboarding({ event }: { event: Event }) {
               </Box>
             ) : !isCompleted ? (
               <>
-                <input
-                  type="text"
-                  value={subnameInput}
-                  onChange={(e) => setSubnameInput(e.target.value)}
-                  placeholder={t('Enter subname')}
-                  style={{
-                    padding: '8px',
-                    borderRadius: '4px',
-                    border: '1px solid #E2E8F0',
-                    width: '200px',
-                  }}
-                />
+                <Box paddingRight={4}>
+                  <input
+                    type="text"
+                    value={subnameInput}
+                    onChange={(e) => setSubnameInput(e.target.value)}
+                    placeholder={t('subname')}
+                    style={{
+                      padding: '2px',
+                      borderRadius: '4px',
+                      border: '1px solid #E2E8F0',
+                      width: '120px',
+                      textAlign: 'end',
+                    }}
+                  />
+                  .{ENS_DOMAIN}
+                </Box>
                 <Button
                   onClick={() => {
                     if (!subnameInput) {
