@@ -26,11 +26,13 @@ import { useSignMessage } from 'wagmi'
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
 import { ENS_DOMAIN } from 'config'
+import { switchChain } from '@wagmi/core'
+import { wagmiAdapter } from 'context'
 
 export default function Onboarding({ event }: { event: Event }) {
   const { t } = useTranslation()
   const { open } = useAppKit()
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, chainId } = useAccount()
   const { sendTransaction } = useSendTransaction()
   const router = useRouter()
   const { eventId } = router.query
@@ -191,6 +193,12 @@ export default function Onboarding({ event }: { event: Event }) {
 
   const handleSendTokens = async () => {
     try {
+      // get current chain id
+      console.log('chainId', chainId)
+      // change the chain id to base mainnet
+      if (chainId !== 8453) {
+        await switchChain(wagmiAdapter.wagmiConfig, { chainId: 8453 })
+      }
       const hash = await sendTransaction({
         to: '0x767D1AF42CC93E15E72aFCF15477733C66e5460a',
         value: parseEther('0.00001'),
