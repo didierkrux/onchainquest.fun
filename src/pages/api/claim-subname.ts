@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: 'Recipient address, subname, and signature are required' });
     }
 
-    const subnameToLower = (subname as string).toLowerCase()
+    const subnameToLower = (subname as string)?.toLowerCase()?.replace(/[^a-zA-Z0-9]/g, '')
 
     if (parseInt(eventId as string) !== currentEventId) {
       return res.status(400).json({ message: 'Event task is not available' });
