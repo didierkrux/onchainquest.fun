@@ -480,7 +480,7 @@ export default function Onboarding({ event }: { event: Event }) {
               </Box>
             ) : !isCompleted ? (
               <>
-                <Box paddingRight={4}>
+                <Box>
                   <input
                     type="text"
                     value={subnameInput}
@@ -490,7 +490,7 @@ export default function Onboarding({ event }: { event: Event }) {
                       padding: '2px',
                       borderRadius: '4px',
                       border: '1px solid #E2E8F0',
-                      width: '120px',
+                      width: '110px',
                       textAlign: 'end',
                     }}
                   />
