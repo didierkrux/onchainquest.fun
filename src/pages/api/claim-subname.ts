@@ -126,7 +126,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         resolverContract.interface.encodeFunctionData('setText', [
           subnodeNamehash,
           'avatar',
-          `https://newtoweb3.io/api/avatar/${subnameToLower}`
+          `https://newtoweb3.io/api/avatar/${subnameToLower}?eventId=${eventId}`
         ])
       ];
 

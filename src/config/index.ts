@@ -1,11 +1,13 @@
 // default event id
 export const eventId = parseInt(process.env.NEXT_PUBLIC_EVENT_ID || '2')
 
-export const eventName = 'New to Web3'
+export const eventName = process.env.NEXT_PUBLIC_EVENT_NAME || 'New to Web3'
 
 export const ENS_DOMAIN = 'newtoweb3.eth'
 
-export const eventDescription = '"New to Web3? Start Here" is a day of activities to get you from 0 to 1 in Web3'
+export const eventDescription =
+  process.env.NEXT_PUBLIC_EVENT_DESCRIPTION ||
+  '"New to Web3? Start Here" is a day of activities to get you from 0 to 1 in Web3'
 
 export const adminWallets = [
   '0xBD19a3F0A9CaCE18513A1e2863d648D13975CB30'.toLowerCase(), // didierkrux.eth

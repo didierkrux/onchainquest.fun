@@ -33,7 +33,7 @@ export default function EventPage({ event }: { event: Event }) {
           <LanguageSwitch eventLanguage={event.config.eventLanguage} />
         )}
       </Box>
-      <Heading as="h1">{t('Program')}</Heading>
+      {event.program?.length > 0 && <Heading as="h1">{t('Program')}</Heading>}
       {event.program?.map((item, index) => (
         <CardComponent mt={4} key={index} type={item.highlight ? 'orange' : 'transparent'}>
           <CardBody

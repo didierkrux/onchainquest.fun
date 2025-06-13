@@ -9,6 +9,7 @@ export const LanguageDescription: LanguageDescriptionType = Object.fromEntries(
   Object.entries({
     en: 'English',
     th: 'ไทย',
+    fr: 'Français',
   }).sort((a, b) => a[1].localeCompare(b[1]))
 )
 

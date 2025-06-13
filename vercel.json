@@ -7,6 +7,14 @@
     {
       "source": "/deeplink",
       "destination": "/api/zerion-deeplink"
+    },
+    {
+      "source": "/manifest.json",
+      "destination": "/api/manifest"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/api/favicon"
     }
   ]
 }

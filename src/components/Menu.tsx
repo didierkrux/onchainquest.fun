@@ -18,6 +18,7 @@ import {
   Plugs,
   InstagramLogo,
   SquaresFour,
+  AppWindow,
 } from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
 import { useAppKit, useAppKitState } from '@reown/appkit/react'
@@ -88,7 +89,6 @@ const Menu = () => {
   const [appDeploymentId, setAppDeploymentId] = useLocalStorage('app-deployment-id', '')
   const [latestDeploymentId, setLatestDeploymentId] = useState(appDeploymentId)
 
-
   const MENU_ITEMS = [
     {
       label: t('Event'),
@@ -97,10 +97,10 @@ const Menu = () => {
       path: '',
     },
     {
-      label: t('Social'),
-      icon: InstagramLogo,
-      href: '/event/[eventId]/social',
-      path: '/social',
+      label: eventId === 3 ? t('Apps') : t('Social'),
+      icon: eventId === 3 ? AppWindow : InstagramLogo,
+      href: eventId === 3 ? '/event/[eventId]/apps' : '/event/[eventId]/social',
+      path: eventId === 3 ? '/apps' : '/social',
     },
     {
       label: t('Onboarding'),
