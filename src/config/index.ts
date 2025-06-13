@@ -1,5 +1,5 @@
 // default event id
-export const eventId = process.env.NEXT_PUBLIC_EVENT_ID || 2
+export const eventId = parseInt(process.env.NEXT_PUBLIC_EVENT_ID || '2')
 
 export const eventName = 'New to Web3'
 
