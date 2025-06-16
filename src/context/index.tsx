@@ -65,3 +65,5 @@ export default function Web3ModalProvider({
     </WagmiProvider>
   )
 }
+
+export const wagmiConfig = wagmiAdapter.wagmiConfig
