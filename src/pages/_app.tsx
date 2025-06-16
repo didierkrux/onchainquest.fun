@@ -20,11 +20,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const menuIndex = router.pathname ? MENU.findIndex((item) => item.href === router.pathname) : 0
   const label = MENU[menuIndex]?.label || ''
   const title = label ? t(label) : ''
-  const socialImage = `${DOMAIN_URL}/social.jpg?v=1`
+  const socialImage = `${process.env.NEXT_PUBLIC_SOCIAL_IMAGE || `${DOMAIN_URL}/social.jpg`}?v=1`
   const url = `${DOMAIN_URL}${router.pathname}`
   const pageTitle = title ? `${title} | ${eventName}` : eventName
   const description = eventDescription
-  const appIcon = `${DOMAIN_URL}/app-icon.png?v=1`
+  const appIcon = `${process.env.NEXT_PUBLIC_APP_ICON || `${DOMAIN_URL}/app-icon.png`}?v=1`
   const canonical = url?.split('?')[0]
 
   useEffect(() => {
