@@ -58,9 +58,9 @@
     "eslint-config-next": "14.1.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.1",
+    "null-loader": "^4.0.1",
     "prettier": "^3.5.3",
-    "typescript": "5.3.3",
-    "worker-loader": "^3.0.8"
+    "typescript": "5.3.3"
   },
   "resolutions": {
     "@types/react": "18.2.0",
