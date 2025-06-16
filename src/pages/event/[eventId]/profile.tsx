@@ -393,7 +393,11 @@ export default function ProfilePage() {
                       </Box>
                     </Box>
                   </Box>
-                  <DynamicWidget />
+                  {eventId === '3' ? (
+                    <Box display="flex" justifyContent="center">
+                      <DynamicWidget />
+                    </Box>
+                  ) : null}
                   <Box m={4} display="flex" justifyContent="center">
                     <Avatar src={profileAvatar(profile)} width="40%" />
                     <Image src={qrCodeDataURL} w="40%" h="auto" alt="QR" ml={8} />

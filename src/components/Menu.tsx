@@ -25,6 +25,11 @@ import { useAppKit, useAppKitState } from '@reown/appkit/react'
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import styled from '@emotion/styled'
+import {
+  DynamicConnectButton,
+  useAuthenticateConnectedUser,
+  useDynamicModals,
+} from '@dynamic-labs/sdk-react-core'
 
 import { MENU, eventId } from 'config'
 import { useLocalStorage } from 'usehooks-ts'
@@ -88,6 +93,7 @@ const Menu = () => {
   const [profile] = useLocalStorage<Profile | null>(`profile-${currentEventId}`, null)
   const [appDeploymentId, setAppDeploymentId] = useLocalStorage('app-deployment-id', '')
   const [latestDeploymentId, setLatestDeploymentId] = useState(appDeploymentId)
+  const { authenticateUser } = useAuthenticateConnectedUser()
 
   const MENU_ITEMS = [
     {
@@ -232,36 +238,69 @@ const Menu = () => {
           {newVersionAvailable ? null : (
             <>
               <Popover isOpen={!isConnected && isProfileActive && !isOpen}>
-                <PopoverTrigger>
+                {!isConnected ? (
+                  <DynamicConnectButton>
+                    <PopoverTrigger>
+                      <Box
+                        w="100%"
+                        h="100%"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                      >
+                        <NextLink
+                          href={MENU[4].href}
+                          as={`/event/${currentEventId}/profile`}
+                          style={{ width: '100%', height: '100%' }}
+                        >
+                          <MenuItem
+                            label={isConnected ? t('Profile') : t('Connect')}
+                            isActive={isProfileActive}
+                            onClick={() => {
+                              if (!isConnected) {
+                                if (currentEventId === '3') {
+                                  // click the dynamic connect button
+                                } else {
+                                  open({ view: 'Connect' })
+                                }
+                              }
+                            }}
+                          >
+                            {profile && isConnected ? (
+                              <Box
+                                border={isProfileActive ? '1px solid white' : '1px solid #C06FDB'}
+                                borderRadius="full"
+                              >
+                                <Avatar width="24px" src={profileAvatar(profile)} />
+                              </Box>
+                            ) : (
+                              <Plugs size={24} />
+                            )}
+                          </MenuItem>
+                        </NextLink>
+                      </Box>
+                    </PopoverTrigger>
+                  </DynamicConnectButton>
+                ) : (
                   <Box w="100%" h="100%" display="flex" justifyContent="center" alignItems="center">
                     <NextLink
                       href={MENU[4].href}
                       as={`/event/${currentEventId}/profile`}
                       style={{ width: '100%', height: '100%' }}
                     >
-                      <MenuItem
-                        label={isConnected ? t('Profile') : t('Connect')}
-                        isActive={isProfileActive}
-                        onClick={() => {
-                          if (!isConnected) {
-                            open({ view: 'Connect' })
-                          }
-                        }}
-                      >
-                        {profile && isConnected ? (
+                      <MenuItem label={t('Profile')} isActive={isProfileActive}>
+                        {profile && (
                           <Box
                             border={isProfileActive ? '1px solid white' : '1px solid #C06FDB'}
                             borderRadius="full"
                           >
                             <Avatar width="24px" src={profileAvatar(profile)} />
                           </Box>
-                        ) : (
-                          <Plugs size={24} />
                         )}
                       </MenuItem>
                     </NextLink>
                   </Box>
-                </PopoverTrigger>
+                )}
                 <PopoverContent>
                   <PopoverArrow />
                   <PopoverBody>
