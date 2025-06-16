@@ -71,7 +71,7 @@ export default function Web3ModalProvider({
         walletConnectors: [EthereumWalletConnectors],
       }}
     >
-      <WagmiProvider config={wagmiAdapter.wagmiConfig} initialState={initialState} as any>
+      <WagmiProvider config={wagmiAdapter.wagmiConfig} initialState={initialState}>
         <QueryClientProvider client={queryClient}>
           <DynamicWagmiConnector>{children}</DynamicWagmiConnector>
         </QueryClientProvider>

@@ -27,7 +27,7 @@
     "@safe-global/safe-core-sdk-types": "^5.1.0",
     "@tanstack/react-query": "^5.80.7",
     "@twemoji/api": "^15.1.0",
-    "@wagmi/core": "2.13.4",
+    "@wagmi/core": "^2.17.3",
     "@web3modal/react": "^2.7.1",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.5",
@@ -56,9 +56,11 @@
     "esbuild": "0.21.1",
     "eslint": "8.56.0",
     "eslint-config-next": "14.1.0",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "worker-loader": "^3.0.8"
   },
   "resolutions": {
-    "@types/react": "18.2.0"
+    "@types/react": "18.2.0",
+    "@wagmi/core": "^2.17.3"
   }
 }
