@@ -23,6 +23,7 @@ import { Trophy, CheckCircle, Star, Lock, Check, CopySimple } from '@phosphor-ic
 import { useRouter } from 'next/router'
 import { parseEther } from 'viem'
 import { useSignMessage } from 'wagmi'
+import { DynamicWidget } from '@dynamic-labs/sdk-react-core'
 
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
@@ -659,6 +660,7 @@ export default function Onboarding({ event }: { event: Event }) {
                       >
                         {t('Connect Wallet')}
                       </Button>
+                      <DynamicWidget />
                     </Box>
                   ) : null}
                 </Box>

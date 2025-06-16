@@ -9,6 +9,10 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { base } from '@reown/appkit/networks'
 import { createAppKit } from '@reown/appkit/react'
 
+import { DynamicContextProvider } from '@dynamic-labs/sdk-react-core'
+import { EthereumWalletConnectors } from '@dynamic-labs/ethereum'
+import { DynamicWagmiConnector } from '@dynamic-labs/wagmi-connector'
+
 // Setup queryClient
 const queryClient = new QueryClient()
 
@@ -52,17 +56,27 @@ export const modal = createAppKit({
   networks: [base],
 })
 
+// https://docs.dynamic.xyz/react-sdk/using-wagmi
 export default function Web3ModalProvider({
   children,
-  initialState
+  initialState,
 }: {
   children: ReactNode
   initialState?: State
 }) {
   return (
-    <WagmiProvider config={wagmiAdapter.wagmiConfig} initialState={initialState}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </WagmiProvider>
+    <DynamicContextProvider
+      settings={{
+        environmentId: '4e90be8c-0307-4000-9034-0c8292f51f58',
+        walletConnectors: [EthereumWalletConnectors],
+      }}
+    >
+      <WagmiProvider config={wagmiAdapter.wagmiConfig} initialState={initialState} as any>
+        <QueryClientProvider client={queryClient}>
+          <DynamicWagmiConnector>{children}</DynamicWagmiConnector>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </DynamicContextProvider>
   )
 }
 

@@ -34,6 +34,7 @@ import {
   Trash,
 } from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
+import { DynamicWidget } from '@dynamic-labs/sdk-react-core'
 
 import { Profile } from 'entities/profile'
 import { profileName, profileAvatar, profileRole } from 'utils/index'
@@ -392,6 +393,7 @@ export default function ProfilePage() {
                       </Box>
                     </Box>
                   </Box>
+                  <DynamicWidget />
                   <Box m={4} display="flex" justifyContent="center">
                     <Avatar src={profileAvatar(profile)} width="40%" />
                     <Image src={qrCodeDataURL} w="40%" h="auto" alt="QR" ml={8} />
