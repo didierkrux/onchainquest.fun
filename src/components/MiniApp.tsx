@@ -100,6 +100,7 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
   const cleanupRef = useRef<(() => void) | null>(null)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const { address } = useAccount()
+  const frameHostRef = useRef<any>(null)
 
   useEffect(() => {
     if (!address || !frameUrl) return
@@ -121,6 +122,16 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
       if (!iframeRef.current) {
         log('No iframe ref found')
         return
+      }
+
+      // Cleanup previous frame host if it exists
+      if (frameHostRef.current) {
+        try {
+          frameHostRef.current.cleanup?.()
+        } catch (error) {
+          log('Error cleaning up previous frame host:', error)
+        }
+        frameHostRef.current = null
       }
 
       const { exposeToIframe } = await import('@farcaster/frame-host')
@@ -172,7 +183,7 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
         endpoint.emit({
           event: 'eip6963:announceProvider',
           info: {
-            name: 'Bankless Academy Frame',
+            name: 'App wallet (parent page)',
             icon: '/favicon.ico',
             rdns: 'com.banklessacademy.frame',
             uuid: '1395b549-854c-48c4-96af-5a58012196e5',
@@ -183,7 +194,7 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
 
       window.addEventListener('message', handleMessage)
 
-      const { endpoint } = exposeToIframe({
+      const { endpoint, cleanup } = exposeToIframe({
         iframe: iframeRef.current,
         sdk: {
           ready: (options: any) => {
@@ -241,12 +252,19 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
         debug: true,
       })
 
+      frameHostRef.current = { endpoint, cleanup }
+
       cleanupRef.current = () => {
         isCurrentFrame = false
         window.removeEventListener('message', handleMessage)
-        if (iframeRef.current) {
-          iframeRef.current.remove()
+        if (frameHostRef.current?.cleanup) {
+          try {
+            frameHostRef.current.cleanup()
+          } catch (error) {
+            log('Error during frame host cleanup:', error)
+          }
         }
+        frameHostRef.current = null
         setIsInitialized(false)
         setIsLoading(false)
         setError(null)
@@ -294,6 +312,7 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
             </Text>
           )}
           <iframe
+            key={`${address}-${frameUrl}`}
             ref={iframeRef}
             id={FRAME_ID}
             src={frameUrl}
