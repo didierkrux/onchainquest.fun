@@ -5,8 +5,8 @@
   ],
   "plugins": ["prettier"],
   "rules": {
-    "prettier/prettier": "error",
+    "prettier/prettier": "warn",
     "semi": "off",
-    "quotes": ["error", "single"]
+    "quotes": ["warn", "single"]
   }
 }

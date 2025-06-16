@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+// /* eslint-disable @typescript-eslint/no-unused-vars */
 // https://github.com/farcasterxyz/frames-v2-demo
 // https://github.com/farcasterxyz/frames/tree/main/packages/frame-host
 import { useState, useEffect, useRef } from 'react'

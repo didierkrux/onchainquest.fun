@@ -348,7 +348,7 @@ export default function Onboarding({ event }: { event: Event }) {
         const buttons = quest.button?.split('\n')
         const Links = links?.map((link, index) => {
           return (
-            <Link isExternal href={link}>
+            <Link key={index} isExternal href={link}>
               <Button onClick={() => handleAction(quest)}>{buttons?.[index]}</Button>
             </Link>
           )
