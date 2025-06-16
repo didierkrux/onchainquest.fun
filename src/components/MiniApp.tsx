@@ -101,6 +101,8 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const { address } = useAccount()
   const frameHostRef = useRef<any>(null)
+  const isTransactionInProgressRef = useRef(false)
+  const lastTransactionErrorRef = useRef<Error | null>(null)
 
   useEffect(() => {
     if (!address || !frameUrl) return
@@ -145,6 +147,40 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
             provider = {
               request: async (args: { method: string; params: any[] }) => {
                 if (!isCurrentFrame) return null
+                // Check if this is a transaction request
+                if (
+                  args.method === 'eth_sendTransaction' ||
+                  args.method === 'eth_signTransaction'
+                ) {
+                  // If we have a previous rejection error, return it immediately
+                  if (lastTransactionErrorRef.current) {
+                    const error = lastTransactionErrorRef.current
+                    lastTransactionErrorRef.current = null
+                    throw error
+                  }
+
+                  if (isTransactionInProgressRef.current) {
+                    log('Transaction already in progress, ignoring request')
+                    return null
+                  }
+
+                  isTransactionInProgressRef.current = true
+                  try {
+                    const result = await client.request({ ...args, params: args.params || [] })
+                    return result
+                  } catch (error: any) {
+                    // Store the error if it's a user rejection
+                    if (error?.code === 4001 || error?.message?.includes('User denied')) {
+                      lastTransactionErrorRef.current = error
+                    }
+                    throw error
+                  } finally {
+                    // Reset the transaction lock after a short delay
+                    setTimeout(() => {
+                      isTransactionInProgressRef.current = false
+                    }, 1000)
+                  }
+                }
                 return client.request({ ...args, params: args.params || [] })
               },
               on: (_event: string, _listener: any) => {
