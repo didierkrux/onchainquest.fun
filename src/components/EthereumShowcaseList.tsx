@@ -14,23 +14,33 @@ interface EthereumShowcaseListProps {
 
 const ethereumShowcaseItems: EthereumShowcaseItem[] = [
   {
+    name: 'Pay w/ stablecoins',
+    url: 'https://shop.slice.so/store/2708',
+    iconUrl: '/images/mini-apps/icon_2.png',
+  },
+  {
+    name: 'Learn about Ethereum',
+    url: 'https://app.banklessacademy.com/lessons/ethereum-basics',
+    iconUrl: 'https://i.postimg.cc/T3ZZGrL7/Ehtereum.png',
+  },
+  {
+    name: 'Collect an onchain Podcast',
+    url: 'https://pods.media/',
+    iconUrl: 'https://pods.media/icon.svg',
+  },
+  {
     name: 'Collect memories',
     url: 'https://poap.gallery/drops/178416',
     iconUrl: '/images/mini-apps/icon_1.png',
   },
   {
-    name: 'Pay w/ stablecoins',
-    url: 'https://shop.slice.so/store/2305',
-    iconUrl: '/images/mini-apps/icon_2.png',
-  },
-  {
     name: 'DeFi',
-    url: 'https://app.uniswap.org/swap?inputCurrency=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&outputCurrency=ETH&chain=base',
+    url: 'https://morpho.dtech.vision/',
     iconUrl: '/images/mini-apps/icon_3.png',
   },
   {
     name: 'Make predictions',
-    url: 'https://www.weponder.io/',
+    url: 'https://www.betswirl.com/',
     iconUrl: '/images/mini-apps/icon_4.png',
   },
   {
@@ -57,11 +67,6 @@ const ethereumShowcaseItems: EthereumShowcaseItem[] = [
     name: 'Prove privately via ZK tech',
     url: 'https://playground.self.xyz/',
     iconUrl: '/images/mini-apps/icon_9.png',
-  },
-  {
-    name: 'Learn about Ethereum',
-    url: 'https://app.banklessacademy.com/lessons/ethereum-basics',
-    iconUrl: '/images/mini-apps/icon_10.png',
   },
 ]
 
