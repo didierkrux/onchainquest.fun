@@ -29,11 +29,6 @@ const ethereumShowcaseItems: EthereumShowcaseItem[] = [
     iconUrl: 'https://pods.media/icon.svg',
   },
   {
-    name: 'Collect memories',
-    url: 'https://poap.gallery/drops/178416',
-    iconUrl: '/images/mini-apps/icon_1.png',
-  },
-  {
     name: 'DeFi',
     url: 'https://morpho.dtech.vision/',
     iconUrl: '/images/mini-apps/icon_3.png',
@@ -44,30 +39,35 @@ const ethereumShowcaseItems: EthereumShowcaseItem[] = [
     iconUrl: '/images/mini-apps/icon_4.png',
   },
   {
+    name: 'Crowdfund',
+    url: 'https://crowdfund.seedclub.com/',
+    iconUrl: '/images/mini-apps/icon_7.png',
+  },
+  {
     name: 'Create an ENS',
     url: 'https://basenames.apoorv.xyz/',
     iconUrl: '/images/mini-apps/icon_5.png',
   },
-  {
-    name: 'Attest w/ EAS',
-    url: 'https://base.easscan.org/attestation/attestWithSchema/0xf58b8b212ef75ee8cd7e8d803c37c03e0519890502d5e99ee2412aae1456cafe',
-    iconUrl: '/images/mini-apps/icon_6.png',
-  },
-  {
-    name: 'Support public goods',
-    url: 'https://explorer.gitcoin.co/#/round/42161/867/59',
-    iconUrl: '/images/mini-apps/icon_7.png',
-  },
-  {
-    name: 'Vote onchain',
-    url: 'https://jokerace.io/',
-    iconUrl: '/images/mini-apps/icon_8.png',
-  },
-  {
-    name: 'Prove privately via ZK tech',
-    url: 'https://playground.self.xyz/',
-    iconUrl: '/images/mini-apps/icon_9.png',
-  },
+  // {
+  //   name: 'Attest w/ EAS',
+  //   url: 'https://base.easscan.org/attestation/attestWithSchema/0xf58b8b212ef75ee8cd7e8d803c37c03e0519890502d5e99ee2412aae1456cafe',
+  //   iconUrl: '/images/mini-apps/icon_6.png',
+  // },
+  // {
+  //   name: 'Collect memories',
+  //   url: 'https://poap.gallery/drops/178416',
+  //   iconUrl: '/images/mini-apps/icon_1.png',
+  // },
+  // {
+  //   name: 'Vote onchain',
+  //   url: 'https://jokerace.io/',
+  //   iconUrl: '/images/mini-apps/icon_8.png',
+  // },
+  // {
+  //   name: 'Prove privately via ZK tech',
+  //   url: 'https://playground.self.xyz/',
+  //   iconUrl: '/images/mini-apps/icon_9.png',
+  // },
 ]
 
 const EthereumShowcaseList: React.FC<EthereumShowcaseListProps> = ({ onSelectItem }) => {
