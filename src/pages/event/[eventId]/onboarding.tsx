@@ -12,6 +12,13 @@ import {
   Divider,
   Link,
   useClipboard,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  Flex,
 } from '@chakra-ui/react'
 import { useAppKit } from '@reown/appkit/react'
 import { useAccount, useBalance, useSendTransaction } from 'wagmi'
@@ -25,6 +32,7 @@ import { parseEther } from 'viem'
 import { useSignMessage } from 'wagmi'
 import { DynamicWidget } from '@dynamic-labs/sdk-react-core'
 import { QRScanner } from 'components/QRScanner'
+import MiniApp from 'components/MiniApp'
 
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
@@ -47,6 +55,8 @@ export default function Onboarding({ event }: { event: Event }) {
   const [subnameInput, setSubnameInput] = useState('')
   const { signMessageAsync } = useSignMessage()
   const { onCopy, hasCopied } = useClipboard(profile?.address || '')
+  const [isShopOpen, setIsShopOpen] = useState(false)
+  const [shopUrl, setShopUrl] = useState('')
 
   useEffect(() => {
     if (address) {
@@ -586,6 +596,7 @@ export default function Onboarding({ event }: { event: Event }) {
           ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
           : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        const [url] = quest?.condition?.split(',') ?? []
         quest.actionField = (
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
@@ -597,9 +608,14 @@ export default function Onboarding({ event }: { event: Event }) {
               </Box>
             ) : !isCompleted ? (
               <Box display="flex" gap={4}>
-                <Link isExternal href="https://shop.slice.so/store/2708">
-                  <Button>{t('Open Shop')}</Button>
-                </Link>
+                <Button
+                  onClick={() => {
+                    setShopUrl(url)
+                    setIsShopOpen(true)
+                  }}
+                >
+                  {t('Open Shop')}
+                </Button>
                 <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
                   {t('Verify')}
                 </Button>
@@ -741,6 +757,23 @@ export default function Onboarding({ event }: { event: Event }) {
           </Card>
         )
       })}
+
+      <Modal isOpen={isShopOpen} onClose={() => setIsShopOpen(false)} size="lg" isCentered>
+        <ModalOverlay />
+        <ModalContent w="424px" maxW="100vw" backdropFilter="blur(10px)">
+          <ModalHeader>
+            <Flex justify="space-between" align="center">
+              <Box>
+                <Heading size="md">Shop</Heading>
+              </Box>
+            </Flex>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody p={0}>
+            <MiniApp frameUrl={shopUrl} onClose={() => setIsShopOpen(false)} />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   )
 }
