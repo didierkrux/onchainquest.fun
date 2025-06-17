@@ -233,81 +233,95 @@ const Menu = () => {
                   </Box>
                 )
               })}
-            </>
-          )}
-          {newVersionAvailable ? null : (
-            <>
-              <Popover isOpen={!isConnected && isProfileActive && !isOpen}>
-                {!isConnected ? (
-                  <DynamicConnectButton>
-                    <PopoverTrigger>
-                      <Box
-                        w="100%"
-                        h="100%"
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                      >
-                        <NextLink
-                          href={MENU[4].href}
-                          as={`/event/${currentEventId}/profile`}
-                          style={{ width: '100%', height: '100%' }}
-                        >
-                          <MenuItem
-                            label={isConnected ? t('Profile') : t('Connect')}
-                            isActive={isProfileActive}
-                            onClick={() => {
-                              if (!isConnected) {
-                                if (currentEventId === '3') {
-                                  // click the dynamic connect button
-                                } else {
-                                  open({ view: 'Connect' })
-                                }
-                              }
-                            }}
-                          >
-                            {profile && isConnected ? (
-                              <Box
-                                border={isProfileActive ? '1px solid white' : '1px solid #C06FDB'}
-                                borderRadius="full"
-                              >
-                                <Avatar width="24px" src={profileAvatar(profile)} />
-                              </Box>
-                            ) : (
-                              <Plugs size={24} />
-                            )}
-                          </MenuItem>
-                        </NextLink>
-                      </Box>
-                    </PopoverTrigger>
-                  </DynamicConnectButton>
-                ) : (
-                  <Box w="100%" h="100%" display="flex" justifyContent="center" alignItems="center">
-                    <NextLink
-                      href={MENU[4].href}
-                      as={`/event/${currentEventId}/profile`}
-                      style={{ width: '100%', height: '100%' }}
+              {newVersionAvailable ? null : (
+                <Popover isOpen={!isConnected && isProfileActive && !isOpen}>
+                  {!isConnected ? (
+                    <Box
+                      w="100%"
+                      h="100%"
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
                     >
-                      <MenuItem label={t('Profile')} isActive={isProfileActive}>
-                        {profile && (
+                      <DynamicConnectButton>
+                        <PopoverTrigger>
                           <Box
-                            border={isProfileActive ? '1px solid white' : '1px solid #C06FDB'}
-                            borderRadius="full"
+                            w="100%"
+                            h="100%"
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
                           >
-                            <Avatar width="24px" src={profileAvatar(profile)} />
+                            <NextLink
+                              href={MENU[4].href}
+                              as={`/event/${currentEventId}/profile`}
+                              style={{ width: '100%', height: '100%' }}
+                            >
+                              <MenuItem
+                                label={isConnected ? t('Profile') : t('Connect')}
+                                isActive={isProfileActive}
+                                onClick={() => {
+                                  if (!isConnected) {
+                                    if (currentEventId === '3') {
+                                      // click the dynamic connect button
+                                    } else {
+                                      open({ view: 'Connect' })
+                                    }
+                                  }
+                                }}
+                              >
+                                {profile && isConnected ? (
+                                  <Box
+                                    border={
+                                      isProfileActive ? '1px solid white' : '1px solid #C06FDB'
+                                    }
+                                    borderRadius="full"
+                                  >
+                                    <Avatar width="24px" src={profileAvatar(profile)} />
+                                  </Box>
+                                ) : (
+                                  <Plugs size={24} />
+                                )}
+                              </MenuItem>
+                            </NextLink>
                           </Box>
-                        )}
-                      </MenuItem>
-                    </NextLink>
-                  </Box>
-                )}
-                <PopoverContent>
-                  <PopoverArrow />
-                  <PopoverBody>
-                    {t('Click here to connect your wallet & access your profile')}
-                  </PopoverBody>
-                </PopoverContent>
-              </Popover>
+                        </PopoverTrigger>
+                      </DynamicConnectButton>
+                    </Box>
+                  ) : (
+                    <Box
+                      w="100%"
+                      h="100%"
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      <NextLink
+                        href={MENU[4].href}
+                        as={`/event/${currentEventId}/profile`}
+                        style={{ width: '100%', height: '100%' }}
+                      >
+                        <MenuItem label={t('Profile')} isActive={isProfileActive}>
+                          {profile && (
+                            <Box
+                              border={isProfileActive ? '1px solid white' : '1px solid #C06FDB'}
+                              borderRadius="full"
+                            >
+                              <Avatar width="24px" src={profileAvatar(profile)} />
+                            </Box>
+                          )}
+                        </MenuItem>
+                      </NextLink>
+                    </Box>
+                  )}
+                  <PopoverContent>
+                    <PopoverArrow />
+                    <PopoverBody>
+                      {t('Click here to connect your wallet & access your profile')}
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
+              )}
             </>
           )}
         </Flex>
