@@ -3,15 +3,21 @@ import { useTranslation } from 'react-i18next'
 import { useLocalStorage } from 'usehooks-ts'
 import { Info } from '@phosphor-icons/react'
 import { isAndroid, isIOS } from 'react-device-detect'
+import { useState, useRef, useEffect } from 'react'
+import { Scanner } from '@yudiel/react-qr-scanner'
 
 import LanguageSwitch from 'components/LanguageSwitch'
 import { Event } from 'entities/data'
+import { eventId } from 'config'
 import { Card as CardComponent } from 'components/Card'
 
 export default function EventPage({ event }: { event: Event }) {
   const { t } = useTranslation()
   const [pwa] = useLocalStorage<boolean | null>('pwa', null)
   const [, setShowInstallPWA] = useLocalStorage('showInstallPWA', false)
+  const [cameraPermission, setCameraPermission] = useState<PermissionState | null>(null)
+  const [isScanning, setIsScanning] = useState(false)
+  const [scanResult, setScanResult] = useState<string | null>(null)
 
   const goldSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '1-gold')
   const silverSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '2-silver')
@@ -193,6 +199,105 @@ export default function EventPage({ event }: { event: Event }) {
                 </Box>
               ))}
             </Box>
+          </Box>
+        )}
+        {eventId === 3 && (
+          <Box mt="10">
+            {/* QR Code Scanner Button and Preview */}
+            {!isScanning ? (
+              <Button
+                onClick={async () => {
+                  try {
+                    // Check if permissions API is available
+                    if (navigator.permissions && navigator.permissions.query) {
+                      const permissionStatus = await navigator.permissions.query({
+                        name: 'camera' as PermissionName,
+                      })
+                      setCameraPermission(permissionStatus.state)
+
+                      if (permissionStatus.state === 'denied') {
+                        alert(
+                          'Camera permission is required. Please enable it in your browser settings.'
+                        )
+                        return
+                      }
+
+                      if (permissionStatus.state === 'prompt') {
+                        const confirmed = window.confirm(
+                          'This app needs camera access to scan QR codes. Would you like to grant permission?'
+                        )
+                        if (!confirmed) return
+                      }
+                    }
+
+                    setIsScanning(true)
+                  } catch (error) {
+                    console.error('Error accessing camera:', error)
+                    if (error instanceof DOMException && error.name === 'NotAllowedError') {
+                      alert('Camera access was denied. Please grant permission to use the camera.')
+                    } else {
+                      alert(
+                        'Failed to access camera. Please ensure you have granted camera permissions.'
+                      )
+                    }
+                  }
+                }}
+              >
+                Scan QR Code
+              </Button>
+            ) : (
+              <Box>
+                <Box
+                  position="relative"
+                  width="100%"
+                  maxWidth="500px"
+                  margin="0 auto"
+                  border="2px solid"
+                  borderColor="purple.500"
+                  borderRadius="md"
+                  overflow="hidden"
+                >
+                  <Scanner
+                    onScan={(detectedCodes: { rawValue: string }[]) => {
+                      if (detectedCodes.length > 0) {
+                        const result = detectedCodes[0].rawValue
+                        setScanResult(result)
+                        setIsScanning(false)
+                        // Save the QR code data
+                        localStorage.setItem('qrCode', result)
+                        alert('QR Code detected successfully!')
+                      }
+                    }}
+                    onError={(error: unknown) => {
+                      console.error('QR Scanner error:', error)
+                    }}
+                    constraints={{
+                      facingMode: 'environment',
+                    }}
+                    styles={{
+                      container: {
+                        width: '100%',
+                        height: '300px',
+                      },
+                      video: {
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      },
+                    }}
+                  />
+                </Box>
+                <Button mt={4} onClick={() => setIsScanning(false)} colorScheme="red">
+                  Stop Scanning
+                </Button>
+              </Box>
+            )}
+            {scanResult && (
+              <Box mt={4} p={4} bg="gray.100" borderRadius="md">
+                <Text fontWeight="bold">Last scanned QR code:</Text>
+                <Text>{scanResult}</Text>
+              </Box>
+            )}
           </Box>
         )}
       </Box>
