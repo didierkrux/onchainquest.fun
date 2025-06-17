@@ -10,9 +10,6 @@ import {
   useClipboard,
   useToast,
   useMediaQuery,
-  FormControl,
-  FormLabel,
-  Switch,
   Link,
   Divider,
 } from '@chakra-ui/react'
@@ -38,7 +35,7 @@ import { DynamicWidget } from '@dynamic-labs/sdk-react-core'
 
 import { Profile } from 'entities/profile'
 import { profileName, profileAvatar, profileRole } from 'utils/index'
-import { adminSignatureMessage, adminWallets, ENS_DOMAIN } from 'config'
+import { adminSignatureMessage, adminWallets, ENS_DOMAIN, eventId as EVENT_ID } from 'config'
 import { Avatar } from 'components/Avatar'
 import SelectTab from 'components/SelectTab'
 
@@ -91,8 +88,8 @@ export default function ProfilePage() {
             feedbackType === 'success'
               ? t('Success')
               : feedbackType === 'warning'
-              ? t('Warning')
-              : t('Error'),
+                ? t('Warning')
+                : t('Error'),
           description:
             feedbackType === 'success' ? t('Profile saved successfully.') : ` ${data?.message}`,
           status: feedbackType,
@@ -589,19 +586,16 @@ export default function ProfilePage() {
                 )} */}
                 {adminSignature && (
                   <Box display="flex" alignItems="center" gap={4}>
-                    <Link href={`/event/${eventId === '1' ? '2' : '1'}`}>
-                      <Button
-                        whiteSpace="nowrap"
-                        colorScheme="red"
-                        leftIcon={<ArrowsLeftRight />}
-                        onClick={() => {
-                          // force changing language to english before switching event
-                          i18n.changeLanguage('en')
-                        }}
-                      >
-                        switch event
-                      </Button>
-                    </Link>
+                    {Array.from({ length: EVENT_ID }, (_, i) => i + 1).map(
+                      (eventIdLoop) =>
+                        eventIdLoop !== Number(eventId) && (
+                          <Link href={`/event/${eventIdLoop}`} key={eventIdLoop}>
+                            <Button colorScheme="red" leftIcon={<ArrowsLeftRight />}>
+                              event {eventIdLoop}
+                            </Button>
+                          </Link>
+                        )
+                    )}
                   </Box>
                 )}
                 <Button
