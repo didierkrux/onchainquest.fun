@@ -42,7 +42,20 @@ export const QRScanner = ({ onScan }: QRScannerProps) => {
         }
 
         if (permissionStatus.state === 'prompt') {
-          return
+          // Request camera access explicitly
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+          // Stop the stream immediately since we just needed it for permission
+          stream.getTracks().forEach((track) => track.stop())
+          // Update permission state after explicit request
+          const newPermissionStatus = await navigator.permissions.query({
+            name: 'camera' as PermissionName,
+          })
+          setCameraPermission(newPermissionStatus.state)
+
+          if (newPermissionStatus.state === 'denied') {
+            alert('Camera access was denied. Please grant permission to use the camera.')
+            return
+          }
         }
       }
       onOpen()
