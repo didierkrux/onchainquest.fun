@@ -46,6 +46,9 @@ export type TaskAction =
   | 'own-basename'
   | 'mint-nft'
   | 'claim-subname'
+  | 'booth-checkin'
+  | 'buy-shop'
+
 export type Quest = {
   id: number
   name: string

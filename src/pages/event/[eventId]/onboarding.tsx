@@ -24,6 +24,7 @@ import { useRouter } from 'next/router'
 import { parseEther } from 'viem'
 import { useSignMessage } from 'wagmi'
 import { DynamicWidget } from '@dynamic-labs/sdk-react-core'
+import { QRScanner } from 'components/QRScanner'
 
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
@@ -63,7 +64,7 @@ export default function Onboarding({ event }: { event: Event }) {
 
   const QUESTS: Quest[] = event.tasks || []
 
-  const handleAction = async (quest: Quest) => {
+  const handleAction = async (quest: Quest, params?: { qrCode?: string }) => {
     const taskId = quest.id
     console.log('taskId', taskId)
     setIsLoading(taskId)
@@ -107,8 +108,8 @@ export default function Onboarding({ event }: { event: Event }) {
             feedbackType === 'success'
               ? t('Success')
               : feedbackType === 'warning'
-              ? t('Warning')
-              : t('Error'),
+                ? t('Warning')
+                : t('Error'),
           description: <>{data?.message}</>,
           status: feedbackType,
           duration: 10000,
@@ -127,7 +128,7 @@ export default function Onboarding({ event }: { event: Event }) {
       fetch(
         quest.action === 'claim-tokens'
           ? `/api/claim-tokens?address=${address}&eventId=${event.config?.eventId}`
-          : `/api/profile?address=${address}&taskId=${taskId}&eventId=${event.config?.eventId}`,
+          : `/api/profile?address=${address}&taskId=${taskId}&eventId=${event.config?.eventId}${params?.qrCode ? `&qrCode=${params.qrCode}` : ''}`,
         {
           method: 'POST',
           headers: {
@@ -153,8 +154,8 @@ export default function Onboarding({ event }: { event: Event }) {
               feedbackType === 'success'
                 ? t('Success')
                 : feedbackType === 'warning'
-                ? t('Warning')
-                : t('Error'),
+                  ? t('Warning')
+                  : t('Error'),
             description: <>{data?.message}</>,
             status: feedbackType,
             duration: 10000,
@@ -236,7 +237,7 @@ export default function Onboarding({ event }: { event: Event }) {
     if (profile?.tasks) {
       if (quest.action === 'claim-tokens') {
         const isLocked = quest.lock
-          ? !profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false
+          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
           : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = (
@@ -272,7 +273,7 @@ export default function Onboarding({ event }: { event: Event }) {
       }
       if (quest.action === 'send-tokens') {
         const isLocked = quest.lock
-          ? !profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false
+          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
           : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = (
@@ -310,7 +311,7 @@ export default function Onboarding({ event }: { event: Event }) {
       }
       if (quest.action === 'claim-poap') {
         const isLocked = quest.lock
-          ? !profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false
+          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
           : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = (
@@ -420,7 +421,7 @@ export default function Onboarding({ event }: { event: Event }) {
       }
       if (quest.action === 'swap-tokens') {
         const isLocked = quest.lock
-          ? !profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false
+          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
           : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = (
@@ -467,7 +468,7 @@ export default function Onboarding({ event }: { event: Event }) {
       }
       if (quest.action === 'claim-subname') {
         const isLocked = quest.lock
-          ? !profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false
+          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
           : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = (
@@ -543,6 +544,70 @@ export default function Onboarding({ event }: { event: Event }) {
           </Box>
         )
       }
+      if (quest.action === 'booth-checkin') {
+        const isLocked = quest.lock
+          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
+          : false
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        quest.actionField = (
+          <Box display="flex" gap={4}>
+            {quest.lock && isLocked ? (
+              <Box display="flex" alignItems="center" gap={2}>
+                {t('Complete task #{{taskNumber}} first to unlock this.', {
+                  taskNumber: quest.lock,
+                })}
+                <Lock size={28} color="gray" />
+              </Box>
+            ) : !isCompleted ? (
+              <Box>
+                <QRScanner
+                  onScan={(result) => {
+                    if (result === quest.condition) {
+                      handleAction(quest, { qrCode: result })
+                    } else {
+                      toast({
+                        title: t('Error'),
+                        description: t('Invalid QR code. Please scan the correct booth QR code.'),
+                        status: 'error',
+                        duration: 5000,
+                        isClosable: true,
+                        position: isMobile ? 'top' : 'bottom-right',
+                      })
+                    }
+                  }}
+                />
+              </Box>
+            ) : null}
+          </Box>
+        )
+      }
+      if (quest.action === 'buy-shop') {
+        const isLocked = quest.lock
+          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
+          : false
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        quest.actionField = (
+          <Box display="flex" gap={4}>
+            {quest.lock && isLocked ? (
+              <Box display="flex" alignItems="center" gap={2}>
+                {t('Complete task #{{taskNumber}} first to unlock this.', {
+                  taskNumber: quest.lock,
+                })}
+                <Lock size={28} color="gray" />
+              </Box>
+            ) : !isCompleted ? (
+              <Box display="flex" gap={4}>
+                <Link isExternal href="https://shop.slice.so/store/2708">
+                  <Button>{t('Open Shop')}</Button>
+                </Link>
+                <Button onClick={() => handleAction(quest)} isLoading={isLoading === quest.id}>
+                  {t('Verify')}
+                </Button>
+              </Box>
+            ) : null}
+          </Box>
+        )
+      }
     }
   }
 
@@ -566,7 +631,7 @@ export default function Onboarding({ event }: { event: Event }) {
       {QUESTS.map((quest, index) => {
         const isCompleted = profile?.tasks?.[index.toString()]?.isCompleted ?? false
         const isLocked = quest.lock
-          ? !profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false
+          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
           : false
         return (
           <Card

@@ -147,6 +147,24 @@ export default async function handler(
       } else {
         return res.status(400).json({ message: "You don't own this NFT." })
       }
+    } else if (taskAction === 'booth-checkin') {
+      const { qrCode } = req.query
+      if (qrCode === taskCondition) {
+        userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
+        console.log('userTasks', userTasks)
+      } else {
+        return res.status(400).json({ message: "Invalid QR code. Please scan the correct booth QR code." })
+      }
+    } else if (taskAction === 'buy-shop') {
+      const targetAddress = '0x767D1AF42CC93E15E72aFCF15477733C66e5460a';
+      const amount = '0.00001';
+      const hasSentTokens = await verifyTokenSend(address, targetAddress, amount);
+      if (hasSentTokens) {
+        userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
+        console.log('userTasks', userTasks)
+      } else {
+        return res.status(400).json({ message: "You haven't made a purchase from the shop yet." })
+      }
     } else if (taskAction === 'send-tokens') {
       const targetAddress = '0x767D1AF42CC93E15E72aFCF15477733C66e5460a';
       const amount = '0.00001';
