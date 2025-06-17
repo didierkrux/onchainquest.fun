@@ -205,7 +205,7 @@ export default function Onboarding({ event }: { event: Event }) {
     }
   }
 
-  const handleSendTokens = async () => {
+  const handleSendTokens = async (amount: string, targetAddress: string) => {
     try {
       // get current chain id
       console.log('chainId', chainId)
@@ -214,8 +214,8 @@ export default function Onboarding({ event }: { event: Event }) {
         await switchChain(wagmiAdapter.wagmiConfig, { chainId: 8453 })
       }
       const hash = await sendTransaction({
-        to: '0x767D1AF42CC93E15E72aFCF15477733C66e5460a',
-        value: parseEther('0.00001'),
+        to: targetAddress as `0x${string}`,
+        value: parseEther(amount),
       })
       console.log('Transaction hash:', hash)
     } catch (error: any) {
@@ -286,6 +286,7 @@ export default function Onboarding({ event }: { event: Event }) {
           ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
           : false
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        const [amount, tokenAddress, targetAddress] = quest?.condition?.split(',') ?? []
         quest.actionField = (
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
@@ -298,7 +299,7 @@ export default function Onboarding({ event }: { event: Event }) {
             ) : !isCompleted ? (
               <Box display="flex" gap={4}>
                 <Button
-                  onClick={handleSendTokens}
+                  onClick={() => handleSendTokens(amount, targetAddress)}
                   loadingText={t('Sending... (takes ~30 seconds)')}
                 >
                   {t('Send')}
