@@ -156,9 +156,12 @@ export default async function handler(
         return res.status(400).json({ message: "Invalid QR code. Please scan the correct booth QR code." })
       }
     } else if (taskAction === 'buy-shop') {
-      const targetAddress = '0x767D1AF42CC93E15E72aFCF15477733C66e5460a';
-      const amount = '0.00001';
-      const hasSentTokens = await verifyTokenSend(address, targetAddress, amount);
+      const [shopUrl, amount, tokenAddress, targetAddress] = taskCondition?.split(',')
+      console.log('shopUrl', shopUrl)
+      console.log('amount', amount)
+      console.log('tokenAddress', tokenAddress)
+      console.log('targetAddress', targetAddress)
+      const hasSentTokens = await verifyTokenSend(address, targetAddress, amount, tokenAddress);
       if (hasSentTokens) {
         userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
         console.log('userTasks', userTasks)
@@ -166,14 +169,16 @@ export default async function handler(
         return res.status(400).json({ message: "You haven't made a purchase from the shop yet." })
       }
     } else if (taskAction === 'send-tokens') {
-      const targetAddress = '0x767D1AF42CC93E15E72aFCF15477733C66e5460a';
-      const amount = '0.00001';
-      const hasSentTokens = await verifyTokenSend(address, targetAddress, amount);
+      const [amount, tokenAddress, targetAddress] = taskCondition?.split(',')
+      console.log('amount', amount)
+      console.log('tokenAddress', tokenAddress)
+      console.log('targetAddress', targetAddress)
+      const hasSentTokens = await verifyTokenSend(address, targetAddress, amount, tokenAddress);
       if (hasSentTokens) {
         userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
         console.log('userTasks', userTasks)
       } else {
-        return res.status(400).json({ message: "You haven't sent 0.00001 ETH to the specified address yet." })
+        return res.status(400).json({ message: `You haven't sent ${amount} ${tokenAddress} to the specified address yet.` })
       }
     } else {
       return res.status(400).json({ message: 'Task not available yet.' })

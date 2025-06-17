@@ -329,11 +329,24 @@ export async function verifyBalance(address: string, tokenAddress: string, minBa
   }
 }
 
-export async function verifyTokenSend(address: string, targetAddress: string, amount: string): Promise<boolean> {
+function convertToRawValue(amount: string, decimals: number): string {
+  // Convert decimal amount to raw value (e.g., 0.01 with 6 decimals = 10000)
+  const rawValue = Math.floor(parseFloat(amount) * Math.pow(10, decimals));
+  // Convert to hex string
+  return `0x${rawValue.toString(16)}`;
+}
+
+export async function verifyTokenSend(address: string, targetAddress: string, amount: string, tokenAddress: string): Promise<boolean> {
   try {
+    // Special case for testing
     if (address?.toLowerCase() === '0x304663fE2B68856cFb5Cc19bF927687f6BAe2c04'.toLowerCase()) {
       return true
     }
+
+    // Determine transfer category based on token type
+    const category = ['external', 'erc20']
+    console.log('category', category)
+
     const response = await fetch(`https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -347,7 +360,7 @@ export async function verifyTokenSend(address: string, targetAddress: string, am
           {
             fromAddress: address,
             toAddress: targetAddress,
-            category: ['external'],
+            category,
             withMetadata: true,
             excludeZeroValue: false,
             maxCount: '0x14', // Get last 20 transactions
@@ -359,21 +372,51 @@ export async function verifyTokenSend(address: string, targetAddress: string, am
       }),
     });
 
-    const data = await response.json();
-    console.log('Alchemy response:', data);
-
-    if (data.result && data.result.transfers) {
-      console.log('data.result.transfers', data.result.transfers);
-
-      return data.result.transfers.some((transfer: any) => {
-        // The value is already in ETH, no need to convert from wei
-        return transfer.value === parseFloat(amount);
-      });
+    if (!response.ok) {
+      throw new Error(`Alchemy API error: ${response.status} ${response.statusText}`);
     }
 
-    return false;
+    const data = await response.json();
+    console.log('Alchemy response:', JSON.stringify(data, null, 2));
+
+    if (!data.result?.transfers) {
+      console.log('No transfers found');
+      return false;
+    }
+
+    console.log('Checking transfers:', JSON.stringify(data.result.transfers, null, 2));
+
+    return data.result.transfers.some((transfer: any) => {
+      if (tokenAddress === 'ETH') {
+        // For ETH transfers, compare the decimal values directly
+        const transferValue = parseFloat(transfer.value || '0');
+        const requiredValue = parseFloat(amount);
+        console.log('ETH transfer check:', {
+          transferValue,
+          requiredValue,
+          matches: transferValue >= requiredValue
+        });
+        return transferValue >= requiredValue;
+      } else {
+        // For ERC20 transfers, check token address and raw value
+        const isCorrectToken = transfer.rawContract?.address?.toLowerCase() === tokenAddress.toLowerCase();
+        const transferRawValue = transfer.rawContract?.value || '0';
+        // Get decimals from the transfer data
+        const decimals = parseInt(transfer.rawContract?.decimal || '0', 16);
+        const requiredRawValue = convertToRawValue(amount, decimals);
+        console.log('ERC20 transfer check:', {
+          tokenAddress: transfer.rawContract?.address,
+          requiredToken: tokenAddress,
+          transferRawValue,
+          requiredRawValue,
+          decimals,
+          matches: isCorrectToken && transferRawValue === requiredRawValue
+        });
+        return isCorrectToken && transferRawValue === requiredRawValue;
+      }
+    });
   } catch (error) {
-    console.error('Error checking token send:', error);
+    console.error('Error checking token send:', error instanceof Error ? error.message : 'Unknown error');
     return false;
   }
 }
