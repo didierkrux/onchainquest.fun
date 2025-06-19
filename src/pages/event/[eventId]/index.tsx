@@ -216,7 +216,14 @@ export default function EventPage({ event }: { event: Event }) {
             </Box>
           </Box>
         )}
-        {eventId === 3 && <QRScanner />}
+        {eventId === 3 && (
+          <Box mt="10">
+            <Text fontWeight="bold" textAlign="center">
+              {t('Connect with attendees by scanning their bracelet QR code')}
+            </Text>
+            <QRScanner />
+          </Box>
+        )}
       </Box>
     </Box>
   )
