@@ -26,6 +26,7 @@ import { Event } from 'entities/data'
 import { eventId } from 'config'
 import { Card as CardComponent } from 'components/Card'
 import { QRScanner } from 'components/QRScanner'
+import { FarcasterMessages } from 'components/FarcasterMessages'
 
 export default function EventPage({ event }: { event: Event }) {
   const { t } = useTranslation()
@@ -222,6 +223,12 @@ export default function EventPage({ event }: { event: Event }) {
               {t('Connect with attendees by scanning their bracelet QR code')}
             </Text>
             <QRScanner />
+          </Box>
+        )}
+
+        {eventId === 3 && (
+          <Box mt="10">
+            <FarcasterMessages eventId={eventId.toString()} />
           </Box>
         )}
       </Box>

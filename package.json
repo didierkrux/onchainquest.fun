@@ -30,6 +30,7 @@
     "@wagmi/core": "^2.17.3",
     "@web3modal/react": "^2.7.1",
     "@yudiel/react-qr-scanner": "^2.3.1",
+    "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.5",
     "framer-motion": "^11.11.1",

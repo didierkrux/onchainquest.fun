@@ -4,6 +4,7 @@ import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import NextHead from 'next/head'
 import { Global, css } from '@emotion/react'
 import { useEffect } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import Layout from 'components/Layout'
 import theme from 'theme'
@@ -12,6 +13,16 @@ import NonSSRWrapper from 'components/NonSSRWrapper'
 import { MENU, eventName, DOMAIN_URL, eventDescription, IS_PROD } from 'config/index'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   const { t } = useTranslation()
@@ -39,85 +50,89 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   }, [router.events])
 
   return (
-    <Web3ModalProvider>
-      <ChakraProvider theme={theme}>
-        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-        <NextHead>
-          <title>{pageTitle}</title>
-          <meta name="description" content={description} />
-          <meta charSet="utf-8" />
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover"
-          />
-          {IS_PROD && <link rel="shortcut icon" sizes="512x512" type="image/png" href={appIcon} />}
-          <link rel="canonical" href={canonical} />
-          <meta name="robots" content={IS_PROD ? 'all' : 'noindex'}></meta>
-          {/* Progressive Web App */}
-          <link rel="manifest" href="/manifest.json" crossOrigin="use-credentials" />
-          <link rel="apple-touch-icon" href={appIcon} />
-          <meta name="apple-mobile-web-app-title" content={eventName} />
-          <meta name="apple-mobile-web-app-capable" content="yes" />
-          <meta name="application-name" content={eventName} />
-          <meta name="format-detection" content="telephone=no" />
-          <meta name="mobile-web-app-capable" content="yes" />
-          <meta name="theme-color" content="#fbf5ee" />
-          <meta name="msapplication-navbutton-color" content="#fbf5ee" />
-          <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-          {/* Open Graph / Facebook (needs to be < 300kb to work on WhatsApp) */}
-          <meta property="og:type" content="website" />
-          <meta property="og:url" content={url} />
-          <meta property="og:title" content={title} />
-          <meta property="og:description" content={description} />
-          <meta property="og:image" content={socialImage} />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="675" />
-          {/* Twitter */}
-          <meta property="twitter:url" content={url} />
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={pageTitle} />
-          <meta name="twitter:description" content={description} />
-          <meta name="twitter:image" content={socialImage} />
-        </NextHead>
-        <NonSSRWrapper>
-          <Global
-            styles={css`
-              html,
-              body {
-                margin: 0;
-                padding: 0;
-                height: 100%;
-                /* overflow-x: hidden; */
-                padding-top: env(safe-area-inset-top);
-                padding-right: env(safe-area-inset-right);
-                padding-bottom: env(safe-area-inset-bottom);
-                padding-left: env(safe-area-inset-left);
-              }
-              #__next {
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-              }
-              main {
-                flex: 1;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-              }
-              @font-face {
-                font-family: 'NeueAugenblick';
-                src: url(/fonts/NeueAugenblick-ExtraBold.ttf);
-              }
-              @font-face {
-                font-family: 'Inter';
-                src: url(/fonts/Inter-Regular.ttf);
-              }
-            `}
-          />
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        </NonSSRWrapper>
-      </ChakraProvider>
-    </Web3ModalProvider>
+    <QueryClientProvider client={queryClient}>
+      <Web3ModalProvider>
+        <ChakraProvider theme={theme}>
+          <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+          <NextHead>
+            <title>{pageTitle}</title>
+            <meta name="description" content={description} />
+            <meta charSet="utf-8" />
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover"
+            />
+            {IS_PROD && (
+              <link rel="shortcut icon" sizes="512x512" type="image/png" href={appIcon} />
+            )}
+            <link rel="canonical" href={canonical} />
+            <meta name="robots" content={IS_PROD ? 'all' : 'noindex'}></meta>
+            {/* Progressive Web App */}
+            <link rel="manifest" href="/manifest.json" crossOrigin="use-credentials" />
+            <link rel="apple-touch-icon" href={appIcon} />
+            <meta name="apple-mobile-web-app-title" content={eventName} />
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+            <meta name="application-name" content={eventName} />
+            <meta name="format-detection" content="telephone=no" />
+            <meta name="mobile-web-app-capable" content="yes" />
+            <meta name="theme-color" content="#fbf5ee" />
+            <meta name="msapplication-navbutton-color" content="#fbf5ee" />
+            <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+            {/* Open Graph / Facebook (needs to be < 300kb to work on WhatsApp) */}
+            <meta property="og:type" content="website" />
+            <meta property="og:url" content={url} />
+            <meta property="og:title" content={title} />
+            <meta property="og:description" content={description} />
+            <meta property="og:image" content={socialImage} />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="675" />
+            {/* Twitter */}
+            <meta property="twitter:url" content={url} />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={pageTitle} />
+            <meta name="twitter:description" content={description} />
+            <meta name="twitter:image" content={socialImage} />
+          </NextHead>
+          <NonSSRWrapper>
+            <Global
+              styles={css`
+                html,
+                body {
+                  margin: 0;
+                  padding: 0;
+                  height: 100%;
+                  /* overflow-x: hidden; */
+                  padding-top: env(safe-area-inset-top);
+                  padding-right: env(safe-area-inset-right);
+                  padding-bottom: env(safe-area-inset-bottom);
+                  padding-left: env(safe-area-inset-left);
+                }
+                #__next {
+                  height: 100%;
+                  display: flex;
+                  flex-direction: column;
+                }
+                main {
+                  flex: 1;
+                  overflow-y: auto;
+                  -webkit-overflow-scrolling: touch;
+                }
+                @font-face {
+                  font-family: 'NeueAugenblick';
+                  src: url(/fonts/NeueAugenblick-ExtraBold.ttf);
+                }
+                @font-face {
+                  font-family: 'Inter';
+                  src: url(/fonts/Inter-Regular.ttf);
+                }
+              `}
+            />
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </NonSSRWrapper>
+        </ChakraProvider>
+      </Web3ModalProvider>
+    </QueryClientProvider>
   )
 }
