@@ -43,20 +43,14 @@ interface FarcasterMessagesProps {
 
 // Helper function to get the best URL for an image
 const getImageUrl = (imageUrl: string, embeds: any[]): string | null => {
-  console.log('getImageUrl called with:', { imageUrl, embeds })
-
   // First, check if the image URL matches any embed URL
   for (const embed of embeds) {
-    console.log('Checking embed:', embed)
-
     // Skip embeds without URLs
     if (!embed.url) {
-      console.log('Skipping embed without URL:', embed)
       continue
     }
 
     if (embed.url === imageUrl) {
-      console.log('Found direct URL match:', embed.url)
       return embed.url
     }
 
@@ -72,7 +66,6 @@ const getImageUrl = (imageUrl: string, embeds: any[]): string | null => {
       const embedPath = embed.url.replace('https://devconnect.org/argentina/ticket/', '')
 
       if (imagePath === embedPath) {
-        console.log('Found devconnect ticket URL match:', embed.url)
         return embed.url
       }
     }
@@ -81,28 +74,23 @@ const getImageUrl = (imageUrl: string, embeds: any[]): string | null => {
     if (embed.images && Array.isArray(embed.images)) {
       const matchingImage = embed.images.find((img: any) => img.url === imageUrl)
       if (matchingImage) {
-        console.log('Found image in embed.images:', embed.url)
         return embed.url
       }
     }
     // Check if image is from og_image
     if (embed.og_image === imageUrl) {
-      console.log('Found og_image match:', embed.url)
       return embed.url
     }
     // Check if image is from thumbnail_url
     if (embed.thumbnail_url === imageUrl) {
-      console.log('Found thumbnail_url match:', embed.url)
       return embed.url
     }
     // Check if image is from single image field
     if (embed.image === imageUrl) {
-      console.log('Found single image match:', embed.url)
       return embed.url
     }
   }
 
-  console.log('No matching embed found for image:', imageUrl)
   // If no matching embed found, return null (no link)
   return null
 }
@@ -154,14 +142,8 @@ export const FarcasterMessages = ({ eventId }: FarcasterMessagesProps) => {
         {t('Latest messages from the official DevConnect channel on Farcaster')}
       </Text>
 
-      <VStack spacing={4} align="stretch">
+      <VStack spacing={4} align="stretch" maxW="618px" mx="auto">
         {allMessages.map((message: FarcasterMessage) => {
-          console.log('Message data:', {
-            id: message.id,
-            images: message.images,
-            embeds: message.embeds,
-          })
-
           return (
             <Link
               key={message.id}
