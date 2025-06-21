@@ -174,12 +174,13 @@ export const FarcasterMessages = ({ eventId }: FarcasterMessagesProps) => {
                 cursor="pointer"
                 _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg' }}
                 transition="all 0.2s"
+                bg="white"
               >
                 <CardBody p={4}>
                   <HStack spacing={3} align="start">
                     <Avatar size="sm" src={message.author.pfp} name={message.author.displayName} />
-                    <Box flex="1">
-                      <HStack spacing={2} mb={2}>
+                    <Box flex="1" maxW="calc(100vw - 110px)">
+                      <HStack spacing={2} mb={2} overflow="hidden">
                         <Text fontWeight="bold" fontSize="sm">
                           {message.author.displayName}
                         </Text>
