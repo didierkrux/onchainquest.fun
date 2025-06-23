@@ -7,6 +7,7 @@ import { getTasks } from 'utils/queries'
 import { TaskAction } from 'entities/data'
 import { getBasename } from 'utils/basenames'
 import { getBasenameAvatar } from 'utils/basenames'
+import { BOOTH_DATA } from 'config'
 
 export default async function handler(
   req: NextApiRequest,
@@ -149,11 +150,95 @@ export default async function handler(
       }
     } else if (taskAction === 'booth-checkin') {
       const { qrCode } = req.query
-      if (qrCode === taskCondition) {
-        userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
+
+      if (!qrCode || typeof qrCode !== 'string') {
+        return res.status(400).json({ message: "QR code is required" })
+      }
+
+      // Extract booth ID and code from QR code
+      // Support QR code format: https://onchainquest.fun/api/booth/1/k9m2x7
+      let boothId: string
+      let boothCode: string
+
+      try {
+        // Parse URL to extract booth ID and code
+        const url = new URL(qrCode)
+        const pathParts = url.pathname.split('/')
+
+        console.log('QR Code URL:', qrCode)
+        console.log('Path parts:', pathParts)
+
+        // Find the index of 'booth' in the path
+        const boothIndex = pathParts.findIndex(part => part === 'booth')
+
+        console.log('Booth index:', boothIndex)
+
+        if (boothIndex === -1 || boothIndex + 2 >= pathParts.length) {
+          return res.status(400).json({ message: "Invalid QR code format - missing booth information" })
+        }
+
+        boothId = pathParts[boothIndex + 1]
+        boothCode = pathParts[boothIndex + 2]
+
+        console.log('Extracted booth ID:', boothId)
+        console.log('Extracted booth code:', boothCode)
+
+        if (!boothId || !boothCode) {
+          return res.status(400).json({ message: "Invalid QR code format - missing booth ID or code" })
+        }
+      } catch (error) {
+        console.error('Error parsing QR code URL:', error)
+        return res.status(400).json({ message: "Invalid QR code format - not a valid URL" })
+      }
+
+      // Validate the QR code via booth API
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL
+          ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+          : 'http://localhost:3000'
+        const boothApiUrl = `${baseUrl}/api/booth/${boothId}/${boothCode}`
+
+        console.log('Calling booth API:', boothApiUrl)
+
+        const boothResponse = await fetch(boothApiUrl)
+        const boothData = await boothResponse.json()
+
+        console.log('Booth API response:', boothData)
+
+        if (!boothData.valid) {
+          return res.status(400).json({ message: boothData.message || "Invalid booth code" })
+        }
+
+        // Get existing check-ins or initialize empty array
+        const existingCheckins = userTasks[taskIdNum.toString()]?.checkins || []
+
+        // Check if this booth was already checked in
+        if (existingCheckins.includes(boothId)) {
+          return res.status(400).json({ message: `You have already checked in at booth ${boothId}` })
+        }
+
+        // Add new booth to check-ins
+        const updatedCheckins = [...existingCheckins, boothId]
+        const totalPoints = taskToSave.points * updatedCheckins.length
+
+        // Task is only complete when ALL booths have been checked in
+        const allBoothIds = Object.keys(BOOTH_DATA)
+        const isCompleted = allBoothIds.every(boothId => updatedCheckins.includes(boothId))
+
+        // For booth check-in, we need to store the cumulative points since calculateScore uses task.points
+        // We mark it as completed for scoring purposes even if not all booths are checked in
+        // This allows points to accumulate as users check in at more booths
+        userTasks[taskIdNum.toString()] = {
+          id: taskIdNum,
+          isCompleted: isCompleted, // Only true when all booths checked in
+          points: totalPoints, // Store cumulative points for calculateScore
+          checkins: updatedCheckins,
+          action: taskAction // Store action for calculateScore to identify booth check-in tasks
+        }
         console.log('userTasks', userTasks)
-      } else {
-        return res.status(400).json({ message: "Invalid QR code. Please scan the correct booth QR code." })
+      } catch (error) {
+        console.error('Error validating booth code:', error)
+        return res.status(500).json({ message: "Failed to validate booth code" })
       }
     } else if (taskAction === 'buy-shop') {
       const [shopUrl, amount, tokenAddress, targetAddress] = taskCondition?.split(',')
@@ -185,7 +270,10 @@ export default async function handler(
     }
     // getMoments -> check if user posted a moment
     // calculate score
+    console.log('Before calculateScore - userTasks:', userTasks)
+    console.log('Before calculateScore - tasks:', tasks)
     const score = calculateScore(userTasks, tasks)
+    console.log('Calculated score:', score)
     const profileToSave = { username, avatar, role, email, score, tasks: userTasks }
 
     console.log('Saving profile', profileToSave)

@@ -57,3 +57,36 @@ export const DOMAIN_URL =
     : IS_PROD
       ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
       : `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+
+export const BOOTH_DATA = {
+  '1': {
+    name: 'Setup your wallet',
+    description: 'Create a wallet and connect it to the app',
+    code: 'k9m2x7',
+  },
+  '2': {
+    name: 'Crypto onramp',
+    description: 'Buy crypto with fiat',
+    code: 'p4n8q1',
+  },
+  '3': {
+    name: 'Get an ENS name',
+    description: 'Get an ENS name',
+    code: 'r6t3v9',
+  },
+  '4': {
+    name: 'Swap tokens',
+    description: 'Swap your crypto',
+    code: 'w2y5z8',
+  },
+  '5': {
+    name: 'Buy NFTs',
+    description: 'Buy NFTs',
+    code: 'a7c4f1',
+  },
+  '6': {
+    name: 'Do a onchain loan',
+    description: 'Do a onchain loan',
+    code: 'h3j6l9',
+  },
+}

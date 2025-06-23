@@ -5,6 +5,8 @@ export type Task = {
   txLink?: string
   condition?: string
   nftLink?: string
+  checkins?: string[]
+  action?: string
 }
 
 export type Tasks = { [key: string]: Task }

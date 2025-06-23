@@ -36,7 +36,7 @@ import MiniApp from 'components/MiniApp'
 
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
-import { ENS_DOMAIN } from 'config'
+import { ENS_DOMAIN, BOOTH_DATA } from 'config'
 import { switchChain } from '@wagmi/core'
 import { wagmiAdapter } from 'context'
 
@@ -559,7 +559,10 @@ export default function Onboarding({ event }: { event: Event }) {
         const isLocked = quest.lock
           ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
           : false
-        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        const checkins = profile?.tasks?.[quest.id]?.checkins || []
+        const totalPoints = profile?.tasks?.[quest.id]?.points || 0
+        const totalBooths = Object.keys(BOOTH_DATA).length // Total number of booths to check in
+        const isCompleted = checkins.length === totalBooths // Only complete when all booths checked in
         quest.actionField = (
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
@@ -573,24 +576,26 @@ export default function Onboarding({ event }: { event: Event }) {
               <Box>
                 <QRScanner
                   onScan={(result) => {
-                    if (result === quest.condition) {
-                      handleAction(quest, { qrCode: result })
-                    } else {
-                      toast({
-                        title: t('Error'),
-                        description: t('Invalid QR code. Please scan the correct booth QR code.'),
-                        status: 'error',
-                        duration: 5000,
-                        isClosable: true,
-                        position: isMobile ? 'top' : 'bottom-right',
-                      })
-                    }
+                    handleAction(quest, { qrCode: result })
                   }}
                 />
               </Box>
             ) : null}
           </Box>
         )
+
+        quest.completedField =
+          checkins.length > 0 ? (
+            <Box display="flex" flexDirection="column" gap={2}>
+              <Text fontWeight="bold">
+                Progress: {checkins.length}/{totalBooths} booths checked in
+              </Text>
+              <Text fontWeight="bold">Checked-in Booths: {checkins.join(', ')}</Text>
+              <Text color="purple.500" fontWeight="bold">
+                Total Points: {totalPoints}
+              </Text>
+            </Box>
+          ) : null
       }
       if (quest.action === 'buy-shop') {
         const isLocked = quest.lock
@@ -672,7 +677,15 @@ export default function Onboarding({ event }: { event: Event }) {
                   >
                     <Star weight="fill" size={24} />
                     <Box ml={1} fontSize="14px">
-                      {quest.points} {t('points')}
+                      {quest.action === 'booth-checkin' ? (
+                        <Box>
+                          {quest.points * Object.keys(BOOTH_DATA).length} {t('points')}
+                        </Box>
+                      ) : (
+                        <Box>
+                          {quest.points} {t('points')}
+                        </Box>
+                      )}
                     </Box>
                   </Badge>
                 </Box>

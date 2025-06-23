@@ -287,9 +287,22 @@ export async function userHasSwappedTokens(address: string, tokenAddress: string
 }
 
 export const calculateScore = (tasks: Tasks, allTasks: Tasks) => {
+  console.log('calculateScore - userTasks:', tasks)
+  console.log('calculateScore - allTasks:', allTasks)
+
   return Object.values(tasks).reduce((acc, task) => {
+    console.log('Processing task:', task)
     if (task?.isCompleted) {
-      return acc + (allTasks[task.id]?.points || 0)
+      // For regular tasks, use base points from task definition
+      const points = allTasks[task.id]?.points || 0
+      console.log(`Task ${task.id} - points: ${points}, isCompleted: ${task.isCompleted}`)
+      return acc + points
+    } else if (task?.action === 'booth-checkin' && task?.points) {
+      // For booth check-in tasks, count points even when not fully completed
+      // Points accumulate as users check in at more booths
+      const points = task.points
+      console.log(`Booth check-in task ${task.id} - points: ${points}, checkins: ${task.checkins?.length}`)
+      return acc + points
     }
     return acc
   }, 0)
