@@ -20,6 +20,7 @@ import {
   InputRightElement,
   useMediaQuery,
 } from '@chakra-ui/react'
+import { useAccount } from 'wagmi'
 
 interface MiniApp {
   domain: string
@@ -56,6 +57,7 @@ interface EthereumShowcaseItem {
 }
 
 const MiniApps = (): JSX.Element => {
+  const { address } = useAccount()
   const [selectedApp, setSelectedApp] = useState<MiniApp | null>(null)
   const [selectedLesson, setSelectedLesson] = useState<MiniLesson | null>(null)
   const [selectedShowcaseItem, setSelectedShowcaseItem] = useState<EthereumShowcaseItem | null>(
@@ -117,6 +119,10 @@ const MiniApps = (): JSX.Element => {
     if (e.key === 'Enter') {
       handleLoadCustomUrl()
     }
+  }
+
+  if (!address) {
+    return <div>Please connect your wallet</div>
   }
 
   return (

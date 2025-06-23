@@ -38,6 +38,7 @@ import { profileName, profileAvatar, profileRole } from 'utils/index'
 import { adminSignatureMessage, adminWallets, ENS_DOMAIN, eventId as EVENT_ID } from 'config'
 import { Avatar } from 'components/Avatar'
 import SelectTab from 'components/SelectTab'
+import ZupassProof from 'components/ZupassProof'
 
 export default function ProfilePage() {
   const { t, i18n } = useTranslation()
@@ -391,8 +392,15 @@ export default function ProfilePage() {
                     </Box>
                   </Box>
                   {eventId === '3' ? (
-                    <Box display="flex" justifyContent="center">
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      gap={4}
+                      flexDirection="column"
+                      alignItems="center"
+                    >
                       <DynamicWidget />
+                      <ZupassProof />
                     </Box>
                   ) : null}
                   <Box m={4} display="flex" justifyContent="center">
