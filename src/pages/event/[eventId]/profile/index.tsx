@@ -203,9 +203,8 @@ export default function ProfilePage() {
           isClosable: true,
           position: isMobile ? 'top' : 'bottom-right',
         })
-        // Refresh the profile after resetting
-        setProfile(null)
-        disconnect()
+        // Refresh the profile after resetting to get latest data
+        fetchProfile()
       } else {
         const data = await response.json()
         throw new Error(`Failed to reset profile: ${data.message}`)

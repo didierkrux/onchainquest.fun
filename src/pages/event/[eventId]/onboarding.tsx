@@ -593,54 +593,61 @@ export default function Onboarding({ event }: { event: Event }) {
             ) : !isCompleted ? (
               <Box display="flex" flexDirection="column" gap={4} alignItems="flex-end">
                 <Box display="flex" gap={4} alignItems="center">
-                  <QRScanner
-                    buttonLabel={t('Scan Booth QR Code')}
-                    onScan={(result) => {
-                      handleAction(quest, { qrCode: result })
-                    }}
-                  />
-                  <Text fontWeight="bold" color="gray.500">
-                    - OR -
-                  </Text>
-                  <Box display="flex" gap={2} alignItems="center">
-                    <input
-                      type="text"
-                      value={boothCodeInput}
-                      onChange={(e) => setBoothCodeInput(e.target.value.toUpperCase())}
-                      placeholder={t('Enter code')}
-                      maxLength={6}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        border: '1px solid #E2E8F0',
-                        width: '120px',
-                        textAlign: 'center',
-                        textTransform: 'uppercase',
-                        fontSize: '14px',
+                  <Box
+                    display="flex"
+                    gap={4}
+                    alignItems="center"
+                    flexDirection={isMobile ? 'column' : 'row'}
+                  >
+                    <QRScanner
+                      buttonLabel={t('Scan Booth QR Code')}
+                      onScan={(result) => {
+                        handleAction(quest, { qrCode: result })
                       }}
                     />
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        if (boothCodeInput.length === 6) {
-                          handleAction(quest, { code: boothCodeInput, eventId: eventId as string })
-                          setBoothCodeInput('') // Clear input after submission
-                        } else {
-                          toast({
-                            title: t('Error'),
-                            description: t('Please enter a 6-character booth code'),
-                            status: 'error',
-                            duration: 5000,
-                            isClosable: true,
-                            position: isMobile ? 'top' : 'bottom-right',
-                          })
-                        }
-                      }}
-                      isDisabled={boothCodeInput.length !== 6}
-                    >
-                      {t('Submit')}
-                    </Button>
+                    <Text fontWeight="bold" color="gray.500">
+                      - OR -
+                    </Text>
+                    <Box display="flex" gap={2} alignItems="center">
+                      <input
+                        type="text"
+                        value={boothCodeInput}
+                        onChange={(e) => setBoothCodeInput(e.target.value.toUpperCase())}
+                        placeholder={t('Enter code')}
+                        maxLength={6}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid #E2E8F0',
+                          width: '120px',
+                          textAlign: 'center',
+                          textTransform: 'uppercase',
+                          fontSize: '14px',
+                        }}
+                      />
+                    </Box>
                   </Box>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (boothCodeInput.length === 6) {
+                        handleAction(quest, { code: boothCodeInput, eventId: eventId as string })
+                        setBoothCodeInput('') // Clear input after submission
+                      } else {
+                        toast({
+                          title: t('Error'),
+                          description: t('Please enter a 6-character booth code'),
+                          status: 'error',
+                          duration: 5000,
+                          isClosable: true,
+                          position: isMobile ? 'top' : 'bottom-right',
+                        })
+                      }
+                    }}
+                    isDisabled={boothCodeInput.length !== 6}
+                  >
+                    {t('Submit')}
+                  </Button>
                 </Box>
               </Box>
             ) : null}

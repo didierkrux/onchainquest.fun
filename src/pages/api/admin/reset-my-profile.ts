@@ -39,13 +39,16 @@ export default async function handler(
     //   return res.status(403).json({ message: 'Invalid signature' })
     // }
 
-    // Delete all users with the specified address
-    const deletedCount = await db('users')
+    // Update user profile instead of deleting
+    const updatedCount = await db('users')
       .where('event_id', eventId)
       .whereILike('address', address)
-      .del()
+      .update({
+        tasks: { "0": { "id": 0, "points": 20, "isCompleted": true } },
+        score: 20
+      })
 
-    res.status(200).json({ message: `Deleted ${deletedCount} user(s) with address ${address}` })
+    res.status(200).json({ message: `Reset ${updatedCount} user(s) with address ${address}` })
   } catch (error) {
     console.error('Error resetting profile:', error)
     res.status(500).json({ message: 'Internal server error' })
