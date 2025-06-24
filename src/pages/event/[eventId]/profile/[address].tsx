@@ -9,12 +9,20 @@ import {
   useMediaQuery,
   Button,
   Link,
+  useClipboard,
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
-import { ArrowLeft, UserPlus, UserMinus, ArrowUpRight } from '@phosphor-icons/react'
+import {
+  ArrowLeft,
+  UserPlus,
+  UserMinus,
+  ArrowUpRight,
+  Check,
+  CopySimple,
+} from '@phosphor-icons/react'
 import { useAccount, useWalletClient } from 'wagmi'
 import { ethers } from 'ethers'
 import {
@@ -39,6 +47,7 @@ export default function PublicProfilePage() {
   const [efpProfile, setEfpProfile] = useState<any>(null)
   const { address: userAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
+  const { onCopy, hasCopied } = useClipboard((address as string) || '')
 
   useEffect(() => {
     if (!address || typeof address !== 'string') {
@@ -242,7 +251,16 @@ export default function PublicProfilePage() {
         <CardBody>
           <Box display="flex" flexDirection="column" alignItems="center" gap={4}>
             <Text fontSize="lg" fontWeight="bold" textAlign="center">
-              {address}
+              <Box display="flex" alignItems="center" gap={2}>
+                <Text fontSize={['2xs', 'xs']} color="gray.500">
+                  {address}
+                </Text>
+                {hasCopied ? (
+                  <Check width={20} />
+                ) : (
+                  <CopySimple width={20} onClick={onCopy} cursor="pointer" />
+                )}
+              </Box>
             </Text>
 
             {/* EFP Profile Info */}

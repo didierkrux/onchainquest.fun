@@ -156,7 +156,7 @@ export default async function handler(
       }
 
       // Extract booth ID and code from QR code
-      // Support QR code format: https://onchainquest.fun/api/booth/1/k9m2x7
+      // Support new QR code format: https://onchainquest.fun/event/3/booth/6/h3j6l9
       let boothId: string
       let boothCode: string
 
@@ -191,22 +191,31 @@ export default async function handler(
         return res.status(400).json({ message: "Invalid QR code format - not a valid URL" })
       }
 
-      // Validate the QR code via booth API
+      // Validate the booth code directly against BOOTH_DATA
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL
-          ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-          : 'http://localhost:3000'
-        const boothApiUrl = `${baseUrl}/api/booth/${boothId}/${boothCode}`
+        // Check if booth exists in config
+        const booth = BOOTH_DATA[boothId as keyof typeof BOOTH_DATA]
 
-        console.log('Calling booth API:', boothApiUrl)
+        if (!booth) {
+          return res.status(404).json({
+            valid: false,
+            message: 'Booth not found'
+          })
+        }
 
-        const boothResponse = await fetch(boothApiUrl)
-        const boothData = await boothResponse.json()
+        // Check if booth has a code defined
+        if (!booth.code) {
+          return res.status(400).json({
+            valid: false,
+            message: 'Booth does not have a validation code'
+          })
+        }
 
-        console.log('Booth API response:', boothData)
+        // Validate the code (case-insensitive comparison)
+        const isValid = booth.code.toLowerCase() === boothCode.toLowerCase()
 
-        if (!boothData.valid) {
-          return res.status(400).json({ message: boothData.message || "Invalid booth code" })
+        if (!isValid) {
+          return res.status(400).json({ message: "Invalid booth code" })
         }
 
         // Get existing check-ins or initialize empty array
