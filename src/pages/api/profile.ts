@@ -149,46 +149,65 @@ export default async function handler(
         return res.status(400).json({ message: "You don't own this NFT." })
       }
     } else if (taskAction === 'booth-checkin') {
-      const { qrCode } = req.query
+      const { qrCode, code } = req.query
 
-      if (!qrCode || typeof qrCode !== 'string') {
-        return res.status(400).json({ message: "QR code is required" })
+      if (!qrCode && !code) {
+        return res.status(400).json({ message: "QR code or booth code is required" })
       }
 
-      // Extract booth ID and code from QR code
-      // Support new QR code format: https://onchainquest.fun/event/3/booth/6/h3j6l9
       let boothId: string
       let boothCode: string
 
-      try {
-        // Parse URL to extract booth ID and code
-        const url = new URL(qrCode)
-        const pathParts = url.pathname.split('/')
+      if (qrCode && typeof qrCode === 'string') {
+      // Handle QR code format: https://onchainquest.fun/event/3/booth/6/h3j6l9
+        try {
+          // Parse URL to extract booth ID and code
+          const url = new URL(qrCode)
+          const pathParts = url.pathname.split('/')
 
-        console.log('QR Code URL:', qrCode)
-        console.log('Path parts:', pathParts)
+          console.log('QR Code URL:', qrCode)
+          console.log('Path parts:', pathParts)
 
-        // Find the index of 'booth' in the path
-        const boothIndex = pathParts.findIndex(part => part === 'booth')
+          // Find the index of 'booth' in the path
+          const boothIndex = pathParts.findIndex(part => part === 'booth')
 
-        console.log('Booth index:', boothIndex)
+          console.log('Booth index:', boothIndex)
 
-        if (boothIndex === -1 || boothIndex + 2 >= pathParts.length) {
-          return res.status(400).json({ message: "Invalid QR code format - missing booth information" })
+          if (boothIndex === -1 || boothIndex + 2 >= pathParts.length) {
+            return res.status(400).json({ message: "Invalid QR code format - missing booth information" })
+          }
+
+          boothId = pathParts[boothIndex + 1]
+          boothCode = pathParts[boothIndex + 2]
+
+          console.log('Extracted booth ID:', boothId)
+          console.log('Extracted booth code:', boothCode)
+
+          if (!boothId || !boothCode) {
+            return res.status(400).json({ message: "Invalid QR code format - missing booth ID or code" })
+          }
+        } catch (error) {
+          console.error('Error parsing QR code URL:', error)
+          return res.status(400).json({ message: "Invalid QR code format - not a valid URL" })
+        }
+      } else if (code && typeof code === 'string') {
+        // Handle manual code input - need to find which booth this code belongs to
+        boothCode = code.toUpperCase()
+
+        // Find the booth that matches this code
+        const boothEntries = Object.entries(BOOTH_DATA)
+        const matchingBooth = boothEntries.find(([_, boothData]) =>
+          boothData.code?.toUpperCase() === boothCode
+        )
+
+        if (!matchingBooth) {
+          return res.status(400).json({ message: "Invalid booth code - no booth found with this code" })
         }
 
-        boothId = pathParts[boothIndex + 1]
-        boothCode = pathParts[boothIndex + 2]
-
-        console.log('Extracted booth ID:', boothId)
-        console.log('Extracted booth code:', boothCode)
-
-        if (!boothId || !boothCode) {
-          return res.status(400).json({ message: "Invalid QR code format - missing booth ID or code" })
-        }
-      } catch (error) {
-        console.error('Error parsing QR code URL:', error)
-        return res.status(400).json({ message: "Invalid QR code format - not a valid URL" })
+        boothId = matchingBooth[0]
+        console.log('Manual code input - booth ID:', boothId, 'code:', boothCode)
+      } else {
+        return res.status(400).json({ message: "Invalid input format" })
       }
 
       // Validate the booth code directly against BOOTH_DATA

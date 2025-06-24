@@ -57,6 +57,7 @@ export default function Onboarding({ event }: { event: Event }) {
   const { onCopy, hasCopied } = useClipboard(profile?.address || '')
   const [isShopOpen, setIsShopOpen] = useState(false)
   const [shopUrl, setShopUrl] = useState('')
+  const [boothCodeInput, setBoothCodeInput] = useState('')
 
   useEffect(() => {
     if (address) {
@@ -74,7 +75,10 @@ export default function Onboarding({ event }: { event: Event }) {
 
   const QUESTS: Quest[] = event.tasks || []
 
-  const handleAction = async (quest: Quest, params?: { qrCode?: string }) => {
+  const handleAction = async (
+    quest: Quest,
+    params?: { qrCode?: string; code?: string; eventId?: string }
+  ) => {
     const taskId = quest.id
     console.log('taskId', taskId)
     setIsLoading(taskId)
@@ -135,10 +139,24 @@ export default function Onboarding({ event }: { event: Event }) {
       }
 
       // Handle other actions
+      const queryParams = new URLSearchParams({
+        address: address || '',
+        taskId: taskId.toString(),
+        eventId: (event.config?.eventId || '').toString(),
+      })
+
+      // Add qrCode or code parameter if provided
+      if (params?.qrCode) {
+        queryParams.append('qrCode', params.qrCode)
+      }
+      if (params?.code) {
+        queryParams.append('code', params.code)
+      }
+
       fetch(
         quest.action === 'claim-tokens'
           ? `/api/claim-tokens?address=${address}&eventId=${event.config?.eventId}`
-          : `/api/profile?address=${address}&taskId=${taskId}&eventId=${event.config?.eventId}${params?.qrCode ? `&qrCode=${params.qrCode}` : ''}`,
+          : `/api/profile?${queryParams.toString()}`,
         {
           method: 'POST',
           headers: {
@@ -559,12 +577,12 @@ export default function Onboarding({ event }: { event: Event }) {
         const isLocked = quest.lock
           ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
           : false
-        const checkins = profile?.tasks?.[quest.id]?.checkins || []
+        const checkins: string[] = profile?.tasks?.[quest.id]?.checkins || []
         const totalPoints = profile?.tasks?.[quest.id]?.points || 0
         const totalBooths = Object.keys(BOOTH_DATA).length // Total number of booths to check in
         const isCompleted = checkins.length === totalBooths // Only complete when all booths checked in
         quest.actionField = (
-          <Box display="flex" gap={4}>
+          <Box display="flex" gap={4} flexDirection="column" alignItems="flex-end">
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
                 {t('Complete task #{{taskNumber}} first to unlock this.', {
@@ -573,13 +591,57 @@ export default function Onboarding({ event }: { event: Event }) {
                 <Lock size={28} color="gray" />
               </Box>
             ) : !isCompleted ? (
-              <Box>
-                <QRScanner
-                  buttonLabel={t('Scan Booth QR Code')}
-                  onScan={(result) => {
-                    handleAction(quest, { qrCode: result })
-                  }}
-                />
+              <Box display="flex" flexDirection="column" gap={4} alignItems="flex-end">
+                <Box display="flex" gap={4} alignItems="center">
+                  <QRScanner
+                    buttonLabel={t('Scan Booth QR Code')}
+                    onScan={(result) => {
+                      handleAction(quest, { qrCode: result })
+                    }}
+                  />
+                  <Text fontWeight="bold" color="gray.500">
+                    - OR -
+                  </Text>
+                  <Box display="flex" gap={2} alignItems="center">
+                    <input
+                      type="text"
+                      value={boothCodeInput}
+                      onChange={(e) => setBoothCodeInput(e.target.value.toUpperCase())}
+                      placeholder={t('Enter code')}
+                      maxLength={6}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid #E2E8F0',
+                        width: '120px',
+                        textAlign: 'center',
+                        textTransform: 'uppercase',
+                        fontSize: '14px',
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (boothCodeInput.length === 6) {
+                          handleAction(quest, { code: boothCodeInput, eventId: eventId as string })
+                          setBoothCodeInput('') // Clear input after submission
+                        } else {
+                          toast({
+                            title: t('Error'),
+                            description: t('Please enter a 6-character booth code'),
+                            status: 'error',
+                            duration: 5000,
+                            isClosable: true,
+                            position: isMobile ? 'top' : 'bottom-right',
+                          })
+                        }
+                      }}
+                      isDisabled={boothCodeInput.length !== 6}
+                    >
+                      {t('Submit')}
+                    </Button>
+                  </Box>
+                </Box>
               </Box>
             ) : null}
           </Box>
@@ -591,7 +653,9 @@ export default function Onboarding({ event }: { event: Event }) {
               <Text fontWeight="bold">
                 Progress: {checkins.length}/{totalBooths} booths checked in
               </Text>
-              <Text fontWeight="bold">Checked-in Booths: {checkins.join(', ')}</Text>
+              <Text fontWeight="bold">
+                Checked-in Booths: {checkins.sort((a, b) => parseInt(a) - parseInt(b)).join(', ')}
+              </Text>
               <Text color="purple.500" fontWeight="bold">
                 Total Points: {totalPoints}
               </Text>
