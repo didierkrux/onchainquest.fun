@@ -15,9 +15,10 @@ import { Scanner } from '@yudiel/react-qr-scanner'
 
 interface QRScannerProps {
   onScan?: (result: string) => void
+  buttonLabel?: string
 }
 
-export const QRScanner = ({ onScan }: QRScannerProps) => {
+export const QRScanner = ({ onScan, buttonLabel }: QRScannerProps) => {
   const [cameraPermission, setCameraPermission] = useState<PermissionState | null>(null)
   const [scanResult, setScanResult] = useState<string | null>(null)
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -128,7 +129,7 @@ export const QRScanner = ({ onScan }: QRScannerProps) => {
   return (
     <Box mt="10">
       <Button onClick={handleScanClick} isDisabled={cameraPermission === 'denied'}>
-        {cameraPermission === 'denied' ? 'Camera Access Denied' : 'Scan QR Code'}
+        {cameraPermission === 'denied' ? 'Camera Access Denied' : buttonLabel || 'Scan QR Code'}
       </Button>
       <QRScannerModal />
       {scanResult && (

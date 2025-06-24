@@ -575,6 +575,7 @@ export default function Onboarding({ event }: { event: Event }) {
             ) : !isCompleted ? (
               <Box>
                 <QRScanner
+                  buttonLabel={t('Scan Booth QR Code')}
                   onScan={(result) => {
                     handleAction(quest, { qrCode: result })
                   }}

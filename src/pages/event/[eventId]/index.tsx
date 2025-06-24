@@ -222,7 +222,7 @@ export default function EventPage({ event }: { event: Event }) {
             <Text fontWeight="bold" textAlign="center">
               {t('Connect with attendees by scanning their bracelet QR code')}
             </Text>
-            <QRScanner />
+            <QRScanner buttonLabel={t('Scan Attendee Bracelet')} />
           </Box>
         )}
 

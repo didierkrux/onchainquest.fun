@@ -641,7 +641,10 @@ export default function ProfilePage() {
                         )}
 
                         <Box display="flex" flexDirection="column" alignItems="center" gap={4}>
-                          <QRScanner onScan={handleTicketScan} />
+                          <QRScanner
+                            buttonLabel={t('Scan Event Ticket')}
+                            onScan={handleTicketScan}
+                          />
                           <Button
                             onClick={() => setIsScanningTicket(false)}
                             variant="outline"
