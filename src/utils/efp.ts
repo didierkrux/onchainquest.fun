@@ -6,6 +6,9 @@ const EFP_API_BASE = 'https://api.ethfollow.xyz/api/v1'
 // EFP Contract Addresses (Base Mainnet) - Updated with correct address
 const EFP_CONTRACT_ADDRESS = '0x41Aa48Ef3c0446b46a5b1cc6337FF3d3716E2A33'
 
+// EFP List Registry Contract Address (Base Mainnet)
+const EFP_LIST_REGISTRY_ADDRESS = '0x0E688f5DCa4a0a4729946ACbC44C792341714e08'
+
 // Base Network Configuration
 const BASE_CHAIN_ID = 8453
 const BASE_RPC_URL = 'https://mainnet.base.org'
@@ -16,6 +19,11 @@ const EFP_ABI = [
   'function getListOpCount(uint256 slot) external view returns (uint256)',
   'function getAllListOps(uint256 slot) external view returns (bytes[] memory)',
   'event ListOp(uint256 indexed slot, bytes op)',
+]
+
+// EFP List Registry ABI
+const EFP_LIST_REGISTRY_ABI = [
+  'function getListStorageLocation(uint256 tokenId) external view returns (bytes memory)',
 ]
 
 // EFP ListOp constants
@@ -43,6 +51,62 @@ export interface EFPList {
 export interface EFPUserLists {
   primary_list: string
   lists: string[]
+}
+
+/**
+ * Convert a token ID to a slot value by calling the EFP List Registry contract
+ * @param tokenId The token ID (e.g., "463")
+ * @param provider The ethers provider to use for the contract call
+ * @returns The slot value as a BigInt
+ */
+export async function getSlotFromTokenId(tokenId: string, provider: ethers.Provider): Promise<bigint> {
+  try {
+    const listRegistryContract = new ethers.Contract(
+      EFP_LIST_REGISTRY_ADDRESS,
+      EFP_LIST_REGISTRY_ABI,
+      provider
+    )
+
+    console.log(`Calling getListStorageLocation for token ID: ${tokenId}`)
+    const listStorageLocation = await listRegistryContract.getListStorageLocation(tokenId)
+
+    console.log('List Storage Location:', listStorageLocation)
+
+    // Extract the last 32 bytes (64 hex characters) which contain the slot
+    const slotHex = listStorageLocation.slice(-64) // last 32 bytes in hex
+    const slotBigInt = BigInt('0x' + slotHex)
+
+    console.log('Extracted slot hex:', slotHex)
+    console.log('Slot as BigInt:', slotBigInt.toString())
+
+    return slotBigInt
+  } catch (error) {
+    console.error('Error getting slot from token ID:', error)
+    throw new Error(`Failed to get slot for token ID ${tokenId}: ${error}`)
+  }
+}
+
+/**
+ * Convert a user's primary list ID to a slot value
+ * @param userAddress The user's address
+ * @param provider The ethers provider to use for the contract call
+ * @returns The slot value as a BigInt
+ */
+export async function getUserPrimaryListSlot(userAddress: string, provider: ethers.Provider): Promise<bigint> {
+  try {
+    // First get the primary list ID from the API
+    const primaryListId = await getUserPrimaryList(userAddress)
+    console.log(`Primary list ID for ${userAddress}: ${primaryListId}`)
+
+    // Then convert the list ID to a slot
+    const slot = await getSlotFromTokenId(primaryListId, provider)
+    console.log(`Slot for primary list ${primaryListId}: ${slot.toString()}`)
+
+    return slot
+  } catch (error) {
+    console.error('Error getting user primary list slot:', error)
+    throw error
+  }
 }
 
 /**
@@ -214,9 +278,9 @@ export async function followAddressOnEFP(signer: ethers.Signer, targetAddress: s
     // Get the user's address
     const userAddress = await baseSigner.getAddress()
 
-    // Get the user's primary list
-    const primaryListId = await getUserPrimaryList(userAddress)
-    console.log(`Using primary list ${primaryListId} for follow operation`)
+    // Get the user's primary list slot
+    const primaryListSlot = await getUserPrimaryListSlot(userAddress, baseSigner.provider!)
+    console.log(`Using primary list slot ${primaryListSlot.toString()} for follow operation`)
 
     const efpContract = new ethers.Contract(
       EFP_CONTRACT_ADDRESS,
@@ -228,11 +292,11 @@ export async function followAddressOnEFP(signer: ethers.Signer, targetAddress: s
     const listOp = encodeListOp(OPERATION_ADD, targetAddress)
     console.log('Follow ListOp:', listOp)
     console.log('Contract address:', EFP_CONTRACT_ADDRESS)
-    console.log('Slot (primaryListId):', primaryListId)
+    console.log('Slot (primaryListSlot):', primaryListSlot.toString())
     console.log('Ops array:', [listOp])
 
     // Apply the ListOp to the user's primary list
-    const tx = await efpContract.applyListOps(primaryListId, [listOp])
+    const tx = await efpContract.applyListOps(primaryListSlot, [listOp])
     const receipt = await tx.wait()
 
     return receipt.hash
@@ -253,9 +317,9 @@ export async function unfollowAddressOnEFP(signer: ethers.Signer, targetAddress:
     // Get the user's address
     const userAddress = await baseSigner.getAddress()
 
-    // Get the user's primary list
-    const primaryListId = await getUserPrimaryList(userAddress)
-    console.log(`Using primary list ${primaryListId} for unfollow operation`)
+    // Get the user's primary list slot
+    const primaryListSlot = await getUserPrimaryListSlot(userAddress, baseSigner.provider!)
+    console.log(`Using primary list slot ${primaryListSlot.toString()} for unfollow operation`)
 
     const efpContract = new ethers.Contract(
       EFP_CONTRACT_ADDRESS,
@@ -268,7 +332,7 @@ export async function unfollowAddressOnEFP(signer: ethers.Signer, targetAddress:
     console.log('Unfollow ListOp:', listOp)
 
     // Apply the ListOp to the user's primary list
-    const tx = await efpContract.applyListOps(primaryListId, [listOp])
+    const tx = await efpContract.applyListOps(primaryListSlot, [listOp])
     const receipt = await tx.wait()
 
     return receipt.hash
@@ -289,8 +353,8 @@ export async function isFollowingOnChain(signer: ethers.Signer, targetAddress: s
     // Get the user's address
     const userAddress = await baseSigner.getAddress()
 
-    // Get the user's primary list
-    const primaryListId = await getUserPrimaryList(userAddress)
+    // Get the user's primary list slot
+    const primaryListSlot = await getUserPrimaryListSlot(userAddress, baseSigner.provider!)
 
     const efpContract = new ethers.Contract(
       EFP_CONTRACT_ADDRESS,
@@ -299,12 +363,12 @@ export async function isFollowingOnChain(signer: ethers.Signer, targetAddress: s
     )
 
     // Get all ListOps for the user's primary list
-    const allOps = await efpContract.getAllListOps(primaryListId)
+    const allOps = await efpContract.getAllListOps(primaryListSlot)
 
     // Check if the target address is in the following list
     // This is a simplified check - in a real implementation you'd need to decode all ops
     // For now, we'll fall back to the API check
-    console.log(`Found ${allOps.length} ListOps for primary list ${primaryListId}`)
+    console.log(`Found ${allOps.length} ListOps for primary list slot ${primaryListSlot.toString()}`)
 
     // For now, return false and let the API handle the check
     return false
@@ -319,4 +383,28 @@ export async function isFollowingOnChain(signer: ethers.Signer, targetAddress: s
  */
 export function getEFPProfileUrl(address: string): string {
   return `https://efp.app/${address}`
+}
+
+/**
+ * Example function demonstrating token ID to slot conversion
+ * This shows how to convert token ID "463" to the expected slot value
+ * @param provider The ethers provider to use for the contract call
+ */
+export async function demonstrateTokenIdToSlotConversion(provider: ethers.Provider): Promise<void> {
+  try {
+    console.log('=== EFP Token ID to Slot Conversion Demo ===')
+
+    // Example: Convert token ID "463" to slot
+    const tokenId = "463"
+    const slot = await getSlotFromTokenId(tokenId, provider)
+
+    console.log(`Token ID: ${tokenId}`)
+    console.log(`Slot: ${slot.toString()}`)
+    console.log(`Expected slot: 18766030840332336081687800343669161599280935459580847353819603320217470654654`)
+    console.log(`Match: ${slot.toString() === '18766030840332336081687800343669161599280935459580847353819603320217470654654'}`)
+
+    console.log('=== Demo Complete ===')
+  } catch (error) {
+    console.error('Demo failed:', error)
+  }
 } 
