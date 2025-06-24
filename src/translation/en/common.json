@@ -14,6 +14,7 @@
   "Event": "Event",
   "Social": "Social",
   "Onboarding": "Onboarding",
+  "Booth": "Booth",
   "Leaderboard": "Leaderboard",
   "New app version available!": "New app version available!",
   "Refresh": "Refresh",
@@ -90,5 +91,13 @@
   "Failed to verify proof": "Failed to verify proof",
   "An error occurred while verifying proof": "An error occurred while verifying proof",
   "Verify Proof": "Verify Proof",
-  "Verifying...": "Verifying..."
+  "Verifying...": "Verifying...",
+  "Back to Event": "Back to Event",
+  "Booth QR Codes": "Booth QR Codes",
+  "Scan these QR codes to check in at each booth during the event": "Scan these QR codes to check in at each booth during the event",
+  "Booth {{boothId}}": "Booth {{boothId}}",
+  "Failed to generate QR code for booth {{boothId}}": "Failed to generate QR code for booth {{boothId}}",
+  "Generating QR code...": "Generating QR code...",
+  "Booth Code": "Booth Code",
+  "Open Booth Link": "Open Booth Link"
 }

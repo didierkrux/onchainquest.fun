@@ -14,6 +14,7 @@
   "Event": "กิจกรรม",
   "Social": "สังคม",
   "Onboarding": "เริ่มต้นใช้งาน",
+  "Booth": "บูธ",
   "Leaderboard": "ตารางผู้นำ",
   "New app version available!": "มีเวอร์ชันแอปใหม่พร้อมให้ดาวน์โหลด!",
   "Refresh": "รีเฟรช",
@@ -90,5 +91,13 @@
   "Failed to verify proof": "ไม่สามารถยืนยันหลักฐานได้",
   "An error occurred while verifying proof": "เกิดข้อผิดพลาดขณะยืนยันหลักฐาน",
   "Verify Proof": "ยืนยันหลักฐาน",
-  "Verifying...": "กำลังยืนยัน..."
+  "Verifying...": "กำลังยืนยัน...",
+  "Back to Event": "กลับไปยังกิจกรรม",
+  "Booth QR Codes": "รหัส QR ของบูธ",
+  "Scan these QR codes to check in at each booth during the event": "สแกนรหัส QR เหล่านี้เพื่อเช็คอินที่แต่ละบูธระหว่างกิจกรรม",
+  "Booth {{boothId}}": "บูธ {{boothId}}",
+  "Failed to generate QR code for booth {{boothId}}": "ไม่สามารถสร้างรหัส QR สำหรับบูธ {{boothId}} ได้",
+  "Generating QR code...": "กำลังสร้างรหัส QR...",
+  "Booth Code": "รหัสบูธ",
+  "Open Booth Link": "เปิดลิงก์บูธ"
 }
