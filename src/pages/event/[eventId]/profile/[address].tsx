@@ -28,10 +28,10 @@ import { ethers } from 'ethers'
 import {
   getEFPProfile,
   isFollowing as checkIsFollowing,
+  getEFPProfileUrl,
   followAddressOnEFP,
   unfollowAddressOnEFP,
   isFollowingOnChain,
-  getEFPProfileUrl,
 } from 'utils/efp'
 
 export default function PublicProfilePage() {
@@ -147,6 +147,14 @@ export default function PublicProfilePage() {
       try {
         if (currentOnChainStatus) {
           // Unfollow
+          toast({
+            title: t('Signature Required'),
+            description: t('You are about to sign a transaction to unfollow this address.'),
+            status: 'info',
+            duration: 7000,
+            isClosable: true,
+            position: isMobile ? 'top' : 'bottom-right',
+          })
           const txHash = await unfollowAddressOnEFP(signer, address)
           setIsFollowing(false)
           toast({
@@ -160,6 +168,14 @@ export default function PublicProfilePage() {
           console.log('Unfollow transaction hash:', txHash)
         } else {
           // Follow
+          toast({
+            title: t('Signature Required'),
+            description: t('You are about to sign a transaction to follow this address.'),
+            status: 'info',
+            duration: 7000,
+            isClosable: true,
+            position: isMobile ? 'top' : 'bottom-right',
+          })
           const txHash = await followAddressOnEFP(signer, address)
           setIsFollowing(true)
           toast({
