@@ -565,6 +565,55 @@ export function getEFPProfileUrl(address: string): string {
 }
 
 /**
+ * Get follower state between two users
+ * @param addressOrENS1 The address or ENS name of the first account
+ * @param addressOrENS2 The address or ENS name of the second account
+ * @param cache Optional cache parameter ('fresh' to skip cache)
+ * @returns The follower state object
+ */
+export async function getFollowerState(
+  addressOrENS1: string,
+  addressOrENS2: string,
+  cache?: 'fresh'
+): Promise<{
+  addressUser: string
+  addressFollower: string
+  state: {
+    follow: boolean
+    block: boolean
+    mute: boolean
+  }
+} | null> {
+  try {
+    const params = new URLSearchParams()
+    if (cache === 'fresh') {
+      params.append('cache', 'fresh')
+    }
+
+    const url = `${EFP_API_BASE}/users/${encodeURIComponent(addressOrENS1)}/${encodeURIComponent(addressOrENS2)}/followerState${params.toString() ? `?${params.toString()}` : ''}`
+
+    console.log('Fetching follower state from:', url)
+
+    const response = await fetch(url)
+    if (!response.ok) {
+      if (response.status === 404) {
+        // No follower state found, return null
+        return null
+      }
+      throw new Error(`Failed to fetch follower state: ${response.status}`)
+    }
+
+    const data = await response.json()
+    console.log('Follower state response:', data)
+
+    return data
+  } catch (error) {
+    console.error('Error fetching follower state:', error)
+    return null
+  }
+}
+
+/**
  * Example function demonstrating token ID to slot conversion
  * This shows how to convert token ID "463" to the expected slot value
  * @param provider The ethers provider to use for the contract call

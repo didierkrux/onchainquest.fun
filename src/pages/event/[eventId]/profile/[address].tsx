@@ -27,11 +27,10 @@ import { useAccount, useWalletClient } from 'wagmi'
 import { ethers } from 'ethers'
 import {
   getEFPProfile,
-  isFollowing as checkIsFollowing,
   getEFPProfileUrl,
   followAddressOnEFP,
   unfollowAddressOnEFP,
-  isFollowingOnChain,
+  getFollowerState,
 } from 'utils/efp'
 
 export default function PublicProfilePage() {
@@ -84,9 +83,17 @@ export default function PublicProfilePage() {
 
     const checkFollowStatus = async () => {
       try {
-        // Only use API check to avoid wallet prompts on page load
-        const following = await checkIsFollowing(userAddress, address)
-        setIsFollowing(following)
+        // Use the follower state API to get accurate follow status
+        const followerState = await getFollowerState(address, userAddress)
+        console.log('Follower state response:', followerState)
+
+        if (followerState) {
+          // Check if the current user is following the target address
+          setIsFollowing(followerState.state.follow)
+        } else {
+          // No follower state found, default to not following
+          setIsFollowing(false)
+        }
       } catch (error) {
         console.error('Error checking follow status:', error)
         // If API check fails, default to not following
@@ -133,20 +140,14 @@ export default function PublicProfilePage() {
       const provider = new ethers.BrowserProvider(walletClient)
       const signer = await provider.getSigner()
 
-      // Check current on-chain status when user clicks the button
-      let currentOnChainStatus = false
-      try {
-        currentOnChainStatus = await isFollowingOnChain(signer, address)
-        console.log('Current on-chain follow status:', currentOnChainStatus)
-      } catch (error) {
-        console.log('Could not check on-chain status, using API status:', error)
-        currentOnChainStatus = isFollowing // Use the API status as fallback
-      }
+      // Use the current API follow status to determine the action
+      // isFollowing state comes from the API check, so we can trust it for the button action
+      const shouldUnfollow = isFollowing
 
       // Try on-chain operation
       try {
-        if (currentOnChainStatus) {
-          // Unfollow
+        if (shouldUnfollow) {
+          // Unfollow - user is currently following, so unfollow them
           toast({
             title: t('Signature Required'),
             description: t('You are about to sign a transaction to unfollow this address.'),
@@ -156,7 +157,15 @@ export default function PublicProfilePage() {
             position: isMobile ? 'top' : 'bottom-right',
           })
           const txHash = await unfollowAddressOnEFP(signer, address)
-          setIsFollowing(false)
+
+          // Refresh follower state after successful unfollow
+          const updatedFollowerState = await getFollowerState(address, userAddress, 'fresh')
+          if (updatedFollowerState) {
+            setIsFollowing(updatedFollowerState.state.follow)
+          } else {
+            setIsFollowing(false)
+          }
+
           toast({
             title: t('Success'),
             description: t('Successfully unfollowed'),
@@ -167,7 +176,7 @@ export default function PublicProfilePage() {
           })
           console.log('Unfollow transaction hash:', txHash)
         } else {
-          // Follow
+          // Follow - user is not currently following, so follow them
           toast({
             title: t('Signature Required'),
             description: t('You are about to sign a transaction to follow this address.'),
@@ -177,7 +186,15 @@ export default function PublicProfilePage() {
             position: isMobile ? 'top' : 'bottom-right',
           })
           const txHash = await followAddressOnEFP(signer, address)
-          setIsFollowing(true)
+
+          // Refresh follower state after successful follow
+          const updatedFollowerState = await getFollowerState(address, userAddress, 'fresh')
+          if (updatedFollowerState) {
+            setIsFollowing(updatedFollowerState.state.follow)
+          } else {
+            setIsFollowing(true) // If no state found but we just followed, assume following
+          }
+
           toast({
             title: t('Success'),
             description: t('Successfully followed'),
@@ -192,7 +209,7 @@ export default function PublicProfilePage() {
         console.log('On-chain operation failed, falling back to EFP app:', onChainError)
 
         // Fallback: redirect to EFP app
-        const action = currentOnChainStatus ? 'unfollow' : 'follow'
+        const action = shouldUnfollow ? 'unfollow' : 'follow'
         const efpUrl = `https://efp.app/${address}`
         window.open(efpUrl, '_blank')
 
