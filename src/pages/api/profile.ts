@@ -333,6 +333,13 @@ export default async function handler(
       }
       console.log('profile', profile)
 
+      // Fetch associated tickets for this user
+      const associatedTickets = await db('tickets')
+        .select('code', 'is_used', 'used_at')
+        .where('event_id', eventIdNum)
+        .where('user_id', profile.id)
+        .orderBy('created_at', 'desc')
+
       if (!profile.basename) {
         const basename = await getBasename(address as `0x${string}`)
         if (basename?.endsWith('.base.eth')) {
@@ -372,7 +379,7 @@ export default async function handler(
         delete profile.email
       }
 
-      res.status(200).json({ ...profile, isSocialCronActive })
+      res.status(200).json({ ...profile, isSocialCronActive, associatedTickets })
     } catch (error) {
       console.error('Error fetching profile:', error)
       res.status(500).json({ message: 'Internal server error' })

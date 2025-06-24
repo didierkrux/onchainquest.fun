@@ -15,12 +15,14 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { ArrowLeft } from '@phosphor-icons/react'
+import { useAccount } from 'wagmi'
 
-import { BOOTH_DATA } from 'config'
+import { BOOTH_DATA, adminWallets } from 'config'
 import { Card as CardComponent } from 'components/Card'
 
 export default function BoothPage() {
   const { t } = useTranslation()
+  const { address } = useAccount()
   const router = useRouter()
   const { eventId } = router.query
   const [isMobile] = useMediaQuery('(max-width: 768px)')
@@ -28,6 +30,7 @@ export default function BoothPage() {
   const [qrCodes, setQrCodes] = useState<Record<string, string>>({})
 
   const DOMAIN_URL = 'https://onchainquest.fun'
+  const isAdmin = address && adminWallets.includes(address.toLowerCase())
 
   useEffect(() => {
     if (!eventId) return
@@ -69,6 +72,15 @@ export default function BoothPage() {
 
   const handleBackClick = () => {
     router.push(`/event/${eventId}`)
+  }
+
+  if (!isAdmin) {
+    return (
+      <Box display="flex" flexDirection="column" alignItems="center" p={8}>
+        <Heading>Access Denied</Heading>
+        <Text mt={4}>Only admins can view booth QR codes.</Text>
+      </Box>
+    )
   }
 
   if (!eventId) {

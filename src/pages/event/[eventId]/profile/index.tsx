@@ -29,9 +29,12 @@ import {
   SignOut,
   Star,
   Trash,
+  Ticket,
+  QrCode,
 } from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
 import { DynamicWidget } from '@dynamic-labs/sdk-react-core'
+import { QRScanner } from 'components/QRScanner'
 
 import { Profile } from 'entities/profile'
 import { profileName, profileAvatar, profileRole } from 'utils/index'
@@ -63,6 +66,10 @@ export default function ProfilePage() {
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const isSocialCronActive = profile?.isSocialCronActive || false
   const [usdValue, setUsdValue] = useState<number | null>(null)
+  const [isGeneratingTickets, setIsGeneratingTickets] = useState(false)
+  const [ticketCount, setTicketCount] = useState('10')
+  const [isScanningTicket, setIsScanningTicket] = useState(false)
+  const [scannedTicket, setScannedTicket] = useState<string | null>(null)
 
   const saveProfile = () => {
     if (!eventId) return
@@ -330,6 +337,155 @@ export default function ProfilePage() {
   const tabLabels = [`${t('Explorer')} 🧑‍🎓`, `${t('Mentor')} 🧑‍🏫`]
   const selectedRoleIndex = role === 'mentor' ? 1 : 0
 
+  const handleGenerateTickets = async () => {
+    if (!address || !adminSignature || !eventId) return
+
+    setIsGeneratingTickets(true)
+    try {
+      const isValid = await verifyMessage({
+        address,
+        message: adminSignatureMessage,
+        signature: adminSignature as `0x${string}`,
+      })
+
+      if (isValid) {
+        const response = await fetch('/api/admin/generate-tickets', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            address,
+            signature: adminSignature,
+            eventId,
+            count: parseInt(ticketCount),
+          }),
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          toast({
+            title: t('Success'),
+            description: `${data.message}. Generated: ${data.tickets.join(', ')}`,
+            status: 'success',
+            duration: 15000,
+            isClosable: true,
+            position: isMobile ? 'top' : 'bottom-right',
+          })
+        } else {
+          const data = await response.json()
+          throw new Error(`Failed to generate tickets: ${data.message}`)
+        }
+      } else {
+        setAdminSignature('')
+        throw new Error('Invalid signature')
+      }
+    } catch (error) {
+      console.error('Error generating tickets:', error)
+      toast({
+        title: t('Error'),
+        description: ` ${(error as Error).message}`,
+        status: 'error',
+        duration: 10000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    } finally {
+      setIsGeneratingTickets(false)
+    }
+  }
+
+  const handleTicketScan = async (result: string) => {
+    if (!address || !eventId) return
+
+    try {
+      // Extract ticket code from the scanned URL
+      // Expected format: /api/ticket/K9M2X7?eventId=3
+      const urlParts = result.split('/')
+      const ticketCode = urlParts[urlParts.length - 1]?.split('?')[0]
+
+      if (!ticketCode) {
+        toast({
+          title: t('Error'),
+          description: t('Invalid ticket QR code format'),
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+        return
+      }
+
+      // Validate the ticket
+      const validationResponse = await fetch(`/api/ticket/${ticketCode}?eventId=${eventId}`)
+      const validationData = await validationResponse.json()
+
+      if (!validationData.valid) {
+        toast({
+          title: t('Invalid Ticket'),
+          description: validationData.message,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+        return
+      }
+
+      // Associate ticket with user
+      const associateResponse = await fetch('/api/associate-ticket', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address,
+          eventId,
+          ticketCode,
+        }),
+      })
+
+      const associateData = await associateResponse.json()
+
+      if (associateResponse.ok) {
+        setScannedTicket(ticketCode)
+        toast({
+          title: t('Success'),
+          description: t('Ticket {{ticketCode}} successfully associated with your profile', {
+            ticketCode,
+          }),
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+        // Refresh profile to show updated ticket info
+        fetchProfile()
+      } else {
+        toast({
+          title: t('Error'),
+          description: associateData.message || t('Failed to associate ticket'),
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+      }
+    } catch (error) {
+      console.error('Error scanning ticket:', error)
+      toast({
+        title: t('Error'),
+        description: t('Failed to process ticket scan'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    } finally {
+      setIsScanningTicket(false)
+    }
+  }
+
   if (!address) return <Box display="flex" flexDirection="column" alignItems="center"></Box>
   else {
     return (
@@ -419,6 +575,88 @@ export default function ProfilePage() {
                 </CardBody>
               </Card>
             </Box>
+
+            {/* Ticket Association Section */}
+            <Box w="100%" maxW="600px" mb={4}>
+              <Heading as="h2" size="md">
+                {t('Event Ticket')}
+              </Heading>
+              <Card mt={4}>
+                <CardBody>
+                  <Box display="flex" flexDirection="column" gap={4} alignItems="center">
+                    {profile?.associatedTickets && profile.associatedTickets.length > 0 ? (
+                      // User already has an associated ticket
+                      <Box display="flex" flexDirection="column" gap={3} w="100%">
+                        <Text textAlign="center" color="gray.600" mb={2}>
+                          {t('Your associated ticket for this event')}
+                        </Text>
+                        {profile.associatedTickets.map((ticket, index) => (
+                          <Box
+                            key={index}
+                            p={4}
+                            bg={ticket.is_used ? 'green.50' : 'blue.50'}
+                            borderRadius="md"
+                            border="1px solid"
+                            borderColor={ticket.is_used ? 'green.200' : 'blue.200'}
+                            display="flex"
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Box>
+                              <Text fontWeight="bold" fontSize="xl" fontFamily="mono">
+                                {ticket.code}
+                              </Text>
+                              <Text fontSize="sm" color="gray.600">
+                                {ticket.is_used ? t('Used') : t('Available')}
+                              </Text>
+                            </Box>
+                            {ticket.is_used && ticket.used_at && (
+                              <Text fontSize="xs" color="gray.500">
+                                {new Date(ticket.used_at).toLocaleDateString()}
+                              </Text>
+                            )}
+                          </Box>
+                        ))}
+                      </Box>
+                    ) : (
+                      // User doesn't have an associated ticket yet
+                      <>
+                        <Text textAlign="center" color="gray.600">
+                          {t('Scan a ticket QR code to associate it with your profile')}
+                        </Text>
+
+                        {scannedTicket && (
+                          <Box
+                            p={3}
+                            bg="green.50"
+                            borderRadius="md"
+                            border="1px solid"
+                            borderColor="green.200"
+                            textAlign="center"
+                          >
+                            <Text color="green.700" fontWeight="bold">
+                              {t('Ticket Associated')}: {scannedTicket}
+                            </Text>
+                          </Box>
+                        )}
+
+                        <Box display="flex" flexDirection="column" alignItems="center" gap={4}>
+                          <QRScanner onScan={handleTicketScan} />
+                          <Button
+                            onClick={() => setIsScanningTicket(false)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            {t('Cancel Scanning')}
+                          </Button>
+                        </Box>
+                      </>
+                    )}
+                  </Box>
+                </CardBody>
+              </Card>
+            </Box>
+
             <Box w="100%" maxW="600px">
               <Heading as="h1">{t('Update Profile')}</Heading>
               <Card mt={4} mb={4}>
@@ -604,6 +842,42 @@ export default function ProfilePage() {
                           </Link>
                         )
                     )}
+                  </Box>
+                )}
+                {adminSignature && (
+                  <Box display="flex" alignItems="center" gap={4}>
+                    <Link href={`/event/${eventId}/tickets`}>
+                      <Button colorScheme="blue" leftIcon={<Ticket />}>
+                        View Tickets
+                      </Button>
+                    </Link>
+                    <Link href={`/event/${eventId}/booth`}>
+                      <Button colorScheme="green" leftIcon={<QrCode />}>
+                        View Booths
+                      </Button>
+                    </Link>
+                  </Box>
+                )}
+                {adminSignature && (
+                  <Box display="flex" alignItems="center" gap={4}>
+                    <Input
+                      placeholder="Number of tickets"
+                      value={ticketCount}
+                      onChange={(e) => setTicketCount(e.target.value)}
+                      w="150px"
+                      type="number"
+                      min="1"
+                      max="100"
+                    />
+                    <Button
+                      onClick={handleGenerateTickets}
+                      isLoading={isGeneratingTickets}
+                      loadingText="Generating..."
+                      colorScheme="red"
+                      leftIcon={<Ticket />}
+                    >
+                      Generate tickets
+                    </Button>
                   </Box>
                 )}
                 <Button

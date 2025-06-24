@@ -1,6 +1,7 @@
 const TABLES = {
   events: 'events',
   users: 'users',
+  tickets: 'tickets',
 }
 
 // add trigger to update updated_at column automatically

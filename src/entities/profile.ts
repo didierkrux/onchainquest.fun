@@ -11,6 +11,12 @@ export type Task = {
 
 export type Tasks = { [key: string]: Task }
 
+export type AssociatedTicket = {
+  code: string
+  is_used: boolean
+  used_at: string | null
+}
+
 export type Profile = {
   address: string
   username: string
@@ -24,4 +30,5 @@ export type Profile = {
   email?: string
   emailOK?: boolean
   subname?: string
+  associatedTickets?: AssociatedTicket[]
 }
