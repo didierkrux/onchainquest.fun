@@ -10,6 +10,9 @@ import {
   Button,
   Link,
   useClipboard,
+  Avatar,
+  Stack,
+  Divider,
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
@@ -22,6 +25,7 @@ import {
   ArrowUpRight,
   Check,
   CopySimple,
+  Star,
 } from '@phosphor-icons/react'
 import { useAccount, useWalletClient } from 'wagmi'
 import { ethers } from 'ethers'
@@ -32,6 +36,8 @@ import {
   unfollowAddressOnEFP,
   getFollowerState,
 } from 'utils/efp'
+import { Profile } from 'entities/profile'
+import { profileAvatar, profileName, profileRole } from 'utils/index'
 
 export default function PublicProfilePage() {
   const { t } = useTranslation()
@@ -44,9 +50,37 @@ export default function PublicProfilePage() {
   const [isFollowing, setIsFollowing] = useState(false)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
   const [efpProfile, setEfpProfile] = useState<any>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [isProfileLoading, setIsProfileLoading] = useState(true)
   const { address: userAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
   const { onCopy, hasCopied } = useClipboard((address as string) || '')
+
+  // Fetch profile data
+  useEffect(() => {
+    if (!address || typeof address !== 'string' || !eventId) {
+      setIsProfileLoading(false)
+      return
+    }
+
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch(`/api/profile?address=${address}&eventId=${eventId}`)
+        if (response.ok) {
+          const profileData = await response.json()
+          setProfile(profileData)
+        } else {
+          console.error('Failed to fetch profile:', response.status)
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error)
+      } finally {
+        setIsProfileLoading(false)
+      }
+    }
+
+    fetchProfile()
+  }, [address, eventId])
 
   useEffect(() => {
     if (!address || typeof address !== 'string') {
@@ -55,7 +89,10 @@ export default function PublicProfilePage() {
       return
     }
 
-    QRCode.toDataURL(address, {
+    // Generate QR code for the profile URL instead of just the address
+    const profileUrl = `https://onchainquest.fun/event/${eventId}/profile/${address}`
+
+    QRCode.toDataURL(profileUrl, {
       type: 'image/png',
       color: { dark: '#000000' },
     })
@@ -75,7 +112,7 @@ export default function PublicProfilePage() {
           position: isMobile ? 'top' : 'bottom-right',
         })
       })
-  }, [address, t, toast, isMobile])
+  }, [address, eventId, t, toast, isMobile])
 
   // Check if user is following this address
   useEffect(() => {
@@ -283,6 +320,64 @@ export default function PublicProfilePage() {
       <Card maxW="400px" w="100%">
         <CardBody>
           <Box display="flex" flexDirection="column" alignItems="center" gap={4}>
+            {/* Profile Information */}
+            {isProfileLoading ? (
+              <Box textAlign="center">
+                <Text>{t('Loading profile...')}</Text>
+              </Box>
+            ) : profile ? (
+              <Stack spacing={4} w="100%" textAlign="center">
+                {/* Avatar and Name */}
+                <Box>
+                  <Avatar
+                    src={profileAvatar(profile)}
+                    size="xl"
+                    mb={3}
+                    name={profileName(profile)}
+                  />
+                  <Text fontSize="xl" fontWeight="bold">
+                    {profileName(profile)}
+                  </Text>
+                  <Text
+                    fontSize="md"
+                    color="gray.600"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    gap={1}
+                  >
+                    {profileRole(profile)}
+                  </Text>
+                </Box>
+
+                {/* Score */}
+                {profile.score && profile.score > 0 && (
+                  <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
+                    <Text fontSize="lg" fontWeight="semibold" color="purple.500">
+                      {profile.score}
+                    </Text>
+                    <Star weight="fill" size={20} color="#A855F7" />
+                  </Box>
+                )}
+
+                {/* Basename */}
+                {profile.basename && (
+                  <Box>
+                    <Text fontSize="sm" color="blue.500" fontWeight="medium">
+                      {profile.basename}
+                    </Text>
+                  </Box>
+                )}
+
+                <Divider />
+              </Stack>
+            ) : (
+              <Box textAlign="center">
+                <Text color="gray.500">{t('Profile not found')}</Text>
+              </Box>
+            )}
+
+            {/* Address */}
             <Text fontSize="lg" fontWeight="bold" textAlign="center">
               <Box display="flex" alignItems="center" gap={2}>
                 <Text fontSize={['2xs', 'xs']} color="gray.500">
@@ -371,7 +466,7 @@ export default function PublicProfilePage() {
             )}
 
             <Text fontSize="sm" color="gray.500" textAlign="center">
-              {t('Scan this QR code to get the wallet address')}
+              {t('Scan this QR code to connect with me')}
             </Text>
           </Box>
         </CardBody>
