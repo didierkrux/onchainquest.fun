@@ -45,10 +45,24 @@ export default async function handler(
 
     // Check if ticket has already been used
     if (ticket.is_used) {
+      // Get ticket owner information even for used tickets
+      let ticketOwner = null
+      if (ticket.user_id) {
+        ticketOwner = await db('users')
+          .where('id', ticket.user_id)
+          .first()
+      }
+
       return res.status(400).json({
         valid: false,
         message: 'Ticket has already been used',
-        usedAt: ticket.used_at
+        usedAt: ticket.used_at,
+        ticketOwner: ticketOwner ? {
+          address: ticketOwner.address,
+          username: ticketOwner.username,
+          subname: ticketOwner.subname,
+          basename: ticketOwner.basename
+        } : null
       })
     }
 
@@ -57,6 +71,14 @@ export default async function handler(
       .where('id', parseInt(eventId))
       .first()
 
+    // Get ticket owner information if ticket is associated
+    let ticketOwner = null
+    if (ticket.user_id) {
+      ticketOwner = await db('users')
+        .where('id', ticket.user_id)
+        .first()
+    }
+
     return res.status(200).json({
       valid: true,
       ticketId: ticket.id,
@@ -64,6 +86,12 @@ export default async function handler(
       eventId: ticket.event_id,
       eventName: event?.name || 'Unknown Event',
       isUsed: ticket.is_used,
+      ticketOwner: ticketOwner ? {
+        address: ticketOwner.address,
+        username: ticketOwner.username,
+        subname: ticketOwner.subname,
+        basename: ticketOwner.basename
+      } : null,
       message: 'Ticket is valid'
     })
 

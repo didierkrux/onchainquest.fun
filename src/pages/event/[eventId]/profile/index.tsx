@@ -68,7 +68,6 @@ export default function ProfilePage() {
   const [usdValue, setUsdValue] = useState<number | null>(null)
   const [isGeneratingTickets, setIsGeneratingTickets] = useState(false)
   const [ticketCount, setTicketCount] = useState('10')
-  const [isScanningTicket, setIsScanningTicket] = useState(false)
   const [scannedTicket, setScannedTicket] = useState<string | null>(null)
 
   const saveProfile = () => {
@@ -481,8 +480,6 @@ export default function ProfilePage() {
         isClosable: true,
         position: isMobile ? 'top' : 'bottom-right',
       })
-    } finally {
-      setIsScanningTicket(false)
     }
   }
 
@@ -622,7 +619,9 @@ export default function ProfilePage() {
                       // User doesn't have an associated ticket yet
                       <>
                         <Text textAlign="center" color="gray.600">
-                          {t('Scan a ticket QR code to associate it with your profile')}
+                          {t(
+                            'Scan the ticket QR code from your bracelet to associate it with your profile'
+                          )}
                         </Text>
 
                         {scannedTicket && (
@@ -645,13 +644,6 @@ export default function ProfilePage() {
                             buttonLabel={t('Scan Event Ticket')}
                             onScan={handleTicketScan}
                           />
-                          <Button
-                            onClick={() => setIsScanningTicket(false)}
-                            variant="outline"
-                            size="sm"
-                          >
-                            {t('Cancel Scanning')}
-                          </Button>
                         </Box>
                       </>
                     )}

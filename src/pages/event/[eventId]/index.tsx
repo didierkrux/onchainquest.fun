@@ -14,12 +14,15 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
+  useToast,
+  useMediaQuery,
 } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
 import { useLocalStorage } from 'usehooks-ts'
 import { Info } from '@phosphor-icons/react'
 import { isAndroid, isIOS } from 'react-device-detect'
 import { useState } from 'react'
+import { useRouter } from 'next/router'
 
 import LanguageSwitch from 'components/LanguageSwitch'
 import { Event } from 'entities/data'
@@ -32,10 +35,111 @@ export default function EventPage({ event }: { event: Event }) {
   const { t } = useTranslation()
   const [pwa] = useLocalStorage<boolean | null>('pwa', null)
   const [, setShowInstallPWA] = useLocalStorage('showInstallPWA', false)
+  const router = useRouter()
+  const { eventId } = router.query
+  const toast = useToast()
+  const [isMobile] = useMediaQuery('(max-width: 1024px)')
 
   const goldSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '1-gold')
   const silverSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '2-silver')
   const bronzeSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '3-bronze')
+
+  const handleAttendeeBraceletScan = async (result: string) => {
+    try {
+      // Check if it's a booth QR code
+      if (result.includes('/booth/')) {
+        toast({
+          title: t('Booth QR Code Detected'),
+          description: t(
+            'This is a booth QR code. Please go to the Onboarding tab and use the scan button there to check in at booths.'
+          ),
+          status: 'info',
+          duration: 8000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+        return
+      }
+
+      // Check if it's a profile QR code
+      if (result.includes('/profile/')) {
+        // Extract the profile path from the URL
+        const url = new URL(result)
+        const profilePath = url.pathname
+        router.push(profilePath)
+        return
+      }
+
+      // Expected format: ${window.location.origin}/api/ticket/${ticketCode}?eventId=${eventId}
+      const url = new URL(result)
+      const pathParts = url.pathname.split('/')
+      const ticketCode = pathParts[pathParts.length - 1]
+      const urlEventId = url.searchParams.get('eventId')
+
+      if (!ticketCode || !urlEventId || !eventId || typeof eventId !== 'string') {
+        toast({
+          title: t('Error'),
+          description: t('Invalid QR code format'),
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+        return
+      }
+
+      // Validate the ticket
+      const validationResponse = await fetch(`/api/ticket/${ticketCode}?eventId=${eventId}`)
+      const validationData = await validationResponse.json()
+
+      if (!validationData.valid) {
+        // If ticket is already used, it means it's claimed - redirect to owner's profile
+        if (
+          validationData.message === 'Ticket has already been used' &&
+          validationData.ticketOwner
+        ) {
+          router.push(`/event/${eventId}/profile/${validationData.ticketOwner.address}`)
+          return
+        }
+
+        toast({
+          title: t('Invalid Ticket'),
+          description: validationData.message,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+        return
+      }
+
+      // Check if ticket has an owner
+      if (validationData.ticketOwner) {
+        // Redirect to the ticket owner's profile
+        router.push(`/event/${eventId}/profile/${validationData.ticketOwner.address}`)
+      } else {
+        // Show message for unclaimed ticket
+        toast({
+          title: t('Unclaimed Ticket'),
+          description: t('If you are the owner of this ticket, associate it via your profile'),
+          status: 'info',
+          duration: 8000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+      }
+    } catch (error) {
+      console.error('Error scanning attendee bracelet:', error)
+      toast({
+        title: t('Error'),
+        description: t('Failed to process QR code'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    }
+  }
 
   if (!event) return <></>
 
@@ -217,18 +321,21 @@ export default function EventPage({ event }: { event: Event }) {
             </Box>
           </Box>
         )}
-        {eventId === 3 && (
+        {eventId === '3' && (
           <Box mt="10">
             <Text fontWeight="bold" textAlign="center">
               {t('Connect with attendees by scanning their bracelet QR code')}
             </Text>
-            <QRScanner buttonLabel={t('Scan Attendee Bracelet')} />
+            <QRScanner
+              buttonLabel={t('Scan Attendee Bracelet')}
+              onScan={handleAttendeeBraceletScan}
+            />
           </Box>
         )}
 
-        {eventId === 3 && (
+        {eventId === '3' && (
           <Box mt="10">
-            <FarcasterMessages eventId={eventId.toString()} />
+            <FarcasterMessages eventId={eventId} />
           </Box>
         )}
       </Box>
