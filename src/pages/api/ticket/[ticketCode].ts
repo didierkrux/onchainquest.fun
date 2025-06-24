@@ -10,7 +10,14 @@ export default async function handler(
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
-  const { ticketCode, eventId } = req.query
+  const { ticketCode, eventId, install } = req.query
+
+  // Check if install parameter is present and redirect
+  if (install === 'true' && eventId && typeof eventId === 'string') {
+    res.setHeader('Location', `/event/${eventId}/install`)
+    res.status(302).end()
+    return
+  }
 
   // Validate required parameters
   if (!ticketCode || typeof ticketCode !== 'string') {

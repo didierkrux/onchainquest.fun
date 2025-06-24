@@ -11,6 +11,7 @@ import {
   Badge,
   Flex,
   Spinner,
+  Link,
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
@@ -63,7 +64,7 @@ export default function TicketsPage() {
 
   const generateQRCode = async (ticketCode: string) => {
     try {
-      const url = `${window.location.origin}/api/ticket/${ticketCode}?eventId=${eventId}`
+      const url = `${window.location.origin}/api/ticket/${ticketCode}?eventId=${eventId}&install=true`
       const qrDataURL = await QRCode.toDataURL(url, {
         type: 'image/png',
         color: { dark: '#000000', light: '#FFFFFF' },
@@ -174,16 +175,18 @@ export default function TicketsPage() {
                 {/* QR Code */}
                 {qrCodes[ticket.code] && (
                   <Box textAlign="center">
-                    <img
-                      src={qrCodes[ticket.code]}
-                      alt={`QR Code for ${ticket.code}`}
-                      style={{
-                        width: '150px',
-                        height: '150px',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                      }}
-                    />
+                    <Link href={`/api/ticket/${ticket.code}?eventId=${eventId}&install=true`}>
+                      <img
+                        src={qrCodes[ticket.code]}
+                        alt={`QR Code for ${ticket.code}`}
+                        style={{
+                          width: '150px',
+                          height: '150px',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                        }}
+                      />
+                    </Link>
                     <Button
                       size="sm"
                       variant="ghost"
