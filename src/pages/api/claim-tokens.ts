@@ -88,7 +88,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const taskCondition = taskDefinitions[taskIdClaimTokens].condition
     // console.log('taskCondition', taskCondition)
-    const taskIdClaimPOAP = Object.values(taskDefinitions).findIndex((task: any) => task.condition === taskCondition)
+
+    // Parse the condition to get POAP ID and ether value
+    const [poapIdOrTicket, etherValue] = taskCondition?.split(',') || []
+    const ethAmount = etherValue ? ethers.parseUnits(etherValue, 'ether').toString() : ethers.parseUnits('0.0001', 'ether').toString()
+
+    // If condition is not "ticket", use the POAP ID from the condition
+    const poapId = poapIdOrTicket === 'ticket' ? taskCondition : poapIdOrTicket
+
+    const taskIdClaimPOAP = Object.values(taskDefinitions).findIndex((task: any) => task.condition === poapId)
     // console.log('taskIdClaimPOAP', taskIdClaimPOAP)
     const badgeCompleted = profileData?.tasks?.[taskIdClaimPOAP]?.isCompleted ?? false
     // console.log('badgeCompleted', badgeCompleted)
@@ -99,7 +107,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const addressToLower = (address as string).toLowerCase();
     const destination = addressToLower;
-    const ethAmount = ethers.parseUnits('0.0001', 'ether').toString();
 
     try {
       // Create provider and signer
