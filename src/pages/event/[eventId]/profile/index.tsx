@@ -587,7 +587,6 @@ export default function ProfilePage() {
                       alignItems="center"
                     >
                       <DynamicWidget />
-                      <ZupassProof />
                     </Box>
                   ) : null}
                   <Box m={4} display="flex" justifyContent="center">
@@ -713,6 +712,22 @@ export default function ProfilePage() {
                 </CardBody>
               </Card>
             </Box>
+
+            {/* Zupass Section */}
+            {eventId === '3' && (
+              <Box w="100%" maxW="600px" mb={4}>
+                <Heading as="h2" size="md">
+                  {t('Zupass Verification')}
+                </Heading>
+                <Card mt={4}>
+                  <CardBody>
+                    <Box display="flex" flexDirection="column" gap={4} alignItems="center">
+                      <ZupassProof />
+                    </Box>
+                  </CardBody>
+                </Card>
+              </Box>
+            )}
 
             <Box w="100%" maxW="600px">
               <Heading as="h1">{t('Update Profile')}</Heading>
