@@ -7,7 +7,6 @@ import { ethers } from 'ethers';
 import { DOMAIN_URL, adminWallets } from 'config';
 import db from 'utils/db';
 import { calculateScore } from 'utils/index';
-import { getTasks } from 'utils/queries';
 import { eventId as currentEventId } from 'config'
 
 const RPC_URL = process.env.ALCHEMY_API_KEY
@@ -40,21 +39,56 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: 'Recipient address is required' });
     }
 
-    const tasks = await getTasks(parseInt(eventId as string))
-    // console.log('tasks', tasks)
+    // Get task definitions from database (similar to profile.ts)
+    const { data_en: { tasks: taskDefinitions } } = await db('events')
+      .where('id', parseInt(eventId as string))
+      .first()
+      .select('data_en')
 
     // check if user has already claimed tokens (Task #2 = force POAP validation)
     const profile = await fetch(`${DOMAIN_URL}/api/profile?address=${address}&taskId=2&eventId=${eventId}`)
     const profileData = await profile.json()
     // console.log('profileData', profileData)
-    const taskIdClaimTokens = Object.values(tasks).findIndex((task: any) => task.action === 'claim-tokens')
+    const taskIdClaimTokens = Object.values(taskDefinitions).findIndex((task: any) => task.action === 'claim-tokens')
     const swapCompleted = profileData?.tasks?.[taskIdClaimTokens]?.isCompleted ?? false
     if (swapCompleted === true) {
       return res.status(400).json({ ...profileData, message: 'You have already claimed your tokens' });
     }
-    const taskCondition = tasks[taskIdClaimTokens].condition
+
+    // Check quest.lock logic for claim-tokens task
+    const claimTokensTask = taskDefinitions[taskIdClaimTokens];
+    if (claimTokensTask?.lock) {
+      if (claimTokensTask.lock === 'ticket') {
+        // For ticket locks, check if user has an associated ticket
+        const associatedTickets = await db('tickets')
+          .select('code', 'is_used', 'used_at')
+          .where('event_id', eventId)
+          .where('user_id', profileData.id)
+          .orderBy('created_at', 'desc');
+
+        if (!associatedTickets || associatedTickets.length === 0) {
+          return res.status(400).json({
+            ...profileData,
+            message: 'Associate your event ticket in your profile to unlock this'
+          });
+        }
+      } else if (typeof claimTokensTask.lock === 'number') {
+        // For numeric locks, check if the previous task is completed
+        const lockTaskId = claimTokensTask.lock - 1; // Convert to 0-based index
+        const lockTaskCompleted = profileData?.tasks?.[lockTaskId]?.isCompleted ?? false;
+
+        if (!lockTaskCompleted) {
+          return res.status(400).json({
+            ...profileData,
+            message: `Complete task #${claimTokensTask.lock} first to unlock this.`
+          });
+        }
+      }
+    }
+
+    const taskCondition = taskDefinitions[taskIdClaimTokens].condition
     // console.log('taskCondition', taskCondition)
-    const taskIdClaimPOAP = Object.values(tasks).findIndex((task: any) => task.condition === taskCondition)
+    const taskIdClaimPOAP = Object.values(taskDefinitions).findIndex((task: any) => task.condition === taskCondition)
     // console.log('taskIdClaimPOAP', taskIdClaimPOAP)
     const badgeCompleted = profileData?.tasks?.[taskIdClaimPOAP]?.isCompleted ?? false
     // console.log('badgeCompleted', badgeCompleted)
@@ -88,10 +122,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // update task as completed in profile
           const userTasks = profileData?.tasks;
           const taskAction = 'claim-tokens';
-          const taskId = Object.values(tasks).findIndex((task: any) => task.action === taskAction);
+          const taskId = Object.values(taskDefinitions).findIndex((task: any) => task.action === taskAction);
           console.log('taskIdClaimTokens', taskId)
-          userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: tasks[taskId].points, txLink };
-          const score = calculateScore(userTasks, tasks)
+          userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskDefinitions[taskId].points, txLink };
+          const score = calculateScore(userTasks, taskDefinitions)
           const profileToSave = { score, tasks: userTasks }
           console.log('profileToSave', profileToSave)
           const [profile] = await db('users')
