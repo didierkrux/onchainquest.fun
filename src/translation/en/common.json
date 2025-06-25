@@ -98,6 +98,7 @@
   "You rejected the transaction in your wallet.": "You rejected the transaction in your wallet.",
   "Failed to send transaction": "Failed to send transaction",
   "Complete task #{{taskNumber}} first to unlock this.": "Complete task #{{taskNumber}} first to unlock this.",
+  "Associate your event ticket in your profile to unlock this": "Associate your event ticket in your profile to unlock this",
   "Claiming... (takes ~30 seconds)": "Claiming... (takes ~30 seconds)",
   "Claim": "Claim",
   "View claiming transaction on BaseScan": "View claiming transaction on BaseScan",

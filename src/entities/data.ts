@@ -60,7 +60,7 @@ export type Quest = {
   condition?: string
   actionField?: React.ReactNode
   completedField?: React.ReactNode
-  lock?: number
+  lock?: number | string
   button?: string
 }
 

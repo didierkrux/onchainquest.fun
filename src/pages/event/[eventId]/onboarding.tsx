@@ -75,6 +75,44 @@ export default function Onboarding({ event }: { event: Event }) {
 
   const QUESTS: Quest[] = event.tasks || []
 
+  // Helper function to render lock messages
+  const renderLockMessage = (quest: Quest) => {
+    if (quest.lock === 'ticket') {
+      return (
+        <Box display="flex" alignItems="center" gap={2}>
+          {t('Associate your event ticket in your profile to unlock this')}
+          <Lock size={28} color="gray" />
+        </Box>
+      )
+    }
+
+    return (
+      <Box display="flex" alignItems="center" gap={2}>
+        {t('Complete task #{{taskNumber}} first to unlock this.', {
+          taskNumber: quest.lock,
+        })}
+        <Lock size={28} color="gray" />
+      </Box>
+    )
+  }
+
+  // Helper function to check if a quest is locked
+  const isQuestLocked = (quest: Quest, profile: Profile | null) => {
+    if (!quest.lock || !profile?.tasks) return false
+
+    if (quest.lock === 'ticket') {
+      // For ticket locks, check if user has an associated ticket
+      return !profile.associatedTickets || profile.associatedTickets.length === 0
+    }
+
+    // For numeric locks, check if the previous task is completed
+    if (typeof quest.lock === 'number') {
+      return !profile.tasks[quest.lock - 1]?.isCompleted ?? false
+    }
+
+    return false
+  }
+
   const handleAction = async (
     quest: Quest,
     params?: { qrCode?: string; code?: string; eventId?: string }
@@ -264,18 +302,13 @@ export default function Onboarding({ event }: { event: Event }) {
   for (const quest of QUESTS) {
     if (profile?.tasks) {
       if (quest.action === 'claim-tokens') {
-        const isLocked = quest.lock
-          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
-          : false
+        const isLocked = isQuestLocked(quest, profile)
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = (
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t('Complete task #{{taskNumber}} first to unlock this.', {
-                  taskNumber: quest.lock,
-                })}
-                <Lock size={28} color="gray" />
+                {renderLockMessage(quest)}
               </Box>
             ) : !isCompleted ? (
               <Box>
@@ -300,19 +333,14 @@ export default function Onboarding({ event }: { event: Event }) {
         ) : null
       }
       if (quest.action === 'send-tokens') {
-        const isLocked = quest.lock
-          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
-          : false
+        const isLocked = isQuestLocked(quest, profile)
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         const [amount, tokenAddress, targetAddress] = quest?.condition?.split(',') ?? []
         quest.actionField = (
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t('Complete task #{{taskNumber}} first to unlock this.', {
-                  taskNumber: quest.lock,
-                })}
-                <Lock size={28} color="gray" />
+                {renderLockMessage(quest)}
               </Box>
             ) : !isCompleted ? (
               <Box display="flex" gap={4}>
@@ -339,18 +367,13 @@ export default function Onboarding({ event }: { event: Event }) {
         ) : null
       }
       if (quest.action === 'claim-poap') {
-        const isLocked = quest.lock
-          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
-          : false
+        const isLocked = isQuestLocked(quest, profile)
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = (
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t('Complete task #{{taskNumber}} first to unlock this.', {
-                  taskNumber: quest.lock,
-                })}
-                <Lock size={28} color="gray" />
+                {renderLockMessage(quest)}
               </Box>
             ) : !isCompleted ? (
               <Box display="flex" flexDirection="column" gap={2} alignItems="flex-end">
@@ -449,18 +472,13 @@ export default function Onboarding({ event }: { event: Event }) {
         ) : null
       }
       if (quest.action === 'swap-tokens') {
-        const isLocked = quest.lock
-          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
-          : false
+        const isLocked = isQuestLocked(quest, profile)
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = (
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t('Complete task #{{taskNumber}} first to unlock this.', {
-                  taskNumber: quest.lock,
-                })}
-                <Lock size={28} color="gray" />
+                {renderLockMessage(quest)}
               </Box>
             ) : (
               <>
@@ -496,18 +514,13 @@ export default function Onboarding({ event }: { event: Event }) {
         ) : null
       }
       if (quest.action === 'claim-subname') {
-        const isLocked = quest.lock
-          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
-          : false
+        const isLocked = isQuestLocked(quest, profile)
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         quest.actionField = (
           <Box display="flex" gap={4} alignItems="center">
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t('Complete task #{{taskNumber}} first to unlock this.', {
-                  taskNumber: quest.lock,
-                })}
-                <Lock size={28} color="gray" />
+                {renderLockMessage(quest)}
               </Box>
             ) : !isCompleted ? (
               <>
@@ -574,9 +587,7 @@ export default function Onboarding({ event }: { event: Event }) {
         )
       }
       if (quest.action === 'booth-checkin') {
-        const isLocked = quest.lock
-          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
-          : false
+        const isLocked = isQuestLocked(quest, profile)
         const checkins: string[] = profile?.tasks?.[quest.id]?.checkins || []
         const totalPoints = profile?.tasks?.[quest.id]?.points || 0
         const totalBooths = Object.keys(BOOTH_DATA).length // Total number of booths to check in
@@ -585,10 +596,7 @@ export default function Onboarding({ event }: { event: Event }) {
           <Box display="flex" gap={4} flexDirection="column" alignItems="flex-end">
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t('Complete task #{{taskNumber}} first to unlock this.', {
-                  taskNumber: quest.lock,
-                })}
-                <Lock size={28} color="gray" />
+                {renderLockMessage(quest)}
               </Box>
             ) : !isCompleted ? (
               <Box display="flex" flexDirection="column" gap={4} alignItems="flex-end">
@@ -671,19 +679,14 @@ export default function Onboarding({ event }: { event: Event }) {
           ) : null
       }
       if (quest.action === 'buy-shop') {
-        const isLocked = quest.lock
-          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
-          : false
+        const isLocked = isQuestLocked(quest, profile)
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         const [url] = quest?.condition?.split(',') ?? []
         quest.actionField = (
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t('Complete task #{{taskNumber}} first to unlock this.', {
-                  taskNumber: quest.lock,
-                })}
-                <Lock size={28} color="gray" />
+                {renderLockMessage(quest)}
               </Box>
             ) : !isCompleted ? (
               <Box display="flex" gap={4}>
@@ -704,19 +707,14 @@ export default function Onboarding({ event }: { event: Event }) {
         )
       }
       if (quest.action === 'feedback-form') {
-        const isLocked = quest.lock
-          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
-          : false
+        const isLocked = isQuestLocked(quest, profile)
         const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
         const [url] = quest?.condition?.split(',') ?? []
         quest.actionField = (
           <Box display="flex" gap={4}>
             {quest.lock && isLocked ? (
               <Box display="flex" alignItems="center" gap={2}>
-                {t('Complete task #{{taskNumber}} first to unlock this.', {
-                  taskNumber: quest.lock,
-                })}
-                <Lock size={28} color="gray" />
+                {renderLockMessage(quest)}
               </Box>
             ) : !isCompleted ? (
               <Box display="flex" gap={4}>
@@ -753,9 +751,7 @@ export default function Onboarding({ event }: { event: Event }) {
       </Box>
       {QUESTS.map((quest, index) => {
         const isCompleted = profile?.tasks?.[index.toString()]?.isCompleted ?? false
-        const isLocked = quest.lock
-          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
-          : false
+        const isLocked = isQuestLocked(quest, profile)
         return (
           <Card
             mt={4}

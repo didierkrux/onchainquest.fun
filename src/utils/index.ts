@@ -85,7 +85,7 @@ export async function fetchPotionData(eventId: number): Promise<Event> {
           image: item.fields.Image,
           action: item.fields.Action,
           condition: item.fields.Condition,
-          lock: parseInt(item.fields.Lock),
+          lock: item.fields.Lock === 'ticket' ? 'ticket' : parseInt(item.fields.Lock),
           button: item.fields.Button,
         })),
       prizes: eventData
