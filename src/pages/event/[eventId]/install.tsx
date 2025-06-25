@@ -28,7 +28,7 @@ export default function InstallPage() {
         {t('Install App')}
       </Heading>
       <Text mb={6} textAlign="center" color="gray.600">
-        {t('Install this app for a better experience at the event')}
+        {t('Install this app on your phone for a better experience at the event')}
       </Text>
 
       {(isAndroid || isIOS) && pwa === false && (

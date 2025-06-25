@@ -109,7 +109,7 @@ const Menu = () => {
       path: eventId === 3 ? '/apps' : '/social',
     },
     {
-      label: t('Onboarding'),
+      label: eventId === 3 ? t('Quest') : t('Onboarding'),
       icon: ListChecks,
       href: '/event/[eventId]/onboarding',
       path: '/onboarding',
