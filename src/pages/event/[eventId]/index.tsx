@@ -23,10 +23,10 @@ import { Info } from '@phosphor-icons/react'
 import { isAndroid, isIOS } from 'react-device-detect'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
+import { useAccount } from 'wagmi'
 
 import LanguageSwitch from 'components/LanguageSwitch'
 import { Event } from 'entities/data'
-import { eventId } from 'config'
 import { Card as CardComponent } from 'components/Card'
 import { QRScanner } from 'components/QRScanner'
 import { FarcasterMessages } from 'components/FarcasterMessages'
@@ -39,10 +39,80 @@ export default function EventPage({ event }: { event: Event }) {
   const { eventId } = router.query
   const toast = useToast()
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
+  const [boothCodeInput, setBoothCodeInput] = useState('')
+  const { address } = useAccount()
 
   const goldSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '1-gold')
   const silverSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '2-silver')
   const bronzeSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '3-bronze')
+
+  const handleAttendeeCodeSubmit = async () => {
+    if (boothCodeInput.length === 6) {
+      try {
+        // Validate the attendee bracelet code
+        const validationResponse = await fetch(`/api/ticket/${boothCodeInput}?eventId=${eventId}`)
+        const validationData = await validationResponse.json()
+
+        if (!validationData.valid) {
+          // If ticket is already used, it means it's claimed - redirect to owner's profile
+          if (
+            validationData.message === 'Ticket has already been used' &&
+            validationData.ticketOwner
+          ) {
+            router.push(`/event/${eventId}/profile/${validationData.ticketOwner.address}`)
+            setBoothCodeInput('') // Clear input after submission
+            return
+          }
+
+          toast({
+            title: t('Invalid Ticket'),
+            description: validationData.message,
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+            position: isMobile ? 'top' : 'bottom-right',
+          })
+          return
+        }
+
+        // Check if ticket has an owner
+        if (validationData.ticketOwner) {
+          // Redirect to the ticket owner's profile
+          router.push(`/event/${eventId}/profile/${validationData.ticketOwner.address}`)
+        } else {
+          // Show message for unclaimed ticket
+          toast({
+            title: t('Unclaimed Ticket'),
+            description: t('If you are the owner of this ticket, associate it via your profile'),
+            status: 'info',
+            duration: 8000,
+            isClosable: true,
+            position: isMobile ? 'top' : 'bottom-right',
+          })
+        }
+        setBoothCodeInput('') // Clear input after submission
+      } catch (error) {
+        console.error('Error submitting attendee code:', error)
+        toast({
+          title: t('Error'),
+          description: t('Failed to process attendee code'),
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+      }
+    } else {
+      toast({
+        title: t('Error'),
+        description: t('Please enter a 6-character attendee code'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    }
+  }
 
   const handleAttendeeBraceletScan = async (result: string) => {
     try {
@@ -321,15 +391,45 @@ export default function EventPage({ event }: { event: Event }) {
             </Box>
           </Box>
         )}
-        {eventId === '3' && (
+        {eventId === '3' && address && (
           <Box mt="10">
             <Text fontWeight="bold" textAlign="center">
               {t('Connect with attendees by scanning their bracelet QR code')}
             </Text>
-            <QRScanner
-              buttonLabel={t('Scan Attendee Bracelet')}
-              onScan={handleAttendeeBraceletScan}
-            />
+            <Box display="flex" flexDirection="column" alignItems="center" gap={4} mt={4}>
+              <QRScanner
+                buttonLabel={t('Scan Attendee Bracelet')}
+                onScan={handleAttendeeBraceletScan}
+              />
+              <Text fontWeight="bold" color="gray.500">
+                - OR -
+              </Text>
+              <Box display="flex" alignItems="center" gap={4}>
+                <input
+                  type="text"
+                  value={boothCodeInput}
+                  onChange={(e) => setBoothCodeInput(e.target.value.toUpperCase())}
+                  placeholder={t('Enter code')}
+                  maxLength={6}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #E2E8F0',
+                    width: '120px',
+                    textAlign: 'center',
+                    textTransform: 'uppercase',
+                    fontSize: '14px',
+                  }}
+                />
+                <Button
+                  size="sm"
+                  onClick={handleAttendeeCodeSubmit}
+                  isDisabled={boothCodeInput.length !== 6}
+                >
+                  {t('Submit')}
+                </Button>
+              </Box>
+            </Box>
           </Box>
         )}
 
