@@ -30,6 +30,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 
   const menuIndex = router.pathname ? MENU.findIndex((item) => item.href === router.pathname) : 0
   const label = MENU[menuIndex]?.label || ''
+  // i18next-parser: disable-next-line
   const title = label ? t(label) : ''
   const socialImage = `${process.env.NEXT_PUBLIC_SOCIAL_IMAGE || `${DOMAIN_URL}/social.jpg`}?v=1`
   const url = `${DOMAIN_URL}${router.pathname}`

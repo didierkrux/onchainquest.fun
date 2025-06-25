@@ -150,7 +150,7 @@ export default function EventPage({ event }: { event: Event }) {
       <Box display="flex" justifyContent="center" gap={4} m={4}>
         {(isAndroid || isIOS) && pwa === false && (
           <Button leftIcon={<Info size={22} />} onClick={() => setShowInstallPWA(true)}>
-            Install
+            {t('Install')}
           </Button>
         )}
         {event?.config?.eventLanguage && event.config.eventLanguage.length > 1 && (

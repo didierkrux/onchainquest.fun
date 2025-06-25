@@ -21,6 +21,7 @@ import {
   useMediaQuery,
 } from '@chakra-ui/react'
 import { useAccount } from 'wagmi'
+import { useTranslation } from 'react-i18next'
 
 interface MiniApp {
   domain: string
@@ -57,6 +58,7 @@ interface EthereumShowcaseItem {
 }
 
 const MiniApps = (): JSX.Element => {
+  const { t } = useTranslation()
   const { address } = useAccount()
   const [selectedApp, setSelectedApp] = useState<MiniApp | null>(null)
   const [selectedLesson, setSelectedLesson] = useState<MiniLesson | null>(null)
@@ -122,23 +124,23 @@ const MiniApps = (): JSX.Element => {
   }
 
   if (!address) {
-    return <div>Please connect your wallet</div>
+    return <div>{t('Please connect your wallet')}</div>
   }
 
   return (
     <Container>
       <CustomUrlContainer>
-        <Title>Load Custom URL</Title>
+        <Title>{t('Load Custom URL')}</Title>
         <InputGroup size="md">
           <Input
-            placeholder="Enter URL to load"
+            placeholder={t('Enter URL to load')}
             value={customUrl}
             onChange={(e) => setCustomUrl(e.target.value)}
             onKeyPress={handleKeyPress}
           />
           <InputRightElement width="4.5rem">
             <Button h="1.75rem" size="sm" colorScheme="blue" onClick={handleLoadCustomUrl}>
-              Load
+              {t('Load')}
             </Button>
           </InputRightElement>
         </InputGroup>
@@ -146,7 +148,7 @@ const MiniApps = (): JSX.Element => {
 
       <ContentWrapper>
         <AppsListContainer>
-          <Title>Ethereum Showcase</Title>
+          <Title>{t('Ethereum Showcase')}</Title>
           <EthereumShowcaseList onSelectItem={handleSelectShowcaseItem} />
         </AppsListContainer>
       </ContentWrapper>
@@ -165,7 +167,7 @@ const MiniApps = (): JSX.Element => {
                     </Text>
                   </Box>
                   <Button size="sm" colorScheme="blue" onClick={handleRefresh} mr={8}>
-                    Refresh
+                    {t('Refresh')}
                   </Button>
                 </Flex>
               </ModalHeader>
@@ -190,7 +192,7 @@ const MiniApps = (): JSX.Element => {
                     </Text>
                   </Box>
                   <Button size="sm" colorScheme="blue" onClick={handleRefresh} mr={8}>
-                    Refresh
+                    {t('Refresh')}
                   </Button>
                 </Flex>
               </ModalHeader>
@@ -207,11 +209,11 @@ const MiniApps = (): JSX.Element => {
                   <Box>
                     <Heading size="md">{selectedShowcaseItem.name}</Heading>
                     <Text fontSize="sm" color="gray.500">
-                      Ethereum Showcase
+                      {t('Ethereum Showcase')}
                     </Text>
                   </Box>
                   <Button size="sm" colorScheme="blue" onClick={handleRefresh} mr={8}>
-                    Refresh
+                    {t('Refresh')}
                   </Button>
                 </Flex>
               </ModalHeader>
@@ -226,13 +228,13 @@ const MiniApps = (): JSX.Element => {
               <ModalHeader>
                 <Flex justify="space-between" align="center">
                   <Box>
-                    <Heading size="md">Custom URL</Heading>
+                    <Heading size="md">{t('Custom URL')}</Heading>
                     <Text fontSize="sm" color="gray.500">
                       {frameUrl}
                     </Text>
                   </Box>
                   <Button size="sm" colorScheme="blue" onClick={handleRefresh} mr={8}>
-                    Refresh
+                    {t('Refresh')}
                   </Button>
                 </Flex>
               </ModalHeader>

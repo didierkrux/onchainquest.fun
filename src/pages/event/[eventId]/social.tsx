@@ -54,7 +54,7 @@ export default function SocialPage({ event }: { event: Event }) {
       )} */}
       {instagramPosts.length > 0 && (
         <>
-          <Heading as="h1">Instagram</Heading>
+          <Heading as="h1">{t('Instagram')}</Heading>
           <Box>
             <Text mt={2}>
               <Link href="https://www.instagram.com/explore/tags/newtoweb3/" isExternal>
@@ -74,7 +74,7 @@ export default function SocialPage({ event }: { event: Event }) {
                   </Box>
                 ))
               ) : (
-                <Text>No posts found</Text>
+                <Text>{t('No posts found')}</Text>
               )}
             </Box>
           </Box>
@@ -83,7 +83,7 @@ export default function SocialPage({ event }: { event: Event }) {
       {twitterPosts.length > 0 && (
         <>
           <Heading as="h1" mt={4}>
-            Twitter
+            {t('Twitter')}
           </Heading>
           <Box>
             <Text mt={2}>
@@ -111,7 +111,7 @@ export default function SocialPage({ event }: { event: Event }) {
                   </Box>
                 ))
               ) : (
-                <Text>No posts found</Text>
+                <Text>{t('No posts found')}</Text>
               )}
             </Box>
           </Box>

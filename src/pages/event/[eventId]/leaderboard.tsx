@@ -126,7 +126,7 @@ export default function Leaderboard({ event }: { event: Event }) {
         ))}
       </Box> */}
       {!leaderboard ? (
-        <Text>Loading...</Text>
+        <Text>{t('Loading...')}</Text>
       ) : leaderboard.length > 0 ? (
         <Box>
           <Heading as="h1">{t('Leaderboard')}</Heading>
@@ -160,7 +160,7 @@ export default function Leaderboard({ event }: { event: Event }) {
           </Tabs>
         </Box>
       ) : (
-        <Text>No users yet</Text>
+        <Text>{t('No users yet')}</Text>
       )}
     </Box>
   )

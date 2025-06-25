@@ -658,13 +658,14 @@ export default function Onboarding({ event }: { event: Event }) {
           checkins.length > 0 ? (
             <Box display="flex" flexDirection="column" gap={2}>
               <Text fontWeight="bold">
-                Progress: {checkins.length}/{totalBooths} booths checked in
+                {t('Progress')}: {checkins.length}/{totalBooths} {t('booths checked in')}
               </Text>
               <Text fontWeight="bold">
-                Checked-in Booths: {checkins.sort((a, b) => parseInt(a) - parseInt(b)).join(', ')}
+                {t('Checked-in Booths')}:{' '}
+                {checkins.sort((a, b) => parseInt(a) - parseInt(b)).join(', ')}
               </Text>
               <Text color="purple.500" fontWeight="bold">
-                Total Points: {totalPoints}
+                {t('Total Points')}: {totalPoints}
               </Text>
             </Box>
           ) : null
@@ -850,7 +851,7 @@ export default function Onboarding({ event }: { event: Event }) {
           <ModalHeader>
             <Flex justify="space-between" align="center">
               <Box>
-                <Heading size="md">Shop</Heading>
+                <Heading size="md">{t('Shop')}</Heading>
               </Box>
             </Flex>
           </ModalHeader>
