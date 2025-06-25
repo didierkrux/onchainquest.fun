@@ -93,16 +93,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const [poapIdOrTicket, etherValue] = taskCondition?.split(',') || []
     const ethAmount = etherValue ? ethers.parseUnits(etherValue, 'ether').toString() : ethers.parseUnits('0.0001', 'ether').toString()
 
-    // If condition is not "ticket", use the POAP ID from the condition
-    const poapId = poapIdOrTicket === 'ticket' ? taskCondition : poapIdOrTicket
-
-    const taskIdClaimPOAP = Object.values(taskDefinitions).findIndex((task: any) => task.condition === poapId)
-    // console.log('taskIdClaimPOAP', taskIdClaimPOAP)
-    const badgeCompleted = profileData?.tasks?.[taskIdClaimPOAP]?.isCompleted ?? false
+    // If condition is not "ticket", check if user has claimed the POAP event
+    if (poapIdOrTicket !== 'ticket') {
+      const taskIdClaimPOAP = Object.values(taskDefinitions).findIndex((task: any) => task.condition === poapIdOrTicket)
+      // console.log('taskIdClaimPOAP', taskIdClaimPOAP)
+      const badgeCompleted = profileData?.tasks?.[taskIdClaimPOAP]?.isCompleted ?? false
     // console.log('badgeCompleted', badgeCompleted)
 
-    if (badgeCompleted === false) {
-      return res.status(400).json({ ...profileData, message: `You have not claimed the POAP event yet (Task #${taskIdClaimPOAP + 1})` });
+      if (badgeCompleted === false) {
+        return res.status(400).json({ ...profileData, message: `You have not claimed the POAP event yet (Task #${taskIdClaimPOAP + 1})` });
+      }
     }
 
     const addressToLower = (address as string).toLowerCase();
@@ -145,9 +145,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             profile.emailOK = true
             delete profile.email
           }
+
+          // Fetch associated tickets for this user
+          const associatedTickets = await db('tickets')
+            .select('code', 'is_used', 'used_at')
+            .where('event_id', eventId)
+            .where('user_id', profile.id)
+            .orderBy('created_at', 'desc')
+
           // Return immediately with transaction hash
           return res.status(200).json({
             ...profile,
+            associatedTickets,
             message: 'Transaction sent successfully.',
             txLink,
             transactionHash: tx.hash

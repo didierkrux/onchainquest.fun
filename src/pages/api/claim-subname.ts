@@ -5,7 +5,6 @@ import { namehash, verifyMessage } from 'viem';
 import { DOMAIN_URL } from 'config';
 import db from 'utils/db';
 import { calculateScore } from 'utils/index';
-import { getTasks } from 'utils/queries';
 import { eventId as currentEventId, ENS_DOMAIN } from 'config'
 
 const RPC_URL = process.env.ALCHEMY_API_KEY
@@ -61,8 +60,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ message: 'Subname already taken' })
     }
 
-    const tasks = await getTasks(parseInt(eventId as string))
-    // console.log('tasks', tasks)
+    // Get task definitions from database (similar to profile.ts)
+    const { data_en: { tasks: taskDefinitions } } = await db('events')
+      .where('id', parseInt(eventId as string))
+      .first()
+      .select('data_en')
 
     // check if user has already claimed subname (Task #2 = force POAP validation)
     // TODO: check if user has already claimed subname for another event
@@ -74,21 +76,64 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
     const profileData = await profile.json()
     // console.log('profileData', profileData)
-    const taskIdClaimSubname = Object.values(tasks).findIndex((task: any) => task.action === 'claim-subname')
+    const taskIdClaimSubname = Object.values(taskDefinitions).findIndex((task: any) => task.action === 'claim-subname')
     const subnameClaimed = profileData?.tasks?.[taskIdClaimSubname]?.isCompleted ?? false
     if (subnameClaimed === true) {
       return res.status(400).json({ ...profileData, message: 'You have already claimed your subname' });
     }
-    const taskCondition = tasks[taskIdClaimSubname].condition
+
+    // Check quest.lock logic for claim-subname task
+    const claimSubnameTask = taskDefinitions[taskIdClaimSubname];
+    if (claimSubnameTask?.lock) {
+      if (claimSubnameTask.lock === 'ticket') {
+        // For ticket locks, check if user has an associated ticket
+        const associatedTickets = await db('tickets')
+          .select('code', 'is_used', 'used_at')
+          .where('event_id', eventId)
+          .where('user_id', profileData.id)
+          .orderBy('created_at', 'desc');
+
+        if (!associatedTickets || associatedTickets.length === 0) {
+          return res.status(400).json({
+            ...profileData,
+            message: 'Associate your event ticket in your profile to unlock this'
+          });
+        }
+      } else if (typeof claimSubnameTask.lock === 'number') {
+        // For numeric locks, check if the previous task is completed
+        const lockTaskId = claimSubnameTask.lock - 1; // Convert to 0-based index
+        const lockTaskCompleted = profileData?.tasks?.[lockTaskId]?.isCompleted ?? false;
+
+        if (!lockTaskCompleted) {
+          return res.status(400).json({
+            ...profileData,
+            message: `Complete task #${claimSubnameTask.lock} first to unlock this.`
+          });
+        }
+      }
+    }
+
+    const taskCondition = taskDefinitions[taskIdClaimSubname].condition
     // console.log('taskCondition', taskCondition)
-    const taskIdClaimPOAP = Object.values(tasks).findIndex((task: any) => task.condition === taskCondition)
+
+    // Parse the condition - can be "ticket" or a POAP ID like "190776"
+    // For claim-subname, we need to find the task that validates the condition
+    let taskIdClaimPOAP: number;
+
+    if (taskCondition === 'ticket') {
+      // If condition is "ticket", ignore it
+    } else {
+      // If condition is a POAP ID, find the task with that POAP ID
+      taskIdClaimPOAP = Object.values(taskDefinitions).findIndex((task: any) => task.condition === taskCondition);
+      const poapCompleted = profileData?.tasks?.[taskIdClaimPOAP]?.isCompleted ?? false
+      if (poapCompleted === false) {
+        return res.status(400).json({ ...profileData, message: `You have not claimed the POAP event yet (Task #${taskIdClaimPOAP + 1})` });
+      }
+    }
+
     // console.log('taskIdClaimPOAP', taskIdClaimPOAP)
-    const poapCompleted = profileData?.tasks?.[taskIdClaimPOAP]?.isCompleted ?? false
     // console.log('poapCompleted', poapCompleted)
 
-    if (poapCompleted === false) {
-      return res.status(400).json({ ...profileData, message: `You have not claimed the POAP event yet (Task #${taskIdClaimPOAP + 1})` });
-    }
 
     const addressToLower = (address as string).toLowerCase();
     const destination = addressToLower;
@@ -159,9 +204,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           // update task as completed in profile
           const userTasks = profileData?.tasks;
           const taskAction = 'claim-subname';
-          const taskId = Object.values(tasks).findIndex((task: any) => task.action === taskAction);
-          userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: tasks[taskId].points, txLink };
-          const score = calculateScore(userTasks, tasks)
+          const taskId = Object.values(taskDefinitions).findIndex((task: any) => task.action === taskAction);
+          userTasks[taskId.toString()] = { id: taskId, isCompleted: true, points: taskDefinitions[taskId].points, txLink };
+          const score = calculateScore(userTasks, taskDefinitions)
           const profileToSave = { score, tasks: userTasks, subname: subnameToLower }
           const [profile] = await db('users')
             .update(profileToSave)
@@ -173,9 +218,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             profile.emailOK = true
             delete profile.email
           }
+
+          // Fetch associated tickets for this user
+          const associatedTickets = await db('tickets')
+            .select('code', 'is_used', 'used_at')
+            .where('event_id', eventId)
+            .where('user_id', profile.id)
+            .orderBy('created_at', 'desc')
+
           // Return immediately with transaction hash
           return res.status(200).json({
             ...profile,
+            associatedTickets,
             message: 'Transaction sent successfully.',
             txLink,
             transactionHash: tx.hash

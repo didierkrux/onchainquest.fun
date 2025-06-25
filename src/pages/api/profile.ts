@@ -384,7 +384,13 @@ export default async function handler(
           res.setHeader('Content-Type', 'text/html')
           return res.status(200).send(generateFeedbackConfirmationHTML())
         }
-        return res.status(200).json({ ...updatedProfile[0], isSocialCronActive })
+        // Fetch associated tickets for this user
+        const associatedTickets = await db('tickets')
+          .select('code', 'is_used', 'used_at')
+          .where('event_id', eventIdNum)
+          .where('user_id', updatedProfile[0].id)
+          .orderBy('created_at', 'desc')
+        return res.status(200).json({ ...updatedProfile[0], associatedTickets, isSocialCronActive })
       } else {
         return res.status(404).json({ message: 'Profile not found or not updated' })
       }
