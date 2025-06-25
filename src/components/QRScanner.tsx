@@ -127,7 +127,7 @@ export const QRScanner = ({ onScan, buttonLabel }: QRScannerProps) => {
   )
 
   return (
-    <Box mt="10">
+    <Box>
       <Button onClick={handleScanClick} isDisabled={cameraPermission === 'denied'}>
         {cameraPermission === 'denied' ? 'Camera Access Denied' : buttonLabel || 'Scan QR Code'}
       </Button>

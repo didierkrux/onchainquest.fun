@@ -325,12 +325,12 @@ export const FarcasterMessages = ({ eventId }: FarcasterMessagesProps) => {
             <Button
               onClick={() => fetchNextPage()}
               isLoading={isFetchingNextPage}
-              loadingText="Loading more..."
+              loadingText={t('Loading more...')}
               colorScheme="purple"
               variant="outline"
               size="lg"
             >
-              {isFetchingNextPage ? 'Loading more...' : 'Load More'}
+              {isFetchingNextPage ? t('Loading more...') : t('Load More')}
             </Button>
           </Box>
         )}
