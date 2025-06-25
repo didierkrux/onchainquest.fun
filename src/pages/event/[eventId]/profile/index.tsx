@@ -69,6 +69,7 @@ export default function ProfilePage() {
   const [isGeneratingTickets, setIsGeneratingTickets] = useState(false)
   const [ticketCount, setTicketCount] = useState('10')
   const [scannedTicket, setScannedTicket] = useState<string | null>(null)
+  const [ticketCodeInput, setTicketCodeInput] = useState('')
 
   const saveProfile = () => {
     if (!eventId) return
@@ -414,6 +415,40 @@ export default function ProfilePage() {
         return
       }
 
+      await processTicketCode(ticketCode)
+    } catch (error) {
+      console.error('Error scanning ticket:', error)
+      toast({
+        title: t('Error'),
+        description: t('Failed to process ticket scan'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    }
+  }
+
+  const handleTicketCodeSubmit = async () => {
+    if (ticketCodeInput.length === 6) {
+      await processTicketCode(ticketCodeInput)
+      setTicketCodeInput('') // Clear input after submission
+    } else {
+      toast({
+        title: t('Error'),
+        description: t('Please enter a 6-character ticket code'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    }
+  }
+
+  const processTicketCode = async (ticketCode: string) => {
+    if (!address || !eventId) return
+
+    try {
       // Validate the ticket
       const validationResponse = await fetch(`/api/ticket/${ticketCode}?eventId=${eventId}`)
       const validationData = await validationResponse.json()
@@ -470,10 +505,10 @@ export default function ProfilePage() {
         })
       }
     } catch (error) {
-      console.error('Error scanning ticket:', error)
+      console.error('Error processing ticket code:', error)
       toast({
         title: t('Error'),
-        description: t('Failed to process ticket scan'),
+        description: t('Failed to process ticket code'),
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -643,6 +678,34 @@ export default function ProfilePage() {
                             buttonLabel={t('Scan Event Ticket')}
                             onScan={handleTicketScan}
                           />
+                          <Text fontWeight="bold" color="gray.500">
+                            - OR -
+                          </Text>
+                          <Box display="flex" alignItems="center" gap={4}>
+                            <input
+                              type="text"
+                              value={ticketCodeInput}
+                              onChange={(e) => setTicketCodeInput(e.target.value.toUpperCase())}
+                              placeholder={t('Enter code')}
+                              maxLength={6}
+                              style={{
+                                padding: '8px 12px',
+                                borderRadius: '6px',
+                                border: '1px solid #E2E8F0',
+                                width: '120px',
+                                textAlign: 'center',
+                                textTransform: 'uppercase',
+                                fontSize: '14px',
+                              }}
+                            />
+                            <Button
+                              size="sm"
+                              onClick={handleTicketCodeSubmit}
+                              isDisabled={ticketCodeInput.length !== 6}
+                            >
+                              {t('Submit')}
+                            </Button>
+                          </Box>
                         </Box>
                       </>
                     )}
