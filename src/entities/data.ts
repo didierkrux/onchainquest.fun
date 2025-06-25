@@ -48,6 +48,7 @@ export type TaskAction =
   | 'claim-subname'
   | 'booth-checkin'
   | 'buy-shop'
+  | 'feedback-form'
 
 export type Quest = {
   id: number

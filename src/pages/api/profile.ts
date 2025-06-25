@@ -9,11 +9,71 @@ import { getBasename } from 'utils/basenames'
 import { getBasenameAvatar } from 'utils/basenames'
 import { BOOTH_DATA } from 'config'
 
+// Helper function to generate feedback confirmation HTML
+const generateFeedbackConfirmationHTML = () => {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Feedback Submitted</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          background-color: #f5f5f5;
+        }
+        .message {
+          text-align: center;
+          padding: 2rem;
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+      </style>
+    </head>
+    <body>
+      <div class="message">
+        <h2>Thanks for completing this form!</h2>
+        <p>You can now close this page.</p>
+      </div>
+      
+      <script>
+        // Auto-update profile in localStorage
+        (function() {
+          const urlParams = new URLSearchParams(window.location.search);
+          const address = urlParams.get('address');
+          const eventId = urlParams.get('eventId');
+          
+          if (address && eventId) {
+            // Fetch updated profile
+            fetch(\`/api/profile?address=\${address}&eventId=\${eventId}\`)
+              .then(res => res.json())
+              .then(data => {
+                // Update localStorage
+                const storageKey = \`profile-\${eventId}\`;
+                localStorage.setItem(storageKey, JSON.stringify(data));
+                console.log('Profile updated in localStorage:', data);
+              })
+              .catch(error => {
+                console.error('Failed to update profile:', error);
+              });
+          }
+        })();
+      </script>
+    </body>
+    </html>
+  `
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> {
-  const { address, eventId, taskId } = req.query
+  const { address, eventId, taskId, confirm } = req.query
   const { username, avatar, role, email } = req.body
   console.log('req.query', req.query)
   console.log('req.body', req.body)
@@ -47,7 +107,7 @@ export default async function handler(
   console.log('isSocialCronActive', isSocialCronActive)
 
   // Include task 7 (own-basename) in the POST method handling
-  if (req.method === 'POST' && taskIdNum >= 0) {
+  if ((req.method === 'POST' || confirm === 'true') && taskIdNum >= 0) {
     // get tasks + profile
     const data = await db('events')
       .leftJoin('users', 'users.event_id', 'events.id')
@@ -281,6 +341,9 @@ export default async function handler(
       } else {
         return res.status(400).json({ message: "You haven't made a purchase from the shop yet." })
       }
+    } else if (taskAction === 'feedback-form') {
+      userTasks[taskIdNum.toString()] = { id: taskIdNum, isCompleted: true, points: taskToSave.points }
+      console.log('userTasks', userTasks)
     } else if (taskAction === 'send-tokens') {
       const [amount, tokenAddress, targetAddress] = taskCondition?.split(',')
       console.log('amount', amount)
@@ -316,6 +379,10 @@ export default async function handler(
         if (updatedProfile[0]?.email) {
           updatedProfile[0].emailOK = true
           delete updatedProfile[0].email
+        }
+        if (confirm === 'true') {
+          res.setHeader('Content-Type', 'text/html')
+          return res.status(200).send(generateFeedbackConfirmationHTML())
         }
         return res.status(200).json({ ...updatedProfile[0], isSocialCronActive })
       } else {
@@ -397,7 +464,6 @@ export default async function handler(
         profile.emailOK = true
         delete profile.email
       }
-
       res.status(200).json({ ...profile, isSocialCronActive, associatedTickets })
     } catch (error) {
       console.error('Error fetching profile:', error)

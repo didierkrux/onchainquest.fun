@@ -703,6 +703,34 @@ export default function Onboarding({ event }: { event: Event }) {
           </Box>
         )
       }
+      if (quest.action === 'feedback-form') {
+        const isLocked = quest.lock
+          ? (!profile?.tasks?.[quest.lock - 1]?.isCompleted ?? false)
+          : false
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        const [url] = quest?.condition?.split(',') ?? []
+        quest.actionField = (
+          <Box display="flex" gap={4}>
+            {quest.lock && isLocked ? (
+              <Box display="flex" alignItems="center" gap={2}>
+                {t('Complete task #{{taskNumber}} first to unlock this.', {
+                  taskNumber: quest.lock,
+                })}
+                <Lock size={28} color="gray" />
+              </Box>
+            ) : !isCompleted ? (
+              <Box display="flex" gap={4}>
+                <Link
+                  isExternal
+                  href={`${url}?wallet=${address}&domain=${window.location.hostname}`}
+                >
+                  <Button>{t('Give Feedback')}</Button>
+                </Link>
+              </Box>
+            ) : null}
+          </Box>
+        )
+      }
     }
   }
 
