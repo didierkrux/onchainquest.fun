@@ -22,8 +22,8 @@ import { adminWallets } from 'config'
 import { CopySimple, Download, QrCode } from '@phosphor-icons/react'
 
 // Print layout constants
-const PRINT_QR_SIZE = 50
-const PRINT_CODE_FONT_SIZE = 10
+const PRINT_QR_SIZE = 60
+const PRINT_CODE_FONT_SIZE = 12
 
 // Helper function to format ticket code with spaces
 const formatTicketCode = (code: string) => {
@@ -73,7 +73,7 @@ export default function TicketsPage() {
 
   const generateQRCode = async (ticketCode: string) => {
     try {
-      const url = `${window.location.origin}/api/ticket/${ticketCode}?eventId=${eventId}&install=true`
+      const url = `https://onchainquest.fun/api/ticket/${ticketCode}?eventId=${eventId}&install=true`
       const qrDataURL = await QRCode.toDataURL(url, {
         type: 'image/png',
         color: { dark: '#000000', light: '#FFFFFF' },
@@ -196,7 +196,7 @@ export default function TicketsPage() {
             font-size: ${PRINT_CODE_FONT_SIZE}px !important;
             font-weight: bold !important;
             font-family: monospace !important;
-            margin-top: 4px !important;
+            margin-top: 0px !important;
             page-break-inside: avoid !important;
           }
 
@@ -214,8 +214,8 @@ export default function TicketsPage() {
           /* Ensure proper page breaks and add border line */
           .ticket-item-print {
             page-break-inside: avoid !important;
-            margin-bottom: 10px !important;
-            padding-bottom: 10px !important;
+            margin-bottom: 5px !important;
+            padding-bottom: 5px !important;
             border-bottom: 1px solid #ccc !important;
             position: relative !important;
           }
