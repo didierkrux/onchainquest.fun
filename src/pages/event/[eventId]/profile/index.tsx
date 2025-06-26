@@ -175,7 +175,16 @@ export default function ProfilePage() {
       return
     }
 
-    QRCode.toDataURL(address, {
+    // Determine what to encode in the QR code
+    let qrCodeContent: string = address
+
+    // If user has an associated ticket, use the ticket URL instead
+    if (profile?.associatedTickets && profile.associatedTickets.length > 0) {
+      const ticketCode = profile.associatedTickets[0].code // Use the first ticket
+      qrCodeContent = `https://onchainquest.fun/api/ticket/${ticketCode}?eventId=${eventId}`
+    }
+
+    QRCode.toDataURL(qrCodeContent, {
       type: 'image/png',
       color: { dark: '#000000' },
     })
@@ -185,7 +194,7 @@ export default function ProfilePage() {
       .catch((err: any) => {
         console.error('Error generating QR code:', err)
       })
-  }, [address])
+  }, [address, profile?.associatedTickets, eventId])
 
   const handleResetProfile = async () => {
     if (!address || !eventId) return
