@@ -129,6 +129,9 @@ const MiniApps = (): JSX.Element => {
 
   return (
     <Container>
+      <Heading as="h1" mb={6} className="no-print">
+        {t('Mini Apps')}
+      </Heading>
       <CustomUrlContainer>
         <Title>{t('Load Custom URL')}</Title>
         <InputGroup size="md">

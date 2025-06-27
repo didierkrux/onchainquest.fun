@@ -54,22 +54,6 @@ const getImageUrl = (imageUrl: string, embeds: any[]): string | null => {
       return embed.url
     }
 
-    // Special handling for devconnect.org ticket URLs
-    if (
-      imageUrl.includes('devconnect.org/api/ticket/') &&
-      embed.url.includes('devconnect.org/argentina/ticket/')
-    ) {
-      // Extract the ticket path from image URL
-      const imagePath = imageUrl
-        .replace('https://devconnect.org/api/ticket/', '')
-        .replace('/social/', '/')
-      const embedPath = embed.url.replace('https://devconnect.org/argentina/ticket/', '')
-
-      if (imagePath === embedPath) {
-        return embed.url
-      }
-    }
-
     // Check if image is from embed.images array
     if (embed.images && Array.isArray(embed.images)) {
       const matchingImage = embed.images.find((img: any) => img.url === imageUrl)
@@ -128,7 +112,7 @@ export const FarcasterMessages = ({ eventId }: FarcasterMessagesProps) => {
     return (
       <Alert status="info" borderRadius="md">
         <AlertIcon />
-        {t('No messages found in DevConnect channel')}
+        {t('No messages found in EthCC channel')}
       </Alert>
     )
   }
@@ -136,10 +120,10 @@ export const FarcasterMessages = ({ eventId }: FarcasterMessagesProps) => {
   return (
     <Box>
       <Heading as="h2" size="lg" mb={4} textAlign="center">
-        {t('DevConnect Channel')}
+        {t('EthCC Channel')}
       </Heading>
       <Text fontSize="sm" color="gray.600" textAlign="center" mb={6}>
-        {t('Latest messages from the official DevConnect channel on Farcaster')}
+        {t('Latest messages from the official EthCC channel on Farcaster')}
       </Text>
 
       <VStack spacing={4} align="stretch" maxW="618px" mx="auto">

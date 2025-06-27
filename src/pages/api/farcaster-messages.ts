@@ -71,10 +71,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // DevConnect channel ID on Farcaster
-    const channelId = 'devconnect'
+    // EthCC channel ID on Farcaster
+    const channelId = 'ethcc'
 
-    console.log('Fetching DevConnect channel feed from Neynar API')
+    console.log('Fetching EthCC channel feed from Neynar API')
 
     // Build URL with cursor for pagination
     let url = getChannelFeedEndpoint(channelId)
@@ -82,7 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       url += `&cursor=${cursor}`
     }
 
-    // Fetch feed from DevConnect channel using Neynar API
+    // Fetch feed from EthCC channel using Neynar API
     const response = await fetch(url, {
       method: 'GET',
       headers: buildAPIHeaders(),
@@ -132,8 +132,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       messages,
       channel: {
         id: channelId,
-        name: 'DevConnect',
-        description: 'Official DevConnect channel on Farcaster'
+        name: 'EthCC',
+        description: 'Official EthCC channel on Farcaster'
       },
       nextCursor: data.next?.cursor // Include next cursor for pagination
     })
