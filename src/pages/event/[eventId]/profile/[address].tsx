@@ -77,7 +77,7 @@ export default function PublicProfilePage() {
 
   // Local storage for IRL meeting attestations
   const [irlAttestations, setIrlAttestations] = useLocalStorage<
-    Array<{ address: string; txLink: string }>
+    Array<string | { address: string; txLink: string }>
   >('irl-meeting-attestations', [])
   const [hasAttestedIRL, setHasAttestedIRL] = useState(false)
   const [currentAttestationTxLink, setCurrentAttestationTxLink] = useState<string | null>(null)
@@ -116,7 +116,7 @@ export default function PublicProfilePage() {
     }
 
     // Generate QR code for the profile URL instead of just the address
-    const profileUrl = `https://onchainquest.fun/event/${eventId}/profile/${address}`
+    const profileUrl = `https://onchainquest.fun/event/${eventId}/profile/${address}?code=true`
 
     QRCode.toDataURL(profileUrl, {
       type: 'image/png',
@@ -185,16 +185,31 @@ export default function PublicProfilePage() {
     fetchEFPProfile()
   }, [address])
 
-  // Check if user has already attested to meeting this person IRL
   // Memoize the attestation lookup to prevent unnecessary re-renders
   const currentAttestation = useMemo(() => {
     if (!userAddress || !address || typeof address !== 'string') {
       return null
     }
     const targetAddress = address.toLowerCase()
-    return irlAttestations.find(
-      (attestation) => attestation?.address && attestation.address.toLowerCase() === targetAddress
-    )
+
+    // Debug logging
+    console.log('Checking attestations for address:', targetAddress)
+    console.log('All attestations:', irlAttestations)
+
+    // Handle both string format and object format
+    const attestation = irlAttestations.find((item) => {
+      if (typeof item === 'string') {
+        // Handle string format: ["0x479FeE75Dab026070c29c3b55bf16B54E1fCd7f1"]
+        return item.toLowerCase() === targetAddress
+      } else if (item && typeof item === 'object' && item.address) {
+        // Handle object format: [{ address: "...", txLink: "..." }]
+        return item.address.toLowerCase() === targetAddress
+      }
+      return false
+    })
+
+    console.log('Found attestation:', attestation)
+    return attestation
   }, [userAddress, address, irlAttestations])
 
   // Update attestation state when memoized value changes
@@ -205,8 +220,16 @@ export default function PublicProfilePage() {
       return
     }
 
-    setHasAttestedIRL(!!currentAttestation)
-    setCurrentAttestationTxLink(currentAttestation?.txLink || null)
+    const hasAttested = !!currentAttestation
+    const txLink =
+      typeof currentAttestation === 'object' && currentAttestation?.txLink
+        ? currentAttestation.txLink
+        : null
+
+    console.log('Setting attestation state:', { hasAttested, txLink })
+
+    setHasAttestedIRL(hasAttested)
+    setCurrentAttestationTxLink(txLink)
   }, [currentAttestation, userAddress, address])
 
   const handleFollow = async () => {
@@ -403,9 +426,14 @@ export default function PublicProfilePage() {
       // Store the address in local storage
       const targetAddress = address.toLowerCase()
       if (
-        !irlAttestations.some(
-          (attestedAddress) => attestedAddress.address.toLowerCase() === targetAddress
-        )
+        !irlAttestations.some((item) => {
+          if (typeof item === 'string') {
+            return item.toLowerCase() === targetAddress
+          } else if (item && typeof item === 'object' && item.address) {
+            return item.address.toLowerCase() === targetAddress
+          }
+          return false
+        })
       ) {
         setIrlAttestations([...irlAttestations, { address, txLink }])
       }
@@ -581,7 +609,16 @@ export default function PublicProfilePage() {
               </Button>
             )}
 
-            {/* IRL Meeting Attestation Button */}
+            {/* View on EFP Button */}
+            <Link href={getEFPProfileUrl(address)} isExternal>
+              <Button leftIcon={<ArrowUpRight />} variant="outline" size="md" w="100%">
+                {t('View on EFP')}
+              </Button>
+            </Link>
+
+            <Divider />
+
+            {/* IRL Meeting Attestation Button - Only show when code parameter is present */}
             {userAddress &&
               userAddress.toLowerCase() !== address.toLowerCase() &&
               (router.query.code || hasAttestedIRL) && (
@@ -644,13 +681,6 @@ export default function PublicProfilePage() {
                     })()}
                 </Box>
               )}
-
-            {/* View on EFP Button */}
-            <Link href={getEFPProfileUrl(address)} isExternal>
-              <Button leftIcon={<ArrowUpRight />} variant="outline" size="md" w="100%">
-                {t('View on EFP')}
-              </Button>
-            </Link>
 
             {isLoading ? (
               <Box
