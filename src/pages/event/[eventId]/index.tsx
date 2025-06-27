@@ -39,7 +39,7 @@ export default function EventPage({ event }: { event: Event }) {
   const { eventId } = router.query
   const toast = useToast()
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
-  const [boothCodeInput, setBoothCodeInput] = useState('')
+  const [attendeeCodeInput, setAttendeeCodeInput] = useState('')
   const { address } = useAccount()
 
   const goldSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '1-gold')
@@ -47,10 +47,12 @@ export default function EventPage({ event }: { event: Event }) {
   const bronzeSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '3-bronze')
 
   const handleAttendeeCodeSubmit = async () => {
-    if (boothCodeInput.length === 6) {
+    if (attendeeCodeInput.length === 6) {
       try {
         // Validate the attendee bracelet code
-        const validationResponse = await fetch(`/api/ticket/${boothCodeInput}?eventId=${eventId}`)
+        const validationResponse = await fetch(
+          `/api/ticket/${attendeeCodeInput}?eventId=${eventId}`
+        )
         const validationData = await validationResponse.json()
 
         if (!validationData.valid) {
@@ -60,7 +62,7 @@ export default function EventPage({ event }: { event: Event }) {
             validationData.ticketOwner
           ) {
             router.push(`/event/${eventId}/profile/${validationData.ticketOwner.address}`)
-            setBoothCodeInput('') // Clear input after submission
+            setAttendeeCodeInput('') // Clear input after submission
             return
           }
 
@@ -78,7 +80,9 @@ export default function EventPage({ event }: { event: Event }) {
         // Check if ticket has an owner
         if (validationData.ticketOwner) {
           // Redirect to the ticket owner's profile
-          router.push(`/event/${eventId}/profile/${validationData.ticketOwner.address}`)
+          router.push(
+            `/event/${eventId}/profile/${validationData.ticketOwner.address}?code=${attendeeCodeInput}`
+          )
         } else {
           // Show message for unclaimed ticket
           toast({
@@ -90,7 +94,7 @@ export default function EventPage({ event }: { event: Event }) {
             position: isMobile ? 'top' : 'bottom-right',
           })
         }
-        setBoothCodeInput('') // Clear input after submission
+        setAttendeeCodeInput('') // Clear input after submission
       } catch (error) {
         console.error('Error submitting attendee code:', error)
         toast({
@@ -407,8 +411,8 @@ export default function EventPage({ event }: { event: Event }) {
               <Box display="flex" alignItems="center" gap={4}>
                 <input
                   type="text"
-                  value={boothCodeInput}
-                  onChange={(e) => setBoothCodeInput(e.target.value.toUpperCase())}
+                  value={attendeeCodeInput}
+                  onChange={(e) => setAttendeeCodeInput(e.target.value.toUpperCase())}
                   placeholder={t('Enter code')}
                   maxLength={6}
                   style={{
@@ -424,7 +428,7 @@ export default function EventPage({ event }: { event: Event }) {
                 <Button
                   size="sm"
                   onClick={handleAttendeeCodeSubmit}
-                  isDisabled={boothCodeInput.length !== 6}
+                  isDisabled={attendeeCodeInput.length !== 6}
                 >
                   {t('Submit')}
                 </Button>

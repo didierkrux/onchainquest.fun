@@ -13,6 +13,13 @@ import {
   Avatar,
   Stack,
   Divider,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
@@ -26,9 +33,12 @@ import {
   Check,
   CopySimple,
   Star,
+  Handshake,
 } from '@phosphor-icons/react'
 import { useAccount, useWalletClient } from 'wagmi'
 import { ethers } from 'ethers'
+import { EAS, SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
+import { useLocalStorage } from 'usehooks-ts'
 import {
   getEFPProfile,
   getEFPProfileUrl,
@@ -38,6 +48,10 @@ import {
 } from 'utils/efp'
 import { Profile } from 'entities/profile'
 import { profileAvatar, profileName, profileRole } from 'utils/index'
+
+// EAS configuration for IRL meeting attestation
+const easContractAddress = '0x4200000000000000000000000000000000000021'
+const irlMeetingSchemaUID = '0xc59265615401143689cbfe73046a922c975c99d97e4c248070435b1104b2dea7'
 
 export default function PublicProfilePage() {
   const { t } = useTranslation()
@@ -55,6 +69,18 @@ export default function PublicProfilePage() {
   const { address: userAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
   const { onCopy, hasCopied } = useClipboard((address as string) || '')
+
+  // IRL Meeting attestation states
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [isAttestingIRL, setIsAttestingIRL] = useState(false)
+  const [irlAttestationTxLink, setIrlAttestationTxLink] = useState<string | null>(null)
+
+  // Local storage for IRL meeting attestations
+  const [irlAttestations, setIrlAttestations] = useLocalStorage<
+    Array<{ address: string; txLink: string }>
+  >('irl-meeting-attestations', [])
+  const [hasAttestedIRL, setHasAttestedIRL] = useState(false)
+  const [currentAttestationTxLink, setCurrentAttestationTxLink] = useState<string | null>(null)
 
   // Fetch profile data
   useEffect(() => {
@@ -158,6 +184,23 @@ export default function PublicProfilePage() {
 
     fetchEFPProfile()
   }, [address])
+
+  // Check if user has already attested to meeting this person IRL
+  useEffect(() => {
+    if (!userAddress || !address || typeof address !== 'string') {
+      setHasAttestedIRL(false)
+      setCurrentAttestationTxLink(null)
+      return
+    }
+
+    const targetAddress = address.toLowerCase()
+    const attestation = irlAttestations.find(
+      (attestation) => attestation.address.toLowerCase() === targetAddress
+    )
+
+    setHasAttestedIRL(!!attestation)
+    setCurrentAttestationTxLink(attestation?.txLink || null)
+  }, [userAddress, address, irlAttestations])
 
   const handleFollow = async () => {
     if (!userAddress || !address || typeof address !== 'string' || !walletClient) {
@@ -297,6 +340,109 @@ export default function PublicProfilePage() {
     }
   }
 
+  const handleIRLMeetingAttestation = async () => {
+    if (!userAddress || !address || typeof address !== 'string' || !walletClient) {
+      toast({
+        title: t('Error'),
+        description: t('Please connect your wallet to create attestation'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+      return
+    }
+
+    setIsAttestingIRL(true)
+    try {
+      const provider = new ethers.BrowserProvider(walletClient)
+      const signer = await provider.getSigner()
+
+      // Initialize EAS
+      const eas = new EAS(easContractAddress)
+      await eas.connect(signer)
+
+      // Initialize SchemaEncoder with the schema string
+      const schemaEncoder = new SchemaEncoder('bool metIRL')
+      const encodedData = schemaEncoder.encodeData([{ name: 'metIRL', value: true, type: 'bool' }])
+
+      toast({
+        title: t('Signature Required'),
+        description: t(
+          'You are about to sign a transaction to attest that you met this person IRL.'
+        ),
+        status: 'info',
+        duration: 7000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+
+      // Create the attestation
+      const tx = await eas.attest({
+        schema: irlMeetingSchemaUID,
+        data: {
+          recipient: address,
+          expirationTime: BigInt(0),
+          revocable: true,
+          data: encodedData,
+        },
+      })
+
+      // Wait for transaction to be mined and get the attestation UID
+      const attestationUID = await tx.wait()
+      const txLink = `https://basescan.org/tx/${attestationUID}`
+      setIrlAttestationTxLink(txLink)
+
+      // Store the address in local storage
+      const targetAddress = address.toLowerCase()
+      if (
+        !irlAttestations.some(
+          (attestedAddress) => attestedAddress.address.toLowerCase() === targetAddress
+        )
+      ) {
+        setIrlAttestations([...irlAttestations, { address, txLink }])
+      }
+
+      console.log('IRL Meeting attestation UID:', attestationUID)
+
+      toast({
+        title: t('Success'),
+        description: t('IRL meeting attestation created successfully!'),
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+
+      onClose()
+    } catch (error: any) {
+      console.error('Error creating IRL meeting attestation:', error)
+
+      // Handle specific error cases
+      if (error?.code === 4001) {
+        toast({
+          title: t('Transaction Cancelled'),
+          description: t('You rejected the transaction in your wallet'),
+          status: 'warning',
+          duration: 5000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+      } else {
+        toast({
+          title: t('Error'),
+          description: error?.message || t('Failed to create IRL meeting attestation'),
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+      }
+    } finally {
+      setIsAttestingIRL(false)
+    }
+  }
+
   if (!address || typeof address !== 'string') {
     return (
       <Box display="flex" flexDirection="column" alignItems="center" p={4}>
@@ -428,6 +574,70 @@ export default function PublicProfilePage() {
               </Button>
             )}
 
+            {/* IRL Meeting Attestation Button */}
+            {userAddress &&
+              userAddress.toLowerCase() !== address.toLowerCase() &&
+              (router.query.code || hasAttestedIRL) && (
+                <Box w="100%">
+                  <Button
+                    leftIcon={<Handshake />}
+                    onClick={hasAttestedIRL ? undefined : onOpen}
+                    colorScheme={hasAttestedIRL ? 'green' : 'green'}
+                    variant={hasAttestedIRL ? 'solid' : 'outline'}
+                    size="md"
+                    w="100%"
+                    isDisabled={hasAttestedIRL}
+                  >
+                    {hasAttestedIRL ? t('✓ Met IRL') : t('Attest IRL Meeting')}
+                  </Button>
+
+                  {/* Display attestation image if user has attested */}
+                  {hasAttestedIRL &&
+                    currentAttestationTxLink &&
+                    (() => {
+                      const txHash = currentAttestationTxLink.split('/').pop()
+                      if (txHash) {
+                        return (
+                          <Box
+                            mt={3}
+                            display="flex"
+                            flexDirection="column"
+                            gap={2}
+                            alignItems="center"
+                          >
+                            <Text fontSize="sm" fontWeight="medium" color="green.600">
+                              {t('IRL Meeting Attestation')}
+                            </Text>
+                            <Link
+                              href={`https://base.easscan.org/attestation/view/${txHash}`}
+                              isExternal
+                            >
+                              <Image
+                                src={`https://base.easscan.org/attestation/preview/${txHash}.png`}
+                                alt="IRL Meeting Attestation"
+                                borderRadius="md"
+                                w="100%"
+                                h="auto"
+                                objectFit="contain"
+                              />
+                            </Link>
+                            <Link
+                              href={`https://base.easscan.org/attestation/view/${txHash}`}
+                              isExternal
+                              color="blue.500"
+                              fontSize="xs"
+                              _hover={{ textDecoration: 'underline' }}
+                            >
+                              {t('View on EAS Scan')}
+                            </Link>
+                          </Box>
+                        )
+                      }
+                      return null
+                    })()}
+                </Box>
+              )}
+
             {/* View on EFP Button */}
             <Link href={getEFPProfileUrl(address)} isExternal>
               <Button leftIcon={<ArrowUpRight />} variant="outline" size="md" w="100%">
@@ -471,6 +681,69 @@ export default function PublicProfilePage() {
           </Box>
         </CardBody>
       </Card>
+
+      {/* IRL Meeting Attestation Modal */}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>{t('Attest IRL Meeting')}</ModalHeader>
+          <ModalBody>
+            <Text mb={4}>
+              {t(
+                'Are you sure you want to create an on-chain attestation that you met this person in real life?'
+              )}
+            </Text>
+            <Text fontSize="sm" color="gray.600">
+              {t('This will create a permanent, verifiable record on Base blockchain that you met')}{' '}
+              {profile ? profileName(profile) : address} {t('in person.')}
+            </Text>
+            {currentAttestationTxLink && (
+              <Box
+                mt={4}
+                p={3}
+                bg="green.50"
+                borderRadius="md"
+                border="1px solid"
+                borderColor="green.200"
+              >
+                <Text fontSize="sm" color="green.700" fontWeight="medium">
+                  {t('Attestation created successfully!')}
+                </Text>
+                <Link href={currentAttestationTxLink} isExternal color="blue.500" fontSize="sm">
+                  {t('View transaction on BaseScan')}
+                </Link>
+              </Box>
+            )}
+            {hasAttestedIRL && (
+              <Box
+                mt={4}
+                p={3}
+                bg="blue.50"
+                borderRadius="md"
+                border="1px solid"
+                borderColor="blue.200"
+              >
+                <Text fontSize="sm" color="blue.700" fontWeight="medium">
+                  {t('You have already attested to meeting this person IRL.')}
+                </Text>
+              </Box>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={onClose}>
+              {t('Cancel')}
+            </Button>
+            <Button
+              colorScheme="green"
+              onClick={handleIRLMeetingAttestation}
+              isLoading={isAttestingIRL}
+              loadingText={t('Creating attestation...')}
+            >
+              {t('Create Attestation')}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   )
 }
