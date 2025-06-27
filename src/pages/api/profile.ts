@@ -386,7 +386,7 @@ export default async function handler(
         }
         // Fetch associated tickets for this user
         const associatedTickets = await db('tickets')
-          .select('code', 'is_used', 'used_at')
+          .select('code', 'is_used', 'used_at', 'attestation_tx_link')
           .where('event_id', eventIdNum)
           .where('user_id', updatedProfile[0].id)
           .orderBy('created_at', 'desc')
@@ -427,7 +427,7 @@ export default async function handler(
 
       // Fetch associated tickets for this user
       const associatedTickets = await db('tickets')
-        .select('code', 'is_used', 'used_at')
+        .select('code', 'is_used', 'used_at', 'attestation_tx_link')
         .where('event_id', eventIdNum)
         .where('user_id', profile.id)
         .orderBy('created_at', 'desc')

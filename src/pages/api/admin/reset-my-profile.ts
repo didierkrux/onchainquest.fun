@@ -59,6 +59,7 @@ export default async function handler(
           user_id: null,
           is_used: false,
           used_at: null,
+          attestation_tx_link: null,
           updated_at: new Date()
         })
 
@@ -100,6 +101,7 @@ export default async function handler(
           user_id: null,
           is_used: false,
           used_at: null,
+          attestation_tx_link: null,
           updated_at: new Date()
         })
 
