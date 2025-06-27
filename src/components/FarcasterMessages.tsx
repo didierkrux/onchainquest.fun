@@ -170,80 +170,39 @@ export const FarcasterMessages = ({ eventId }: FarcasterMessagesProps) => {
                       {/* Display images if available */}
                       {message.images && message.images.length > 0 && (
                         <Box mt={3}>
-                          {message.images.length === 1 ? (
-                            // Single image - no grid
-                            <Box
-                              borderRadius="md"
-                              overflow="hidden"
-                              border="1px solid"
-                              borderColor="gray.200"
-                            >
-                              {(() => {
-                                const linkUrl = getImageUrl(message.images[0], message.embeds)
-                                const ImageComponent = (
-                                  <Image
-                                    src={message.images[0]}
-                                    alt="Image"
-                                    maxW="536px"
-                                    w="100%"
-                                    h="auto"
-                                    objectFit="contain"
-                                    onError={(e) => {
-                                      console.error(`Failed to load image: ${message.images[0]}`)
-                                      e.currentTarget.style.display = 'none'
-                                    }}
-                                    fallback={
-                                      <Box
-                                        bg="gray.100"
-                                        height="120px"
-                                        display="flex"
-                                        alignItems="center"
-                                        justifyContent="center"
-                                      >
-                                        <Text fontSize="xs" color="gray.500">
-                                          Image
-                                        </Text>
-                                      </Box>
-                                    }
-                                  />
-                                )
+                          {(() => {
+                            // Filter out emoji images
+                            const filteredImages = message.images.filter(
+                              (imageUrl: string) => !imageUrl.includes('twimg.com/emoji')
+                            )
 
-                                return linkUrl ? (
-                                  <Link
-                                    href={linkUrl}
-                                    isExternal
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    {ImageComponent}
-                                  </Link>
-                                ) : (
-                                  ImageComponent
-                                )
-                              })()}
-                            </Box>
-                          ) : (
-                            // Multiple images - use grid
-                            <SimpleGrid columns={[1, 2, 3]} spacing={2}>
-                              {message.images.slice(0, 6).map((imageUrl: string, index: number) => (
+                            if (filteredImages.length === 0) {
+                              return null
+                            }
+
+                            if (filteredImages.length === 1) {
+                              // Single image - no grid
+                              return (
                                 <Box
-                                  key={index}
                                   borderRadius="md"
                                   overflow="hidden"
                                   border="1px solid"
                                   borderColor="gray.200"
                                 >
                                   {(() => {
-                                    const linkUrl = getImageUrl(imageUrl, message.embeds)
+                                    const linkUrl = getImageUrl(filteredImages[0], message.embeds)
                                     const ImageComponent = (
                                       <Image
-                                        src={imageUrl}
-                                        alt={`Image ${index + 1}`}
+                                        src={filteredImages[0]}
+                                        alt="Image"
                                         maxW="536px"
                                         w="100%"
                                         h="auto"
                                         objectFit="contain"
                                         onError={(e) => {
-                                          console.error(`Failed to load image: ${imageUrl}`)
+                                          console.error(
+                                            `Failed to load image: ${filteredImages[0]}`
+                                          )
                                           e.currentTarget.style.display = 'none'
                                         }}
                                         fallback={
@@ -275,9 +234,69 @@ export const FarcasterMessages = ({ eventId }: FarcasterMessagesProps) => {
                                     )
                                   })()}
                                 </Box>
-                              ))}
-                            </SimpleGrid>
-                          )}
+                              )
+                            } else {
+                              // Multiple images - use grid
+                              return (
+                                <SimpleGrid columns={[1, 2, 3]} spacing={2}>
+                                  {filteredImages
+                                    .slice(0, 6)
+                                    .map((imageUrl: string, index: number) => (
+                                      <Box
+                                        key={index}
+                                        borderRadius="md"
+                                        overflow="hidden"
+                                        border="1px solid"
+                                        borderColor="gray.200"
+                                      >
+                                        {(() => {
+                                          const linkUrl = getImageUrl(imageUrl, message.embeds)
+                                          const ImageComponent = (
+                                            <Image
+                                              src={imageUrl}
+                                              alt={`Image ${index + 1}`}
+                                              maxW="536px"
+                                              w="100%"
+                                              h="auto"
+                                              objectFit="contain"
+                                              onError={(e) => {
+                                                console.error(`Failed to load image: ${imageUrl}`)
+                                                e.currentTarget.style.display = 'none'
+                                              }}
+                                              fallback={
+                                                <Box
+                                                  bg="gray.100"
+                                                  height="120px"
+                                                  display="flex"
+                                                  alignItems="center"
+                                                  justifyContent="center"
+                                                >
+                                                  <Text fontSize="xs" color="gray.500">
+                                                    Image
+                                                  </Text>
+                                                </Box>
+                                              }
+                                            />
+                                          )
+
+                                          return linkUrl ? (
+                                            <Link
+                                              href={linkUrl}
+                                              isExternal
+                                              onClick={(e) => e.stopPropagation()}
+                                            >
+                                              {ImageComponent}
+                                            </Link>
+                                          ) : (
+                                            ImageComponent
+                                          )
+                                        })()}
+                                      </Box>
+                                    ))}
+                                </SimpleGrid>
+                              )
+                            }
+                          })()}
                         </Box>
                       )}
 
