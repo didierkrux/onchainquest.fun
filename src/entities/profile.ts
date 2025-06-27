@@ -15,6 +15,7 @@ export type AssociatedTicket = {
   code: string
   is_used: boolean
   used_at: string | null
+  attestation_tx_link?: string | null
 }
 
 export type Profile = {

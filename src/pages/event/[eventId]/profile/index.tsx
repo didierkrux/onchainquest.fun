@@ -638,22 +638,64 @@ export default function ProfilePage() {
                             border="1px solid"
                             borderColor={ticket.is_used ? 'green.200' : 'blue.200'}
                             display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
+                            flexDirection="column"
+                            gap={3}
                           >
-                            <Box>
-                              <Text fontWeight="bold" fontSize="xl" fontFamily="mono">
-                                {ticket.code}
-                              </Text>
-                              <Text fontSize="sm" color="gray.600">
-                                {ticket.is_used ? t('Used') : t('Available')}
-                              </Text>
+                            <Box display="flex" justifyContent="space-between" alignItems="center">
+                              <Box>
+                                <Text fontWeight="bold" fontSize="xl" fontFamily="mono">
+                                  {ticket.code}
+                                </Text>
+                                <Text fontSize="sm" color="gray.600">
+                                  {ticket.is_used ? t('Used') : t('Available')}
+                                </Text>
+                              </Box>
+                              {ticket.is_used && ticket.used_at && (
+                                <Text fontSize="xs" color="gray.500">
+                                  {new Date(ticket.used_at).toLocaleDateString()}
+                                </Text>
+                              )}
                             </Box>
-                            {ticket.is_used && ticket.used_at && (
-                              <Text fontSize="xs" color="gray.500">
-                                {new Date(ticket.used_at).toLocaleDateString()}
-                              </Text>
-                            )}
+
+                            {/* Display attestation if available */}
+                            {ticket.attestation_tx_link &&
+                              (() => {
+                                const txHash = ticket.attestation_tx_link.split('/').pop()
+                                if (txHash) {
+                                  return (
+                                    <Box display="flex" flexDirection="column" gap={2}>
+                                      <Text fontSize="sm" fontWeight="medium" color="purple.600">
+                                        {t('Event attendance onchain attestation')} -{' '}
+                                        <Link
+                                          href={`https://base.easscan.org/attestation/view/${txHash}`}
+                                          isExternal
+                                          color="blue.500"
+                                          fontSize="sm"
+                                          _hover={{ textDecoration: 'underline' }}
+                                        >
+                                          {t('View proof on EAS Scan')}
+                                        </Link>
+                                      </Text>
+                                      <Box display="flex" alignItems="center" gap={3}>
+                                        <Link
+                                          href={`https://base.easscan.org/attestation/view/${txHash}`}
+                                          isExternal
+                                        >
+                                          <Image
+                                            src={`https://base.easscan.org/attestation/preview/${txHash}.png`}
+                                            alt="EAS Attestation"
+                                            borderRadius="md"
+                                            w="100%"
+                                            h="auto"
+                                            objectFit="contain"
+                                          />
+                                        </Link>
+                                      </Box>
+                                    </Box>
+                                  )
+                                }
+                                return null
+                              })()}
                           </Box>
                         ))}
                       </Box>
