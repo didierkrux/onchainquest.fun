@@ -21,7 +21,7 @@ import {
   ModalFooter,
   useDisclosure,
 } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import QRCode from 'qrcode'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
@@ -68,7 +68,7 @@ export default function PublicProfilePage() {
   const [isProfileLoading, setIsProfileLoading] = useState(true)
   const { address: userAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
-  const { onCopy, hasCopied } = useClipboard((address as string) || '')
+  const { onCopy, hasCopied } = useClipboard(address && typeof address === 'string' ? address : '')
 
   // IRL Meeting attestation states
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -138,7 +138,7 @@ export default function PublicProfilePage() {
           position: isMobile ? 'top' : 'bottom-right',
         })
       })
-  }, [address, eventId, t, toast, isMobile])
+  }, [address, eventId])
 
   // Check if user is following this address
   useEffect(() => {
@@ -186,6 +186,18 @@ export default function PublicProfilePage() {
   }, [address])
 
   // Check if user has already attested to meeting this person IRL
+  // Memoize the attestation lookup to prevent unnecessary re-renders
+  const currentAttestation = useMemo(() => {
+    if (!userAddress || !address || typeof address !== 'string') {
+      return null
+    }
+    const targetAddress = address.toLowerCase()
+    return irlAttestations.find(
+      (attestation) => attestation?.address && attestation.address.toLowerCase() === targetAddress
+    )
+  }, [userAddress, address, irlAttestations])
+
+  // Update attestation state when memoized value changes
   useEffect(() => {
     if (!userAddress || !address || typeof address !== 'string') {
       setHasAttestedIRL(false)
@@ -193,14 +205,9 @@ export default function PublicProfilePage() {
       return
     }
 
-    const targetAddress = address.toLowerCase()
-    const attestation = irlAttestations.find(
-      (attestation) => attestation.address.toLowerCase() === targetAddress
-    )
-
-    setHasAttestedIRL(!!attestation)
-    setCurrentAttestationTxLink(attestation?.txLink || null)
-  }, [userAddress, address, irlAttestations])
+    setHasAttestedIRL(!!currentAttestation)
+    setCurrentAttestationTxLink(currentAttestation?.txLink || null)
+  }, [currentAttestation, userAddress, address])
 
   const handleFollow = async () => {
     if (!userAddress || !address || typeof address !== 'string' || !walletClient) {
@@ -443,10 +450,10 @@ export default function PublicProfilePage() {
     }
   }
 
-  if (!address || typeof address !== 'string') {
+  if (!router.isReady || !address || typeof address !== 'string' || !eventId) {
     return (
       <Box display="flex" flexDirection="column" alignItems="center" p={4}>
-        <Text>{t('Invalid address')}</Text>
+        <Text>{t('Loading...')}</Text>
       </Box>
     )
   }

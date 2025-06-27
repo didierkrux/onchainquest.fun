@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
 import { useLocalStorage } from 'usehooks-ts'
@@ -15,7 +15,7 @@ export function useEventData() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
-  const fetchData = async (eventId: string) => {
+  const fetchData = useCallback(async (eventId: string) => {
     setIsLoading(true)
     try {
       const response = await fetch(`/api/event?id=${eventId}`)
@@ -29,15 +29,17 @@ export function useEventData() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (router.isReady) {
-      const eventId = router.query.eventId as string
-      if (eventId) {
-        fetchData(eventId)
+      const currentEventId = router.query.eventId as string
+      if (currentEventId) {
+        fetchData(currentEventId)
       }
     }
+
+    // Handle redirects
     if (router.route === '/404') {
       console.log('404 detected: /event/defaultEventId')
       router.push(`/event/${defaultEventId}`)
@@ -46,26 +48,18 @@ export function useEventData() {
       console.log('redirecting to /event/defaultEventId')
       router.push(`/event/${defaultEventId}`)
     }
-  }, [router.isReady, router.query.eventId])
-
-  useEffect(() => {
-    if (router.isReady && (router.route === '/' || router.route === '/onboarding')) {
-      const eventId = router.query.eventId as string
-      if (eventId) {
-        fetchData(eventId)
-      }
-    }
-  }, [router.isReady, router.route, router.query.eventId])
+  }, [router.isReady, router.query.eventId, router.route, fetchData])
 
   useEffect(() => {
     if (i18n.language && eventData && eventData?.data_en) {
-      setEvent(
-        i18n.language?.startsWith('en')
-          ? { ...eventData.data_en, config: eventData.config }
-          : { ...eventData.data_tr, config: eventData.config }
-      )
+      const newEvent = i18n.language?.startsWith('en')
+        ? { ...eventData.data_en, config: eventData.config }
+        : { ...eventData.data_tr, config: eventData.config }
+
+      setEvent(newEvent)
     }
   }, [i18n.language, eventData, setEvent])
 
   return { event, isLoading, error }
 }
+

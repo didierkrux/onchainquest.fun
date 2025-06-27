@@ -160,7 +160,7 @@ const Menu = () => {
       clearInterval(interval)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [appDeploymentId])
+  }, [])
 
   const newVersionAvailable =
     latestDeploymentId && latestDeploymentId !== '' && latestDeploymentId !== appDeploymentId

@@ -61,7 +61,9 @@ export default function EventPage({ event }: { event: Event }) {
             validationData.message === 'Ticket has already been used' &&
             validationData.ticketOwner
           ) {
-            router.push(`/event/${eventId}/profile/${validationData.ticketOwner.address}`)
+            router.push(
+              `/event/${eventId}/profile/${validationData.ticketOwner.address}?code=${attendeeCodeInput}`
+            )
             setAttendeeCodeInput('') // Clear input after submission
             return
           }
@@ -172,7 +174,9 @@ export default function EventPage({ event }: { event: Event }) {
           validationData.message === 'Ticket has already been used' &&
           validationData.ticketOwner
         ) {
-          router.push(`/event/${eventId}/profile/${validationData.ticketOwner.address}`)
+          router.push(
+            `/event/${eventId}/profile/${validationData.ticketOwner.address}?code=${ticketCode}`
+          )
           return
         }
 
@@ -190,7 +194,9 @@ export default function EventPage({ event }: { event: Event }) {
       // Check if ticket has an owner
       if (validationData.ticketOwner) {
         // Redirect to the ticket owner's profile
-        router.push(`/event/${eventId}/profile/${validationData.ticketOwner.address}`)
+        router.push(
+          `/event/${eventId}/profile/${validationData.ticketOwner.address}?code=${ticketCode}`
+        )
       } else {
         // Show message for unclaimed ticket
         toast({
