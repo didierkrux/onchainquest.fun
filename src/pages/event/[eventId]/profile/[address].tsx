@@ -45,6 +45,7 @@ import {
   followAddressOnEFP,
   unfollowAddressOnEFP,
   getFollowerState,
+  completeFollowWithMint,
 } from 'utils/efp'
 import { Profile } from 'entities/profile'
 import { profileAvatar, profileName, profileRole } from 'utils/index'
@@ -319,10 +320,25 @@ export default function PublicProfilePage() {
           const txHash = await unfollowAddressOnEFP(signer, address)
 
           toast({
-            title: t('Success'),
-            description: t('Successfully unfollowed'),
+            title: t('Successfully Unfollowed'),
+            description: (
+              <Box>
+                <Text mb={2}>{t('You have unfollowed this address.')}</Text>
+                <Link
+                  href={`https://basescan.org/tx/${txHash}`}
+                  isExternal
+                  color="white"
+                  fontSize="xs"
+                  fontFamily="mono"
+                  _hover={{ textDecoration: 'underline' }}
+                  display="block"
+                >
+                  {t('Transaction:')} {txHash.slice(0, 10)}...{txHash.slice(-8)}
+                </Link>
+              </Box>
+            ),
             status: 'success',
-            duration: 5000,
+            duration: 10000,
             isClosable: true,
             position: isMobile ? 'top' : 'bottom-right',
           })
@@ -344,19 +360,131 @@ export default function PublicProfilePage() {
             isClosable: true,
             position: isMobile ? 'top' : 'bottom-right',
           })
-          const txHash = await followAddressOnEFP(signer, address)
 
-          toast({
-            title: t('Success'),
-            description: t(
-              "Successfully followed. Your primary list has been created if you didn't have one before."
-            ),
-            status: 'success',
-            duration: 5000,
-            isClosable: true,
-            position: isMobile ? 'top' : 'bottom-right',
-          })
-          console.log('Follow transaction hash:', txHash)
+          const result = await followAddressOnEFP(signer, address)
+
+          // Show different success messages based on operation type
+          if (result.operationType === 'double') {
+            // Two transactions: created primary list + followed
+            toast({
+              title: t('Primary List Created & Following'),
+              description: (
+                <Box>
+                  <Text mb={2}>
+                    {t('Successfully created your primary list and followed this address!')}
+                  </Text>
+                  <Link
+                    href={`https://basescan.org/tx/${result.followTxHash}`}
+                    isExternal
+                    color="white"
+                    fontSize="xs"
+                    fontFamily="mono"
+                    _hover={{ textDecoration: 'underline' }}
+                    display="block"
+                    mb={1}
+                  >
+                    {t('Follow:')} {result.followTxHash?.slice(0, 10)}...
+                    {result.followTxHash?.slice(-8)}
+                  </Link>
+                </Box>
+              ),
+              status: 'success',
+              duration: 8000,
+              isClosable: true,
+              position: isMobile ? 'top' : 'bottom-right',
+            })
+            console.log('Follow operation (double) - first step:', {
+              followTxHash: result.followTxHash,
+            })
+
+            // Show intermediate toast about minting
+            toast({
+              title: t('Minting Primary List NFT'),
+              description: t(
+                'You are about to sign a transaction to mint your primary EFP list NFT.'
+              ),
+              status: 'info',
+              duration: 7000,
+              isClosable: true,
+              position: isMobile ? 'top' : 'bottom-right',
+            })
+
+            // Complete the second transaction
+            const mintTxHash = await completeFollowWithMint(signer)
+
+            // Show final success toast with both transaction links
+            toast({
+              title: t('Primary List Created & Following'),
+              description: (
+                <Box>
+                  <Text mb={2}>
+                    {t('Successfully created your primary list and followed this address!')}
+                  </Text>
+                  <Text fontSize="sm" color="gray.600">
+                    {t('Two transactions completed:')}
+                  </Text>
+                  <Link
+                    href={`https://basescan.org/tx/${result.followTxHash}`}
+                    isExternal
+                    color="white"
+                    fontSize="xs"
+                    fontFamily="mono"
+                    _hover={{ textDecoration: 'underline' }}
+                    display="block"
+                    mb={1}
+                  >
+                    {t('Follow:')} {result.followTxHash?.slice(0, 10)}...
+                    {result.followTxHash?.slice(-8)}
+                  </Link>
+                  <Link
+                    href={`https://basescan.org/tx/${mintTxHash}`}
+                    isExternal
+                    color="white"
+                    fontSize="xs"
+                    fontFamily="mono"
+                    _hover={{ textDecoration: 'underline' }}
+                    display="block"
+                  >
+                    {t('Mint:')} {mintTxHash.slice(0, 10)}...{mintTxHash.slice(-8)}
+                  </Link>
+                </Box>
+              ),
+              status: 'success',
+              duration: 12000,
+              isClosable: true,
+              position: isMobile ? 'top' : 'bottom-right',
+            })
+            console.log('Follow operation (double) - completed:', {
+              followTxHash: result.followTxHash,
+              mintTxHash: mintTxHash,
+            })
+          } else {
+            // Single transaction: normal follow
+            toast({
+              title: t('Successfully Following'),
+              description: (
+                <Box>
+                  <Text mb={2}>{t('You are now following this address!')}</Text>
+                  <Link
+                    href={`https://basescan.org/tx/${result.txHash}`}
+                    isExternal
+                    color="white"
+                    fontSize="xs"
+                    fontFamily="mono"
+                    _hover={{ textDecoration: 'underline' }}
+                    display="block"
+                  >
+                    {t('Transaction:')} {result.txHash.slice(0, 10)}...{result.txHash.slice(-8)}
+                  </Link>
+                </Box>
+              ),
+              status: 'success',
+              duration: 10000,
+              isClosable: true,
+              position: isMobile ? 'top' : 'bottom-right',
+            })
+            console.log('Follow operation (single):', result.txHash)
+          }
 
           // Start refresh process for follow
           // For follow, we can be more confident that the state should be true

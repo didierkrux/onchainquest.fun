@@ -517,7 +517,12 @@ export async function getEFPLists(address: string): Promise<EFPList[]> {
 /**
  * Follow an address on-chain using EFP on Base
  */
-export async function followAddressOnEFP(signer: ethers.Signer, targetAddress: string): Promise<string> {
+export async function followAddressOnEFP(signer: ethers.Signer, targetAddress: string): Promise<{
+  txHash: string
+  operationType: 'single' | 'double'
+  followTxHash?: string
+  mintTxHash?: string
+}> {
   try {
     // Ensure we're on Base network
     const baseSigner = await ensureBaseNetwork(signer)
@@ -531,12 +536,17 @@ export async function followAddressOnEFP(signer: ethers.Signer, targetAddress: s
     if (!hasPrimary) {
       console.log(`User ${userAddress} doesn't have a primary list, creating one and following ${targetAddress}`)
 
-      // Create primary list and follow in one transaction
+      // Step 1: Create primary list and follow in first transaction
       const result = await createPrimaryListAndFollow(baseSigner, targetAddress)
       console.log('Primary list created and follow completed:', result)
 
-      // Return the follow transaction hash
-      return result.followTxHash
+      // Return the follow transaction hash for the first step
+      return {
+        txHash: result.followTxHash, // Return the follow tx hash as primary
+        operationType: 'double',
+        followTxHash: result.followTxHash,
+        mintTxHash: undefined // Will be filled after second transaction
+      }
     }
 
     // User has a primary list, use normal follow process
@@ -562,9 +572,35 @@ export async function followAddressOnEFP(signer: ethers.Signer, targetAddress: s
     const tx = await efpContract.applyListOps(primaryListSlot, [listOp])
     const receipt = await tx.wait()
 
-    return receipt.hash
+    // Return single transaction hash for single operation
+    return {
+      txHash: receipt.hash,
+      operationType: 'single'
+    }
   } catch (error) {
     console.error('Error following address:', error)
+    throw error
+  }
+}
+
+/**
+ * Complete the two-step follow process by minting the primary list NFT
+ * This should be called after followAddressOnEFP when operationType is 'double'
+ */
+export async function completeFollowWithMint(
+  signer: ethers.Signer
+): Promise<string> {
+  try {
+    const baseSigner = await ensureBaseNetwork(signer)
+    const userAddress = await baseSigner.getAddress()
+
+    // Mint the primary list NFT
+    const mintTxHash = await mintPrimaryListNFT(baseSigner, userAddress)
+    console.log('Follow process completed with mint:', mintTxHash)
+
+    return mintTxHash
+  } catch (error) {
+    console.error('Error completing follow with mint:', error)
     throw error
   }
 }
@@ -642,7 +678,7 @@ export async function isFollowingOnChain(signer: ethers.Signer, targetAddress: s
 }
 
 /**
- * Create a primary list and follow an address in one transaction
+ * Create a primary list and follow an address in two transactions
  * This is used when a user doesn't have a primary list yet
  */
 export async function createPrimaryListAndFollow(
@@ -709,7 +745,41 @@ export async function createPrimaryListAndFollow(
     const followReceipt = await followTx.wait()
     console.log('Follow transaction confirmed:', followReceipt.hash)
 
-    // Step 6: Mint the primary list NFT
+    // Return the follow transaction hash first, allowing frontend to show intermediate toast
+    return {
+      followTxHash: followReceipt.hash,
+      mintTxHash: '' // Will be filled after mint transaction
+    }
+  } catch (error) {
+    console.error('Error creating primary list and following:', error)
+    throw error
+  }
+}
+
+/**
+ * Mint the primary list NFT (second step of the two-step process)
+ * This should be called after createPrimaryListAndFollow
+ */
+export async function mintPrimaryListNFT(
+  signer: ethers.Signer,
+  userAddress: string
+): Promise<string> {
+  try {
+    // Ensure we're on Base network
+    const baseSigner = await ensureBaseNetwork(signer)
+
+    // Generate the same deterministic slot
+    const slotInput = ethers.toUtf8Bytes(`${userAddress.toLowerCase()}-primary`)
+    const slotBytes32 = ethers.keccak256(slotInput)
+
+    // Create the list storage location
+    const listStorageLocation = createListStorageLocation(
+      8453, // Use Base mainnet chainId to match working example
+      EFP_LIST_RECORDS_ADDRESS,
+      slotBytes32 // Use the original bytes32 string for storage location
+    )
+
+// Mint the primary list NFT
     const listMinterContract = new ethers.Contract(
       EFP_LIST_MINTER_ADDRESS,
       EFP_LIST_MINTER_ABI,
@@ -721,12 +791,9 @@ export async function createPrimaryListAndFollow(
     const mintReceipt = await mintTx.wait()
     console.log('Primary list NFT minted:', mintReceipt.hash)
 
-    return {
-      followTxHash: followReceipt.hash,
-      mintTxHash: mintReceipt.hash
-    }
+    return mintReceipt.hash
   } catch (error) {
-    console.error('Error creating primary list and following:', error)
+    console.error('Error minting primary list NFT:', error)
     throw error
   }
 }
@@ -1485,9 +1552,12 @@ export async function demonstrateNewFollowProcess(signer: ethers.Signer, targetA
 
     // The followAddressOnEFP function now handles both cases automatically
     console.log('Calling followAddressOnEFP...')
-    const txHash = await followAddressOnEFP(signer, targetAddress)
+    const result = await followAddressOnEFP(signer, targetAddress)
 
-    console.log(`Follow transaction completed: ${txHash}`)
+    console.log(`Follow transaction completed: ${result.txHash}`)
+    console.log(`Operation type: ${result.operationType}`)
+    console.log(`Follow transaction hash: ${result.followTxHash}`)
+    console.log(`Mint transaction hash: ${result.mintTxHash}`)
     console.log('=== Demo Complete ===')
   } catch (error) {
     console.error('Demo failed:', error)
