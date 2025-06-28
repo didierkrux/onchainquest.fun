@@ -289,7 +289,9 @@ export default function PublicProfilePage() {
           // Follow - user is not currently following, so follow them
           toast({
             title: t('Signature Required'),
-            description: t('You are about to sign a transaction to follow this address.'),
+            description: t(
+              "You are about to sign a transaction to follow this address. This may also create your primary list if you don't have one yet."
+            ),
             status: 'info',
             duration: 7000,
             isClosable: true,
@@ -307,13 +309,30 @@ export default function PublicProfilePage() {
 
           toast({
             title: t('Success'),
-            description: t('Successfully followed'),
+            description: t(
+              "Successfully followed. Your primary list has been created if you didn't have one before."
+            ),
             status: 'success',
             duration: 5000,
             isClosable: true,
             position: isMobile ? 'top' : 'bottom-right',
           })
           console.log('Follow transaction hash:', txHash)
+
+          // Wait a bit for the API to index the new follow, then refresh
+          setTimeout(async () => {
+            try {
+              const updatedFollowerState = await getFollowerState(address, userAddress, 'fresh')
+              if (updatedFollowerState) {
+                setIsFollowing(updatedFollowerState.state.follow)
+              } else {
+                setIsFollowing(true) // If no state found but we just followed, assume following
+              }
+            } catch (error) {
+              console.error('Error refreshing follow state:', error)
+              setIsFollowing(true) // Assume following if refresh fails
+            }
+          }, 3000) // Wait 3 seconds for API indexing
         }
       } catch (onChainError: any) {
         console.log('On-chain operation failed, falling back to EFP app:', onChainError)

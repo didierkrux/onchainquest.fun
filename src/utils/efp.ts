@@ -1,5 +1,35 @@
 import { ethers } from 'ethers'
 
+/**
+ * EFP (Ethereum Follow Protocol) Utilities
+ * 
+ * This module provides functions for interacting with the EFP protocol on Base network.
+ * 
+ * NEW: Two-Step Follow Process for Users Without Primary Lists
+ * 
+ * When a user doesn't have a primary list yet, the follow process now works as follows:
+ * 
+ * 1. First Transaction: Call setMetadataValuesAndApplyListOps on the EFP List Records contract
+ *    - Creates the primary list with metadata
+ *    - Adds the target address to the list (follows them)
+ *    - Uses a deterministic slot based on the user's address
+ * 
+ * 2. Second Transaction: Call mintPrimaryListNoMeta on the EFP List Minter contract
+ *    - Mints the primary list NFT
+ *    - Makes the list the user's primary list
+ * 
+ * Example usage:
+ * ```typescript
+ * // This will automatically handle both cases:
+ * // - If user has primary list: normal follow
+ * // - If user doesn't have primary list: create list + follow + mint NFT
+ * const txHash = await followAddressOnEFP(signer, targetAddress)
+ * ```
+ * 
+ * The followAddressOnEFP function now automatically detects if a user has a primary list
+ * and handles the appropriate flow transparently.
+ */
+
 // EFP API Base URL
 const EFP_API_BASE = 'https://api.ethfollow.xyz/api/v1'
 
@@ -47,6 +77,7 @@ const EFP_LIST_RECORDS_ABI = [
   'function setMetadataValue(bytes32 slot, string calldata key, bytes calldata value) external',
   'function getMetadataValue(bytes32 slot, string calldata key) external view returns (bytes memory)',
   'function applyListOps(uint256 slot, bytes[] calldata ops) external',
+  'function setMetadataValuesAndApplyListOps(uint256 slot, tuple(string key, bytes value)[] records, bytes[] ops) external',
 ]
 
 // EFP Account Metadata ABI
@@ -292,10 +323,25 @@ function generateRandomSlot(): string {
  * Create a list storage location bytes array
  */
 function createListStorageLocation(chainId: number, listRecordsAddress: string, slot: string): string {
+  // Based on the working example, try to match the exact format
+  // Working example: 210541aa48ef3c0446b46a5b1cc6337ff3d3716e2a333e18d30941cb0f7988ac7507470f3f55a3062b890779a3dc6698ff637e573d10
+
   const version = '0x01'
   const locationType = '0x01' // EVM
-  const chainIdBytes = ethers.zeroPadValue(ethers.toBeHex(chainId), 32)
-  const listRecordsBytes = ethers.zeroPadValue(listRecordsAddress, 20)
+  const chainIdBytes = ethers.zeroPadValue(ethers.toBeHex(chainId), 32) // Try Base mainnet chainId
+
+  // Try to match the working example format exactly
+  const listRecordsHex = listRecordsAddress.replace('0x', '')
+  const listRecordsBytes = ethers.getBytes('0x' + listRecordsHex)
+
+  console.log('Storage location components:')
+  console.log('  Version:', version)
+  console.log('  Location type:', locationType)
+  console.log('  ChainId bytes:', chainIdBytes)
+  console.log('  List records address:', listRecordsAddress)
+  console.log('  List records hex:', listRecordsHex)
+  console.log('  List records bytes:', listRecordsBytes)
+  console.log('  Slot:', slot)
 
   // Encode packed: version + locationType + chainId + listRecordsAddress + slot
   const encoded = ethers.concat([
@@ -315,7 +361,7 @@ function createListStorageLocation(chainId: number, listRecordsAddress: string, 
  */
 async function getUserPrimaryList(userAddress: string): Promise<string> {
   try {
-    const response = await fetch(`${EFP_API_BASE}/users/${userAddress}/lists`)
+    const response = await fetch(`${EFP_API_BASE}/users/${userAddress}/lists?cache=fresh`)
     if (!response.ok) {
       throw new Error('Failed to fetch user lists')
     }
@@ -328,6 +374,28 @@ async function getUserPrimaryList(userAddress: string): Promise<string> {
     // Fallback to a default slot if API fails
     console.log('Using fallback slot 0')
     return '0'
+  }
+}
+
+/**
+ * Check if a user has a primary list
+ */
+export async function hasPrimaryList(userAddress: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${EFP_API_BASE}/users/${userAddress}/lists?cache=fresh`)
+    if (!response.ok) {
+      throw new Error('Failed to fetch user lists')
+    }
+    const data: EFPUserLists = await response.json()
+    console.log('EFP API response for user lists:', data)
+
+    // Check if primary_list exists and is not null/empty
+    const hasPrimary = typeof data.primary_list === 'string' && data.primary_list !== '0' && data.primary_list !== ''
+    console.log(`User ${userAddress} has primary list: ${hasPrimary}`)
+    return hasPrimary
+  } catch (error) {
+    console.error('Error checking if user has primary list:', error)
+    return false
   }
 }
 
@@ -371,7 +439,7 @@ export async function ensureBaseNetwork(signer: ethers.Signer): Promise<ethers.S
  */
 export async function getEFPProfile(address: string): Promise<EFPProfile | null> {
   try {
-    const response = await fetch(`${EFP_API_BASE}/users/${address}/details`)
+    const response = await fetch(`${EFP_API_BASE}/users/${address}/details?cache=fresh`)
     if (!response.ok) {
       throw new Error('Failed to fetch EFP profile')
     }
@@ -387,7 +455,7 @@ export async function getEFPProfile(address: string): Promise<EFPProfile | null>
  */
 export async function getEFPFollowers(address: string): Promise<string[]> {
   try {
-    const response = await fetch(`${EFP_API_BASE}/users/${address}/followers`)
+    const response = await fetch(`${EFP_API_BASE}/users/${address}/followers?cache=fresh`)
     if (!response.ok) {
       throw new Error('Failed to fetch EFP followers')
     }
@@ -404,7 +472,7 @@ export async function getEFPFollowers(address: string): Promise<string[]> {
  */
 export async function getEFPFollowing(address: string): Promise<string[]> {
   try {
-    const response = await fetch(`${EFP_API_BASE}/users/${address}/following`)
+    const response = await fetch(`${EFP_API_BASE}/users/${address}/following?cache=fresh`)
     if (!response.ok) {
       throw new Error('Failed to fetch EFP following')
     }
@@ -434,7 +502,7 @@ export async function isFollowing(followerAddress: string, targetAddress: string
  */
 export async function getEFPLists(address: string): Promise<EFPList[]> {
   try {
-    const response = await fetch(`${EFP_API_BASE}/users/${address}/lists`)
+    const response = await fetch(`${EFP_API_BASE}/users/${address}/lists?cache=fresh`)
     if (!response.ok) {
       throw new Error('Failed to fetch EFP lists')
     }
@@ -457,7 +525,23 @@ export async function followAddressOnEFP(signer: ethers.Signer, targetAddress: s
     // Get the user's address
     const userAddress = await baseSigner.getAddress()
 
-    // Get the user's primary list slot
+    // Check if user has a primary list
+    const hasPrimary = await hasPrimaryList(userAddress)
+
+    if (!hasPrimary) {
+      console.log(`User ${userAddress} doesn't have a primary list, creating one and following ${targetAddress}`)
+
+      // Create primary list and follow in one transaction
+      const result = await createPrimaryListAndFollow(baseSigner, targetAddress)
+      console.log('Primary list created and follow completed:', result)
+
+      // Return the follow transaction hash
+      return result.followTxHash
+    }
+
+    // User has a primary list, use normal follow process
+    console.log(`User ${userAddress} has a primary list, using normal follow process`)
+
     const primaryListSlot = await getUserPrimaryListSlot(userAddress, baseSigner.provider!)
     console.log(`Using primary list slot ${primaryListSlot.toString()} for follow operation`)
 
@@ -558,6 +642,96 @@ export async function isFollowingOnChain(signer: ethers.Signer, targetAddress: s
 }
 
 /**
+ * Create a primary list and follow an address in one transaction
+ * This is used when a user doesn't have a primary list yet
+ */
+export async function createPrimaryListAndFollow(
+  signer: ethers.Signer,
+  targetAddress: string
+): Promise<{ followTxHash: string; mintTxHash: string }> {
+  try {
+    // Ensure we're on Base network
+    const baseSigner = await ensureBaseNetwork(signer)
+    const userAddress = await baseSigner.getAddress()
+
+    console.log(`Creating primary list and following ${targetAddress} for user ${userAddress}`)
+
+    // Step 1: Generate a deterministic slot based on user address
+    const slotInput = ethers.toUtf8Bytes(`${userAddress.toLowerCase()}-primary`)
+    const slotBytes32 = ethers.keccak256(slotInput)
+    const slot = BigInt(slotBytes32) // Convert bytes32 to uint256
+    console.log(`Generated deterministic slot for primary list: ${slot.toString()}`)
+    console.log(`Slot bytes32: ${slotBytes32}`)
+    console.log(`Slot input: ${userAddress.toLowerCase()}-primary`)
+
+    // Step 2: Create the list storage location
+    const listStorageLocation = createListStorageLocation(
+      8453, // Use Base mainnet chainId to match working example
+      EFP_LIST_RECORDS_ADDRESS,
+      slotBytes32 // Use the original bytes32 string for storage location
+    )
+    console.log(`List storage location: ${listStorageLocation}`)
+
+    // Step 3: Encode the follow ListOp
+    const listOp = encodeListOp(OPERATION_ADD, targetAddress)
+    console.log('Follow ListOp:', listOp)
+
+    // Step 4: Prepare metadata records for the list
+    const userAddressBytes = ethers.getBytes(userAddress)
+    const metadataRecords = [
+      {
+        key: 'user',
+        value: userAddressBytes
+      }
+    ]
+    console.log('User address bytes:', userAddressBytes)
+    console.log('User address hex:', ethers.hexlify(userAddressBytes))
+
+    // Step 5: Call setMetadataValuesAndApplyListOps to create the list and add the follow
+    const listRecordsContract = new ethers.Contract(
+      EFP_LIST_RECORDS_ADDRESS,
+      EFP_LIST_RECORDS_ABI,
+      baseSigner
+    )
+
+    console.log('Calling setMetadataValuesAndApplyListOps...')
+    console.log('Contract address:', EFP_LIST_RECORDS_ADDRESS)
+    console.log('Slot:', slot.toString())
+    console.log('Metadata records:', metadataRecords)
+    console.log('ListOps:', [listOp])
+    console.log('Available functions:', Object.keys(listRecordsContract.interface.fragments))
+
+    const followTx = await listRecordsContract.setMetadataValuesAndApplyListOps(
+      slot,
+      metadataRecords,
+      [listOp]
+    )
+    const followReceipt = await followTx.wait()
+    console.log('Follow transaction confirmed:', followReceipt.hash)
+
+    // Step 6: Mint the primary list NFT
+    const listMinterContract = new ethers.Contract(
+      EFP_LIST_MINTER_ADDRESS,
+      EFP_LIST_MINTER_ABI,
+      baseSigner
+    )
+
+    console.log('Minting primary list NFT...')
+    const mintTx = await listMinterContract.mintPrimaryListNoMeta(listStorageLocation)
+    const mintReceipt = await mintTx.wait()
+    console.log('Primary list NFT minted:', mintReceipt.hash)
+
+    return {
+      followTxHash: followReceipt.hash,
+      mintTxHash: mintReceipt.hash
+    }
+  } catch (error) {
+    console.error('Error creating primary list and following:', error)
+    throw error
+  }
+}
+
+/**
  * Get EFP profile URL for an address
  */
 export function getEFPProfileUrl(address: string): string {
@@ -590,7 +764,7 @@ export async function getFollowerState(
       params.append('cache', 'fresh')
     }
 
-    const url = `${EFP_API_BASE}/users/${encodeURIComponent(addressOrENS1)}/${encodeURIComponent(addressOrENS2)}/followerState${params.toString() ? `?${params.toString()}` : ''}`
+    const url = `${EFP_API_BASE}/users/${encodeURIComponent(addressOrENS1)}/${encodeURIComponent(addressOrENS2)}/followerState${params.toString() ? `?${params.toString()}&cache=fresh` : '?cache=fresh'}`
 
     console.log('Fetching follower state from:', url)
 
@@ -706,8 +880,9 @@ export async function createDedicatedEFPListWithoutMinting(
 
     // Generate a deterministic slot based on user address and tag
     const slotInput = ethers.toUtf8Bytes(`${userAddress.toLowerCase()}-${tag}`)
-    const slot = ethers.keccak256(slotInput)
-    console.log(`Generated deterministic slot: ${slot}`)
+    const slotBytes32 = ethers.keccak256(slotInput)
+    const slot = BigInt(slotBytes32) // Convert bytes32 to uint256
+    console.log(`Generated deterministic slot: ${slot.toString()}`)
 
     // Check if the slot is already claimed
     const listRecordsContract = new ethers.Contract(
@@ -766,10 +941,10 @@ export async function createDedicatedEFPListWithoutMinting(
 
     console.log(`Dedicated EFP list created successfully!`)
     console.log(`Token ID: ${tokenId.toString()}`)
-    console.log(`Slot: ${slot}`)
+    console.log(`Slot: ${slot.toString()}`)
     console.log(`Tag: ${tag}`)
 
-    return { tokenId, slot }
+    return { tokenId, slot: slot.toString() }
   } catch (error: any) {
     console.error('Error creating dedicated EFP list without minting:', error)
     throw error
@@ -797,7 +972,7 @@ export async function createDedicatedEFPList(
 
     // 2. Create the list storage location
     const listStorageLocation = createListStorageLocation(
-      BASE_CHAIN_ID,
+      8453, // Use Base mainnet chainId to match working example
       EFP_LIST_RECORDS_ADDRESS,
       slot
     )
@@ -1282,4 +1457,71 @@ export async function getAddressesInDedicatedList(
     console.error('Error getting addresses in dedicated list:', error)
     return []
   }
+}
+
+/**
+ * Example function demonstrating the new two-step follow process
+ * This shows how the system automatically handles users without primary lists
+ */
+export async function demonstrateNewFollowProcess(signer: ethers.Signer, targetAddress: string): Promise<void> {
+  try {
+    console.log('=== EFP New Follow Process Demo ===')
+
+    const userAddress = await signer.getAddress()
+    console.log(`User address: ${userAddress}`)
+    console.log(`Target address: ${targetAddress}`)
+
+    // Check if user has a primary list
+    const hasPrimary = await hasPrimaryList(userAddress)
+    console.log(`User has primary list: ${hasPrimary}`)
+
+    if (!hasPrimary) {
+      console.log('User does not have a primary list - will use two-step process')
+      console.log('Step 1: Create primary list and follow in one transaction')
+      console.log('Step 2: Mint primary list NFT')
+    } else {
+      console.log('User has a primary list - will use normal follow process')
+    }
+
+    // The followAddressOnEFP function now handles both cases automatically
+    console.log('Calling followAddressOnEFP...')
+    const txHash = await followAddressOnEFP(signer, targetAddress)
+
+    console.log(`Follow transaction completed: ${txHash}`)
+    console.log('=== Demo Complete ===')
+  } catch (error) {
+    console.error('Demo failed:', error)
+  }
+}
+
+/**
+ * Test function to debug encoding with specific addresses
+ */
+export function debugEncoding(userAddress: string, targetAddress: string): void {
+  console.log('=== Debug Encoding ===')
+  console.log('User address:', userAddress)
+  console.log('Target address:', targetAddress)
+
+  // Test slot generation
+  const slotInput = ethers.toUtf8Bytes(`${userAddress.toLowerCase()}-primary`)
+  const slotBytes32 = ethers.keccak256(slotInput)
+  const slot = BigInt(slotBytes32)
+  console.log('Slot input:', `${userAddress.toLowerCase()}-primary`)
+  console.log('Slot bytes32:', slotBytes32)
+  console.log('Slot uint256:', slot.toString())
+
+  // Test user address encoding
+  const userAddressBytes = ethers.getBytes(userAddress)
+  console.log('User address bytes:', userAddressBytes)
+  console.log('User address hex:', ethers.hexlify(userAddressBytes))
+
+  // Test storage location
+  const listStorageLocation = createListStorageLocation(0, EFP_LIST_RECORDS_ADDRESS, slotBytes32)
+  console.log('Storage location:', listStorageLocation)
+
+  // Test ListOp encoding
+  const listOp = encodeListOp(OPERATION_ADD, targetAddress)
+  console.log('ListOp:', listOp)
+
+  console.log('=== End Debug ===')
 } 
