@@ -232,6 +232,56 @@ export default function PublicProfilePage() {
     setCurrentAttestationTxLink(txLink)
   }, [currentAttestation, userAddress, address])
 
+  // Helper function to refresh follow state with retries
+  const refreshFollowState = async (retryCount = 0, maxRetries = 3): Promise<void> => {
+    if (!userAddress || !address || typeof address !== 'string') return
+
+    try {
+      console.log(`Refreshing follow state (attempt ${retryCount + 1}/${maxRetries + 1})`)
+
+      const updatedFollowerState = await getFollowerState(address, userAddress, 'fresh')
+
+      if (updatedFollowerState) {
+        const newFollowState = updatedFollowerState.state.follow
+        console.log('Updated follow state from API:', newFollowState)
+        setIsFollowing(newFollowState)
+        return
+      } else {
+        // No follower state found - this could mean the API hasn't indexed yet
+        console.log('No follower state found in API response')
+
+        if (retryCount < maxRetries) {
+          // Wait with exponential backoff: 1s, 2s, 4s
+          const delay = Math.pow(2, retryCount) * 1000
+          console.log(`Retrying in ${delay}ms...`)
+
+          setTimeout(() => {
+            refreshFollowState(retryCount + 1, maxRetries)
+          }, delay)
+        } else {
+          // After max retries, make a reasonable assumption based on the action
+          console.log('Max retries reached, making reasonable assumption')
+          // Don't change the state here - let the calling code handle it
+        }
+      }
+    } catch (error) {
+      console.error(`Error refreshing follow state (attempt ${retryCount + 1}):`, error)
+
+      if (retryCount < maxRetries) {
+        // Wait with exponential backoff: 1s, 2s, 4s
+        const delay = Math.pow(2, retryCount) * 1000
+        console.log(`Retrying in ${delay}ms after error...`)
+
+        setTimeout(() => {
+          refreshFollowState(retryCount + 1, maxRetries)
+        }, delay)
+      } else {
+        console.error('Max retries reached for follow state refresh')
+        // Don't change the state here - let the calling code handle it
+      }
+    }
+  }
+
   const handleFollow = async () => {
     if (!userAddress || !address || typeof address !== 'string' || !walletClient) {
       toast({
@@ -268,14 +318,6 @@ export default function PublicProfilePage() {
           })
           const txHash = await unfollowAddressOnEFP(signer, address)
 
-          // Refresh follower state after successful unfollow
-          const updatedFollowerState = await getFollowerState(address, userAddress, 'fresh')
-          if (updatedFollowerState) {
-            setIsFollowing(updatedFollowerState.state.follow)
-          } else {
-            setIsFollowing(false)
-          }
-
           toast({
             title: t('Success'),
             description: t('Successfully unfollowed'),
@@ -285,6 +327,11 @@ export default function PublicProfilePage() {
             position: isMobile ? 'top' : 'bottom-right',
           })
           console.log('Unfollow transaction hash:', txHash)
+
+          // Start refresh process for unfollow
+          // For unfollow, we can be more confident that the state should be false
+          setIsFollowing(false) // Optimistic update
+          // refreshFollowState() // Start background refresh
         } else {
           // Follow - user is not currently following, so follow them
           toast({
@@ -299,14 +346,6 @@ export default function PublicProfilePage() {
           })
           const txHash = await followAddressOnEFP(signer, address)
 
-          // Refresh follower state after successful follow
-          const updatedFollowerState = await getFollowerState(address, userAddress, 'fresh')
-          if (updatedFollowerState) {
-            setIsFollowing(updatedFollowerState.state.follow)
-          } else {
-            setIsFollowing(true) // If no state found but we just followed, assume following
-          }
-
           toast({
             title: t('Success'),
             description: t(
@@ -319,20 +358,10 @@ export default function PublicProfilePage() {
           })
           console.log('Follow transaction hash:', txHash)
 
-          // Wait a bit for the API to index the new follow, then refresh
-          setTimeout(async () => {
-            try {
-              const updatedFollowerState = await getFollowerState(address, userAddress, 'fresh')
-              if (updatedFollowerState) {
-                setIsFollowing(updatedFollowerState.state.follow)
-              } else {
-                setIsFollowing(true) // If no state found but we just followed, assume following
-              }
-            } catch (error) {
-              console.error('Error refreshing follow state:', error)
-              setIsFollowing(true) // Assume following if refresh fails
-            }
-          }, 3000) // Wait 3 seconds for API indexing
+          // Start refresh process for follow
+          // For follow, we can be more confident that the state should be true
+          setIsFollowing(true) // Optimistic update
+          // refreshFollowState() // Start background refresh
         }
       } catch (onChainError: any) {
         console.log('On-chain operation failed, falling back to EFP app:', onChainError)
