@@ -455,8 +455,9 @@ export default function ProfilePage() {
   }
 
   const handleTicketCodeSubmit = async () => {
-    if (ticketCodeInput.length === 6) {
-      await processTicketCode(ticketCodeInput)
+    const cleanedCode = ticketCodeInput.replace(/\s/g, '')
+    if (cleanedCode.length === 6) {
+      await processTicketCode(cleanedCode)
       setTicketCodeInput('') // Clear input after submission
     } else {
       toast({
