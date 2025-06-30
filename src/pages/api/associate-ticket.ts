@@ -35,10 +35,11 @@ export default async function handler(
       return res.status(404).json({ message: 'Event not found' })
     }
 
-    // Check if user exists
+    // Check if user exists - if multiple users with same address, select the one with lower ID
     const user = await db('users')
       .whereILike('address', address)
       .where('event_id', parseInt(eventId))
+      .orderBy('id', 'asc')
       .first()
 
     if (!user) {
