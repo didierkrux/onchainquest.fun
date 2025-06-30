@@ -85,7 +85,7 @@ const InstallPWA: React.FC<InstallPWAProps> = ({ onClose }) => {
             pb={4}
           >
             <Box
-              w="74px"
+              w="87px"
               display="flex"
               alignItems="start"
               justifyContent="start"
@@ -94,9 +94,21 @@ const InstallPWA: React.FC<InstallPWAProps> = ({ onClose }) => {
               ml={2}
             >
               <Box w="100%" display="flex" alignItems="center" justifyContent="center" px={2}>
-                <Image src={appIcon} alt={t('App icon')} borderRadius="16px" />
+                <Image
+                  src={appIcon}
+                  alt={t('App icon')}
+                  borderRadius="16px"
+                  boxShadow="0px 0px 10px 0px rgba(0, 0, 0, 0.1)"
+                />
               </Box>
-              <Text fontSize="11px" fontWeight="bold" mt={2} color="white">
+              <Text
+                w="87px"
+                textAlign="center"
+                fontSize="11px"
+                fontWeight="bold"
+                mt={2}
+                color="white"
+              >
                 {eventName}
               </Text>
             </Box>
