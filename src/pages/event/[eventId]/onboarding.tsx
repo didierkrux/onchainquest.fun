@@ -23,7 +23,7 @@ import {
 import { useAppKit } from '@reown/appkit/react'
 import { useAccount, useBalance, useSendTransaction } from 'wagmi'
 import { useTranslation } from 'react-i18next'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import React from 'react'
 import { useLocalStorage } from 'usehooks-ts'
 import { Trophy, CheckCircle, Star, Lock, Check, CopySimple } from '@phosphor-icons/react/dist/ssr'
@@ -58,6 +58,7 @@ export default function Onboarding({ event }: { event: Event }) {
   const [isShopOpen, setIsShopOpen] = useState(false)
   const [shopUrl, setShopUrl] = useState('')
   const [boothCodeInput, setBoothCodeInput] = useState('')
+  const [scrollToQuestId, setScrollToQuestId] = useState<number | null>(null)
 
   useEffect(() => {
     if (address) {
@@ -72,6 +73,24 @@ export default function Onboarding({ event }: { event: Event }) {
         })
     }
   }, [address, lastAddress])
+
+  // Handle scrolling to QR scanner after profile update
+  useEffect(() => {
+    if (scrollToQuestId) {
+      setTimeout(() => {
+        const element = document.getElementById(`qr-scanner-${scrollToQuestId}`)
+        if (element) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          })
+        } else {
+          console.log('QR scanner element not found for quest:', scrollToQuestId)
+        }
+        setScrollToQuestId(null) // Reset after scrolling
+      }, 100)
+    }
+  }, [profile, scrollToQuestId])
 
   const QUESTS: Quest[] = event.tasks || []
 
@@ -607,12 +626,16 @@ export default function Onboarding({ event }: { event: Event }) {
                     alignItems="center"
                     flexDirection={isMobile ? 'column' : 'row'}
                   >
-                    <QRScanner
-                      buttonLabel={t('Scan Booth QR Code')}
-                      onScan={(result) => {
-                        handleAction(quest, { qrCode: result })
-                      }}
-                    />
+                    <Box id={`qr-scanner-${quest.id}`}>
+                      <QRScanner
+                        buttonLabel={t('Scan Booth QR Code')}
+                        onScan={(result) => {
+                          handleAction(quest, { qrCode: result })
+                          // Set the quest ID to scroll to after profile update
+                          setScrollToQuestId(quest.id)
+                        }}
+                      />
+                    </Box>
                     <Text fontWeight="bold" color="gray.500">
                       - OR -
                     </Text>
