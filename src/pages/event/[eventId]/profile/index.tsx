@@ -752,7 +752,9 @@ export default function ProfilePage() {
                             <input
                               type="text"
                               value={ticketCodeInput}
-                              onChange={(e) => setTicketCodeInput(e.target.value.toUpperCase())}
+                              onChange={(e) =>
+                                setTicketCodeInput(e.target.value.replace(/\s/g, '').toUpperCase())
+                              }
                               placeholder={t('Enter code')}
                               maxLength={6}
                               style={{

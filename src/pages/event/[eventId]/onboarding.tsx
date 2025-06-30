@@ -620,7 +620,9 @@ export default function Onboarding({ event }: { event: Event }) {
                       <input
                         type="text"
                         value={boothCodeInput}
-                        onChange={(e) => setBoothCodeInput(e.target.value.toUpperCase())}
+                        onChange={(e) =>
+                          setBoothCodeInput(e.target.value.replace(/\s/g, '').toUpperCase())
+                        }
                         placeholder={t('Enter code')}
                         maxLength={6}
                         style={{

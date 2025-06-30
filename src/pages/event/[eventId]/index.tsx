@@ -417,7 +417,9 @@ export default function EventPage({ event }: { event: Event }) {
                 <input
                   type="text"
                   value={attendeeCodeInput}
-                  onChange={(e) => setAttendeeCodeInput(e.target.value.toUpperCase())}
+                  onChange={(e) =>
+                    setAttendeeCodeInput(e.target.value.replace(/\s/g, '').toUpperCase())
+                  }
                   placeholder={t('Enter code')}
                   maxLength={6}
                   style={{
