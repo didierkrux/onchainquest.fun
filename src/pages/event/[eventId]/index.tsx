@@ -47,12 +47,11 @@ export default function EventPage({ event }: { event: Event }) {
   const bronzeSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '3-bronze')
 
   const handleAttendeeCodeSubmit = async () => {
-    if (attendeeCodeInput.length === 6) {
+    const cleanedCode = attendeeCodeInput.replace(/\s/g, '')
+    if (cleanedCode.length === 6) {
       try {
         // Validate the attendee bracelet code
-        const validationResponse = await fetch(
-          `/api/ticket/${attendeeCodeInput}?eventId=${eventId}`
-        )
+        const validationResponse = await fetch(`/api/ticket/${cleanedCode}?eventId=${eventId}`)
         const validationData = await validationResponse.json()
 
         if (!validationData.valid) {
@@ -62,7 +61,7 @@ export default function EventPage({ event }: { event: Event }) {
             validationData.ticketOwner
           ) {
             router.push(
-              `/event/${eventId}/profile/${validationData.ticketOwner.address}?code=${attendeeCodeInput}`
+              `/event/${eventId}/profile/${validationData.ticketOwner.address}?code=${cleanedCode}`
             )
             setAttendeeCodeInput('') // Clear input after submission
             return
@@ -83,7 +82,7 @@ export default function EventPage({ event }: { event: Event }) {
         if (validationData.ticketOwner) {
           // Redirect to the ticket owner's profile
           router.push(
-            `/event/${eventId}/profile/${validationData.ticketOwner.address}?code=${attendeeCodeInput}`
+            `/event/${eventId}/profile/${validationData.ticketOwner.address}?code=${cleanedCode}`
           )
         } else {
           // Show message for unclaimed ticket
@@ -434,7 +433,7 @@ export default function EventPage({ event }: { event: Event }) {
                 <Button
                   size="sm"
                   onClick={handleAttendeeCodeSubmit}
-                  isDisabled={attendeeCodeInput.length !== 6}
+                  isDisabled={attendeeCodeInput.replace(/\s/g, '').length !== 6}
                 >
                   {t('Submit')}
                 </Button>
