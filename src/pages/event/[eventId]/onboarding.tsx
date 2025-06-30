@@ -638,8 +638,9 @@ export default function Onboarding({ event }: { event: Event }) {
                   <Button
                     size="sm"
                     onClick={() => {
-                      if (boothCodeInput.length === 6) {
-                        handleAction(quest, { code: boothCodeInput, eventId: eventId as string })
+                      const cleanedCode = boothCodeInput.replace(/\s/g, '')
+                      if (cleanedCode.length === 6) {
+                        handleAction(quest, { code: cleanedCode, eventId: eventId as string })
                         setBoothCodeInput('') // Clear input after submission
                       } else {
                         toast({
@@ -652,7 +653,7 @@ export default function Onboarding({ event }: { event: Event }) {
                         })
                       }
                     }}
-                    isDisabled={boothCodeInput.length !== 6}
+                    isDisabled={boothCodeInput.replace(/\s/g, '').length !== 6}
                   >
                     {t('Submit')}
                   </Button>
