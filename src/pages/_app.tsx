@@ -24,6 +24,8 @@ const queryClient = new QueryClient({
   },
 })
 
+export const appIcon = `${process.env.NEXT_PUBLIC_APP_ICON || `${DOMAIN_URL}/app-icon.png`}?v=1`
+
 export default function MyApp({ Component, pageProps }: AppProps) {
   const { t } = useTranslation()
   const router = useRouter()
@@ -36,7 +38,6 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const url = `${DOMAIN_URL}${router.pathname}`
   const pageTitle = title ? `${title} | ${eventName}` : eventName
   const description = eventDescription
-  const appIcon = `${process.env.NEXT_PUBLIC_APP_ICON || `${DOMAIN_URL}/app-icon.png`}?v=1`
   const canonical = url?.split('?')[0]
 
   useEffect(() => {

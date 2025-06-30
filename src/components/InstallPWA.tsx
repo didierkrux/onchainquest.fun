@@ -17,6 +17,7 @@ import { Export, PlusCircle, PlusSquare } from '@phosphor-icons/react'
 import { isAndroid, isIOS } from 'react-device-detect'
 import { eventName } from 'config/index'
 import { useLocalStorage } from 'usehooks-ts'
+import { appIcon } from 'pages/_app'
 
 interface InstallPWAProps {
   onClose?: () => void
@@ -93,7 +94,7 @@ const InstallPWA: React.FC<InstallPWAProps> = ({ onClose }) => {
               ml={2}
             >
               <Box w="100%" display="flex" alignItems="center" justifyContent="center" px={2}>
-                <Image src="/app-icon.png" alt={t('App icon')} borderRadius="16px" />
+                <Image src={appIcon} alt={t('App icon')} borderRadius="16px" />
               </Box>
               <Text fontSize="11px" fontWeight="bold" mt={2} color="white">
                 {eventName}
