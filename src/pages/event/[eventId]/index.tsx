@@ -141,7 +141,7 @@ export default function EventPage({ event }: { event: Event }) {
         // Extract the profile path from the URL
         const url = new URL(result)
         const profilePath = url.pathname
-        router.push(profilePath)
+        router.push(profilePath + '?code=true')
         return
       }
 
