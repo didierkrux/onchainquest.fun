@@ -729,6 +729,25 @@ export default function Onboarding({ event }: { event: Event }) {
           </Box>
         )
       }
+      if (quest.action === 'setup-profile') {
+        const isLocked = isQuestLocked(quest, profile)
+        const isCompleted = profile?.tasks?.[quest.id]?.isCompleted ?? false
+        quest.actionField = (
+          <Box display="flex" gap={4}>
+            {quest.lock && isLocked ? (
+              <Box display="flex" alignItems="center" gap={2}>
+                {renderLockMessage(quest)}
+              </Box>
+            ) : !isCompleted ? (
+              <Box display="flex" gap={4}>
+                <Link href={`/event/${eventId}/profile#profile`}>
+                  <Button>{t('Setup Profile')}</Button>
+                </Link>
+              </Box>
+            ) : null}
+          </Box>
+        )
+      }
     }
   }
 

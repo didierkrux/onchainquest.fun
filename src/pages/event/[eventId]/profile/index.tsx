@@ -152,6 +152,22 @@ export default function ProfilePage() {
     fetchProfile()
   }, [address, eventId])
 
+  // Handle hash navigation to scroll to specific sections
+  useEffect(() => {
+    if (profile && router.asPath.includes('#')) {
+      const hash = router.asPath.split('#')[1]
+      if (hash === 'profile') {
+        // Small delay to ensure the element is rendered
+        setTimeout(() => {
+          const element = document.getElementById('profile')
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+        }, 100)
+      }
+    }
+  }, [profile, router.asPath])
+
   useEffect(() => {
     if (balanceData) {
       const ethValue = Number(balanceData?.value.toString()) / 10 ** 18
@@ -780,8 +796,8 @@ export default function ProfilePage() {
               </Box>
             )}
 
-            <Box w="100%" maxW="600px">
-              <Heading as="h1">{t('Update Profile')}</Heading>
+            <Box id="profile" w="100%" maxW="600px">
+              <Heading as="h1">{t('Profile')}</Heading>
               <Card mt={4} mb={4}>
                 <CardBody>
                   <Box display="flex" flexDirection="column" gap={4} maxW="400px" mx="auto">
