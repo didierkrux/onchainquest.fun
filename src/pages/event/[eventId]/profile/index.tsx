@@ -70,6 +70,7 @@ export default function ProfilePage() {
   const [ticketCount, setTicketCount] = useState('10')
   const [scannedTicket, setScannedTicket] = useState<string | null>(null)
   const [ticketCodeInput, setTicketCodeInput] = useState('')
+  const [isProcessingTicket, setIsProcessingTicket] = useState(false)
 
   const saveProfile = () => {
     if (!eventId) return
@@ -474,6 +475,7 @@ export default function ProfilePage() {
   const processTicketCode = async (ticketCode: string) => {
     if (!address || !eventId) return
 
+    setIsProcessingTicket(true)
     try {
       // Validate the ticket
       const validationResponse = await fetch(`/api/ticket/${ticketCode}?eventId=${eventId}`)
@@ -540,6 +542,8 @@ export default function ProfilePage() {
         isClosable: true,
         position: isMobile ? 'top' : 'bottom-right',
       })
+    } finally {
+      setIsProcessingTicket(false)
     }
   }
 
@@ -770,7 +774,12 @@ export default function ProfilePage() {
                             <Button
                               size="sm"
                               onClick={handleTicketCodeSubmit}
-                              isDisabled={ticketCodeInput.length !== 6}
+                              isDisabled={
+                                ticketCodeInput.replace(/\s/g, '').length !== 6 ||
+                                isProcessingTicket
+                              }
+                              isLoading={isProcessingTicket}
+                              loadingText={t('Processing...')}
                             >
                               {t('Submit')}
                             </Button>
