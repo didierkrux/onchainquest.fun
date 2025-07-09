@@ -75,6 +75,7 @@ export default function PublicProfilePage() {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [isAttestingIRL, setIsAttestingIRL] = useState(false)
   const [irlAttestationTxLink, setIrlAttestationTxLink] = useState<string | null>(null)
+  const [showAttestationImage, setShowAttestationImage] = useState(false)
 
   // Local storage for IRL meeting attestations
   const [irlAttestations, setIrlAttestations] = useLocalStorage<
@@ -218,6 +219,7 @@ export default function PublicProfilePage() {
     if (!userAddress || !address || typeof address !== 'string') {
       setHasAttestedIRL(false)
       setCurrentAttestationTxLink(null)
+      setShowAttestationImage(false)
       return
     }
 
@@ -231,6 +233,17 @@ export default function PublicProfilePage() {
 
     setHasAttestedIRL(hasAttested)
     setCurrentAttestationTxLink(txLink)
+
+    // Add 2-second delay for showing attestation image
+    if (hasAttested) {
+      const timer = setTimeout(() => {
+        setShowAttestationImage(true)
+      }, 2000)
+
+      return () => clearTimeout(timer)
+    } else {
+      setShowAttestationImage(false)
+    }
   }, [currentAttestation, userAddress, address])
 
   // Helper function to refresh follow state with retries
@@ -781,14 +794,14 @@ export default function PublicProfilePage() {
                 size="md"
                 w="100%"
               >
-                {isFollowing ? t('Unfollow') : t('Follow')}
+                {isFollowing ? t('Unfollow on EFP') : t('Follow on EFP')}
               </Button>
             )}
 
             {/* View on EFP Button */}
             <Link href={getEFPProfileUrl(address)} isExternal>
               <Button leftIcon={<ArrowUpRight />} variant="outline" size="md" w="100%">
-                {t('View on EFP')}
+                {t('View EFP Profile')}
               </Button>
             </Link>
 
@@ -814,6 +827,7 @@ export default function PublicProfilePage() {
                   {/* Display attestation image if user has attested */}
                   {hasAttestedIRL &&
                     currentAttestationTxLink &&
+                    showAttestationImage &&
                     (() => {
                       const txHash = currentAttestationTxLink.split('/').pop()
                       if (txHash) {
