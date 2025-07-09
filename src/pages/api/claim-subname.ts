@@ -66,7 +66,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .first()
       .select('data_en')
 
-    // check if user has already claimed subname (Task #2 = force POAP validation)
     // TODO: check if user has already claimed subname for another event
     const profile = await fetch(`${DOMAIN_URL}/api/profile?address=${address}&taskId=2&eventId=${eventId}`, {
       method: 'POST',
@@ -91,7 +90,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .select('code', 'is_used', 'used_at', 'attestation_tx_link')
           .where('event_id', eventId)
           .where('user_id', profileData.id)
-          .orderBy('created_at', 'desc');
 
         if (!associatedTickets || associatedTickets.length === 0) {
           return res.status(400).json({
@@ -224,7 +222,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .select('code', 'is_used', 'used_at', 'attestation_tx_link')
             .where('event_id', eventId)
             .where('user_id', profile.id)
-            .orderBy('created_at', 'desc')
 
           // Return immediately with transaction hash
           return res.status(200).json({
