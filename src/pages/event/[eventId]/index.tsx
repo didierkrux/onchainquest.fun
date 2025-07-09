@@ -40,6 +40,7 @@ export default function EventPage({ event }: { event: Event }) {
   const toast = useToast()
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const [attendeeCodeInput, setAttendeeCodeInput] = useState('')
+  const [isProcessingCode, setIsProcessingCode] = useState(false)
   const { address } = useAccount()
 
   const goldSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '1-gold')
@@ -49,6 +50,7 @@ export default function EventPage({ event }: { event: Event }) {
   const handleAttendeeCodeSubmit = async () => {
     const cleanedCode = attendeeCodeInput.replace(/\s/g, '')
     if (cleanedCode.length === 6) {
+      setIsProcessingCode(true)
       try {
         // Validate the attendee bracelet code
         const validationResponse = await fetch(`/api/ticket/${cleanedCode}?eventId=${eventId}`)
@@ -106,6 +108,8 @@ export default function EventPage({ event }: { event: Event }) {
           isClosable: true,
           position: isMobile ? 'top' : 'bottom-right',
         })
+      } finally {
+        setIsProcessingCode(false)
       }
     } else {
       toast({
@@ -435,7 +439,9 @@ export default function EventPage({ event }: { event: Event }) {
                 <Button
                   size="sm"
                   onClick={handleAttendeeCodeSubmit}
-                  isDisabled={attendeeCodeInput.replace(/\s/g, '').length !== 6}
+                  isDisabled={attendeeCodeInput.replace(/\s/g, '').length !== 6 || isProcessingCode}
+                  isLoading={isProcessingCode}
+                  loadingText={t('Processing...')}
                 >
                   {t('Submit')}
                 </Button>
