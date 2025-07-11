@@ -1,61 +1,41 @@
-# onchainquest.fun
+# Onchain Quest
 
-## Features
+A Web3 event management platform designed for onboarding users at Ethereum events, providing an interactive experience with wallet integration, quest completion, and social features.
 
-### Farcaster Integration (Event ID 3)
+## Quick Summary
 
-For Event ID 3, the application includes integration with Farcaster to display messages from the DevConnect channel using the Neynar API.
+Onchain Quest is a Next.js application designed for Ethereum events that helps onboard new users by allowing attendees to:
 
-#### Setup
+- Connect their wallets and create profiles
+- Complete interactive quests and earn points
+- Check in at event booths via QR codes
+- View leaderboards and social features
+- Claim ENS subnames and tokens
+- Install as a Progressive Web App (PWA)
 
-1. Add your Neynar API key to the environment variables:
+The platform supports multiple events with configurable quests, booth check-ins, and social integrations focused on Ethereum ecosystem education.
 
-   ```bash
-   NEYNAR_API_KEY=your_neynar_api_key_here
-   ```
+## Quest Integrations
 
-2. The feature will automatically load and display the latest 20 messages from the DevConnect channel on Farcaster.
+- **POAP**: [Proof of Attendance Protocol](https://poap.xyz/) for event memories
+- **ENS**: [Subname claiming](https://docs.ens.domains/) thanks to [Durin](https://durin.dev/)
+- **EFP**: [Ethereum Follow Protocol](https://efp.app/) for social following
+- **EAS**: [Ethereum Attestation Service](https://docs.attest.org/docs/welcome) for on-chain attestations
+- **Farcaster**: Display Farcaster channel messages + mini-apps host
+- **Social Media**: Twitter and Instagram embeds via [react-social-media-embed](https://www.npmjs.com/package/react-social-media-embed)
+- **Zupass**: [Zero-knowledge proof verification](https://zupass.org/)
+- **Safe**: Ethereum faucet via [Safe](https://safe.global/) or EOA
+- **QR Code**: Scanning for booth check-ins and ticket validation
+- **DeFi**: Token swapping and balance verification
+- **NFT**: Minting NFTs on Zora
+- **Slice**: [Onchain shopping](https://shop.slice.so/)
+- **Tally**: [Feedback forms](https://tally.so/) for event surveys
 
-#### Features
+## App Infrastructure
 
-- Real-time message fetching from DevConnect channel
-- Display of user avatars, display names, and usernames
-- Verification badges for verified users
-- Message timestamps with relative time formatting
-- Support for message embeds and links
-- Reaction counts display
-- Auto-refresh every 30 seconds
-- Responsive design with Chakra UI components
-- **Real Messages**: Uses Neynar API to fetch actual channel messages
-- **Professional API**: Reliable and well-documented
-
-#### API Details
-
-- **Endpoint**: `https://api.neynar.com`
-- **Cost**: Free tier available
-- **Auth**: API key required
-- **Rate Limit**: 100 requests/minute (free tier)
-- **Type**: REST API
-- **Maintained by**: Neynar
-
-#### Getting a Neynar API Key
-
-1. Visit [Neynar's website](https://neynar.com)
-2. Sign up for a free account
-3. Generate an API key from your dashboard
-4. Add the key to your environment variables
-
-#### Components
-
-- `FarcasterMessages` - Main component for displaying messages
-- `useFarcasterMessages` - Custom hook for fetching data
-- `/api/farcaster-messages` - API endpoint using Neynar API
-- `utils/farcaster-apis.ts` - API configuration utilities
-
-#### Dependencies
-
-- `@tanstack/react-query` - For data fetching and caching
-- `date-fns` - For timestamp formatting
-- `@chakra-ui/react` - For UI components
-
-The Farcaster integration is only active for Event ID 3 and will not appear for other events.
+- **PWA**: Progressive Web App capabilities
+- **Internationalization**: [i18next](https://www.i18next.com/) with multiple languages
+- **Wallet Connection**: [Dynamic Labs (embed wallet)](https://www.dynamic.xyz/), [Wagmi](https://wagmi.sh/), [Reown AppKit](https://reown.com/appkit)
+- **Blockchain**: [Base network](https://base.org/), Ethereum
+- **UI**: [Chakra UI](https://chakra-ui.com/) with custom theme
+- **Database**: PostgreSQL with Knex.js migrations
