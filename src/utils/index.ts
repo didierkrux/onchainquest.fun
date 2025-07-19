@@ -441,17 +441,24 @@ export async function verifySignature({
   address,
   message,
   signature,
+  chainId = 8453, // Default to Base mainnet
   alchemyKey,
 }: {
   address: string
   message: string
   signature: string
+    chainId?: number
     alchemyKey?: string
 }) {
   const publicClient = createPublicClient({
-    chain: base,
-    transport: http(`https://base-mainnet.g.alchemy.com/v2/${alchemyKey || process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
+    transport: getTransport({ chainId })
   })
+
+  function getTransport({ chainId }: { chainId: number }) {
+    return http(
+      `https://rpc.walletconnect.org/v1/?chainId=eip155:${chainId}&projectId=${process.env.NEXT_PUBLIC_PROJECT_ID}`
+    )
+  }
 
   return publicClient.verifyMessage({
     message,
