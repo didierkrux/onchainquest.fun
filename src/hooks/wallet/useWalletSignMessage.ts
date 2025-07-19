@@ -3,6 +3,16 @@ import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { sdk } from '@farcaster/miniapp-sdk'
 import { isPrivyProvider, createWalletError, type HookError } from 'utils/wallet'
 
+/**
+ * Custom hook for wallet message signing that works with multiple wallet providers.
+ * 
+ * NOTE: Farcaster Mini App SDK's Ethereum provider has limited support for message signing.
+ * If you encounter signing issues in Farcaster Mini App context, consider:
+ * 1. Using an external wallet (MetaMask, Coinbase Wallet, etc.)
+ * 2. Implementing signing outside of the Mini App context
+ * 3. Using alternative authentication methods like Quick Auth
+ */
+
 export function useWalletSignMessage() {
   const privy = usePrivy()
   const { ready: walletsReady, wallets } = useWallets()
@@ -19,25 +29,114 @@ export function useWalletSignMessage() {
       if (context) {
         console.log('🔗 Farcaster Mini App context detected, using Farcaster wallet for signing')
 
-        const ethProvider = await sdk.wallet.getEthereumProvider()
-        if (ethProvider) {
-          // Get the current account from Farcaster
-          const accounts = await ethProvider.request({ method: 'eth_accounts' }) as string[]
-          if (accounts && accounts.length > 0) {
-            const address = options?.address || accounts[0]
-            console.log('🔗 Signing with Farcaster wallet:', address)
+        // For Farcaster Mini App, we need to use a different approach
+        // The Ethereum provider might not support message signing directly
+        // Let's try to use the Farcaster SDK's built-in signing capabilities
 
-            const signature = await ethProvider.request({
-              method: 'personal_sign',
-              params: [message, address]
-            }) as string
-
-            return signature
-          } else {
-            throw new Error('No Farcaster wallet connected. Please connect your wallet first.')
+        try {
+          // Check SDK capabilities first
+          try {
+            const capabilities = await sdk.getCapabilities()
+            console.log('🔗 Farcaster SDK capabilities:', capabilities)
+          } catch (capabilitiesError) {
+            console.log('⚠️ Could not get Farcaster SDK capabilities:', capabilitiesError)
           }
-        } else {
-          throw new Error('Farcaster Ethereum provider not available')
+        // First, try to get the Ethereum provider and check if it supports signing
+          const ethProvider = await sdk.wallet.getEthereumProvider()
+          if (ethProvider) {
+            // Get the current account from Farcaster
+            const accounts = await ethProvider.request({ method: 'eth_accounts' }) as string[]
+            if (accounts && accounts.length > 0) {
+              const address = options?.address || accounts[0]
+              console.log('🔗 Signing with Farcaster wallet:', address)
+
+              // Check if the provider supports the methods we need
+              const supportedMethods = await ethProvider.request({ method: 'eth_chainId' })
+              console.log('🔗 Farcaster provider chain ID:', supportedMethods)
+
+              // Try different signing approaches
+              try {
+                // Method 1: Try personal_sign with proper error handling
+                console.log('🔗 Attempting personal_sign method')
+                const signature = await ethProvider.request({
+                  method: 'personal_sign',
+                  params: [message, address]
+                }) as string
+
+                console.log('✅ personal_sign successful')
+                return signature
+              } catch (personalSignError: any) {
+                console.log('⚠️ personal_sign failed:', personalSignError?.message || personalSignError)
+
+                // Method 2: Try eth_sign with address first
+                try {
+                  console.log('🔗 Attempting eth_sign method (address first)')
+                  const signature = await ethProvider.request({
+                    method: 'eth_sign',
+                    params: [address, message]
+                  }) as string
+
+                  console.log('✅ eth_sign successful')
+                  return signature
+                } catch (ethSignError: any) {
+                  console.log('⚠️ eth_sign failed:', ethSignError?.message || ethSignError)
+
+                  // Method 3: Try eth_sign with message first
+                  try {
+                    console.log('🔗 Attempting eth_sign method (message first)')
+                    const signature = await ethProvider.request({
+                      method: 'eth_sign',
+                      params: [message, address]
+                    }) as string
+
+                    console.log('✅ eth_sign with reversed parameters successful')
+                    return signature
+                  } catch (ethSignError2: any) {
+                    console.log('⚠️ eth_sign with reversed parameters failed:', ethSignError2?.message || ethSignError2)
+
+                    // Method 4: Try with hex encoding
+                    try {
+                      console.log('🔗 Attempting personal_sign with hex encoding')
+                      const hexMessage = '0x' + Buffer.from(message, 'utf8').toString('hex')
+                      const signature = await ethProvider.request({
+                        method: 'personal_sign',
+                        params: [hexMessage, address]
+                      }) as string
+
+                      console.log('✅ personal_sign with hex encoding successful')
+                      return signature
+                    } catch (hexError: any) {
+                      console.log('⚠️ personal_sign with hex encoding failed:', hexError?.message || hexError)
+
+                      // If all methods fail, try to provide helpful guidance
+                      console.error('❌ All Farcaster signing methods failed')
+
+                      // Check if we can use Quick Auth as an alternative
+                      try {
+                        console.log('🔗 Attempting to use Farcaster Quick Auth as alternative')
+                        const { token } = await sdk.quickAuth.getToken()
+                        if (token) {
+                          console.log('✅ Quick Auth token available, but cannot be used for message signing')
+                          throw new Error(`Farcaster wallet signing not supported. The Farcaster Mini App SDK's Ethereum provider does not support message signing. Please use an external wallet like MetaMask or Coinbase Wallet, or try again outside of the Mini App context.`)
+                        }
+                      } catch (quickAuthError) {
+                        console.log('⚠️ Quick Auth also not available:', quickAuthError)
+                      }
+
+                      throw new Error(`Farcaster wallet signing not supported. The Farcaster Mini App SDK's Ethereum provider does not support message signing. Please use an external wallet like MetaMask or Coinbase Wallet, or try again outside of the Mini App context.`)
+                    }
+                  }
+                }
+              }
+            } else {
+              throw new Error('No Farcaster wallet connected. Please connect your wallet first.')
+            }
+          } else {
+            throw new Error('Farcaster Ethereum provider not available')
+          }
+        } catch (farcasterError) {
+          console.error('❌ Farcaster wallet signing failed:', farcasterError)
+          throw new Error(`Farcaster wallet signing failed: ${farcasterError instanceof Error ? farcasterError.message : 'Unknown error'}`)
         }
       }
 
