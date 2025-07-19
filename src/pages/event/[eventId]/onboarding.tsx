@@ -20,7 +20,10 @@ import {
   ModalBody,
   Flex,
 } from '@chakra-ui/react'
-import { useWalletAccount, useWalletSendTransaction, useWalletSignMessage, useWalletModal } from 'hooks/useWallet'
+import { useWalletAccount } from 'hooks/wallet/useWalletAccount'
+import { useWalletTransaction } from 'hooks/wallet/useWalletTransaction'
+import { useWalletSignMessage } from 'hooks/wallet/useWalletSignMessage'
+import { useWalletModal } from 'hooks/wallet/useWalletModal'
 import { PROJECT_WALLET_TYPE } from 'config'
 import { useAppKit } from '@reown/appkit/react'
 import { useTranslation } from 'react-i18next'
@@ -43,13 +46,13 @@ import { wagmiAdapter } from 'context'
 export default function Onboarding({ event }: { event: Event }) {
   const { t } = useTranslation()
   const { address, isConnected, chainId } = useWalletAccount()
-  const { sendTransaction } = useWalletSendTransaction()
+  const { sendTransaction } = useWalletTransaction()
   const { signMessageAsync } = useWalletSignMessage()
   const { open: openPrivyModal } = useWalletModal()
-  
+
   // AppKit hook for WalletConnect
   const { open: openAppKit } = useAppKit()
-  
+
   const router = useRouter()
   const { eventId } = router.query
   const [profile, setProfile] = useLocalStorage<Profile | null>(`profile-${eventId}`, null)

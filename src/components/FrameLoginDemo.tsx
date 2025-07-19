@@ -68,7 +68,16 @@ export default function FrameLoginDemo() {
   }
 
   return (
-    <Box w="360px" mx="auto" py={4} px={2} display="flex" flexDirection="column" justifyContent="center" minH="100vh">
+    <Box
+      w="360px"
+      mx="auto"
+      py={4}
+      px={2}
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      minH="100vh"
+    >
       <VStack spacing={4} align="stretch">
         <Text fontSize="2xl" fontWeight="bold" textAlign="start">
           Frame Login Demo
@@ -84,12 +93,21 @@ export default function FrameLoginDemo() {
             size="sm"
             leftIcon={<Text fontSize="xs">{isFrameContextOpen ? '▼' : '▶'}</Text>}
           >
-            <Text fontSize="lg" fontWeight="bold">Frame Context</Text>
+            <Text fontSize="lg" fontWeight="bold">
+              Frame Context
+            </Text>
           </Button>
 
           {isFrameContextOpen && (
             <Box p={4} mt={2} bg="gray.100" borderRadius="lg">
-              <Text fontSize="xs" fontFamily="mono" whiteSpace="pre-wrap" wordBreak="break-word" maxW="260px" overflowX="auto">
+              <Text
+                fontSize="xs"
+                fontFamily="mono"
+                whiteSpace="pre-wrap"
+                wordBreak="break-word"
+                maxW="260px"
+                overflowX="auto"
+              >
                 {JSON.stringify(context, null, 2)}
               </Text>
             </Box>
@@ -104,12 +122,21 @@ export default function FrameLoginDemo() {
             size="sm"
             leftIcon={<Text fontSize="xs">{isPrivyUserObjectOpen ? '▼' : '▶'}</Text>}
           >
-            <Text fontSize="lg" fontWeight="bold">Privy User</Text>
+            <Text fontSize="lg" fontWeight="bold">
+              Privy User
+            </Text>
           </Button>
 
           {isPrivyUserObjectOpen && (
             <Box p={4} mt={2} bg="gray.100" borderRadius="lg">
-              <Text fontSize="xs" fontFamily="mono" whiteSpace="pre-wrap" wordBreak="break-word" maxW="260px" overflowX="auto">
+              <Text
+                fontSize="xs"
+                fontFamily="mono"
+                whiteSpace="pre-wrap"
+                wordBreak="break-word"
+                maxW="260px"
+                overflowX="auto"
+              >
                 {JSON.stringify(user, null, 2)}
               </Text>
             </Box>
@@ -118,7 +145,9 @@ export default function FrameLoginDemo() {
 
         {/* Status Information */}
         <VStack spacing={2} align="stretch">
-          <Text fontSize="lg" fontWeight="bold">Status</Text>
+          <Text fontSize="lg" fontWeight="bold">
+            Status
+          </Text>
           <HStack justify="space-between">
             <Text>Frame Context:</Text>
             <Text color={isFrameContext ? 'green.500' : 'red.500'}>
@@ -133,9 +162,7 @@ export default function FrameLoginDemo() {
           </HStack>
           <HStack justify="space-between">
             <Text>Ready:</Text>
-            <Text color={ready ? 'green.500' : 'red.500'}>
-              {ready ? '✅ Yes' : '❌ No'}
-            </Text>
+            <Text color={ready ? 'green.500' : 'red.500'}>{ready ? '✅ Yes' : '❌ No'}</Text>
           </HStack>
         </VStack>
 
@@ -143,7 +170,7 @@ export default function FrameLoginDemo() {
         {error && (
           <Alert status="error">
             <AlertIcon />
-            <Text fontSize="sm">{error}</Text>
+            <Text fontSize="sm">{error.message}</Text>
           </Alert>
         )}
 
@@ -177,10 +204,14 @@ export default function FrameLoginDemo() {
         {/* User Info */}
         {authenticated && user && (
           <Box p={4} bg="blue.50" borderRadius="lg">
-            <Text fontSize="sm" fontWeight="bold" mb={2}>User Info:</Text>
+            <Text fontSize="sm" fontWeight="bold" mb={2}>
+              User Info:
+            </Text>
             <Text fontSize="xs">ID: {user.id}</Text>
             <Text fontSize="xs">Email: {user.email?.address || 'No email'}</Text>
-            <Text fontSize="xs">Wallets: {user.linkedAccounts.filter(acc => acc.type === 'wallet').length}</Text>
+            <Text fontSize="xs">
+              Wallets: {user.linkedAccounts.filter((acc) => acc.type === 'wallet').length}
+            </Text>
           </Box>
         )}
       </VStack>

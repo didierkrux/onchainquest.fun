@@ -24,6 +24,7 @@ export function useFrameLogin() {
   const [isFrameContext, setIsFrameContext] = useState(false)
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [error, setError] = useState<HookError | null>(null)
+  const [hasAttemptedAutoLogin, setHasAttemptedAutoLogin] = useState(false)
 
   // Check if we're in a Frame context
   useEffect(() => {
@@ -44,9 +45,11 @@ export function useFrameLogin() {
     checkFrameContext()
   }, [])
 
-  // Auto-login to Frame when ready and not authenticated
+  // Auto-login to Frame when ready and not authenticated (only on first page load)
   useEffect(() => {
-    if (ready && !authenticated && isFrameContext) {
+    if (ready && !authenticated && isFrameContext && !hasAttemptedAutoLogin) {
+      setHasAttemptedAutoLogin(true)
+
       const performAutoLogin = async () => {
         try {
           setIsLoggingIn(true)
@@ -90,7 +93,7 @@ export function useFrameLogin() {
 
       performAutoLogin()
     }
-  }, [ready, authenticated, isFrameContext, initLoginToFrame, loginToFrame])
+  }, [ready, authenticated, isFrameContext, hasAttemptedAutoLogin, initLoginToFrame, loginToFrame])
 
   // Manual login function
   const loginToFrameManually = useCallback(async () => {

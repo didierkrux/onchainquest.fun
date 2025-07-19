@@ -28,6 +28,7 @@ export default function FrameLoginProvider({ children }: FrameLoginProviderProps
   const [isFrameContext, setIsFrameContext] = useState(false)
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hasAttemptedAutoLogin, setHasAttemptedAutoLogin] = useState(false)
 
   // Check if we're in a Frame context
   useEffect(() => {
@@ -47,35 +48,37 @@ export default function FrameLoginProvider({ children }: FrameLoginProviderProps
     checkFrameContext()
   }, [])
 
-  // Auto-login to Frame when ready and not authenticated
+  // Auto-login to Frame when ready and not authenticated (only on first page load)
   useEffect(() => {
-    if (ready && !authenticated && isFrameContext) {
+    if (ready && !authenticated && isFrameContext && !hasAttemptedAutoLogin) {
+      setHasAttemptedAutoLogin(true)
+
       const performAutoLogin = async () => {
         try {
           setIsLoggingIn(true)
           setError(null)
-          
+
           const sdk = await loadFrameSDK()
           if (!sdk) {
             throw new Error('Frame SDK not available')
           }
 
           console.log('🔄 Starting automatic Frame login...')
-          
+
           // Initialize login to frame
           const { nonce } = await initLoginToFrame()
           console.log('✅ Nonce generated for Frame login')
-          
+
           // Sign in with Frame SDK
           const result = await sdk.actions.signIn({ nonce })
           console.log('✅ Frame sign-in completed')
-          
+
           // Complete login with Privy
           await loginToFrame({
             message: result.message,
             signature: result.signature,
           })
-          
+
           console.log('✅ Frame login completed successfully')
         } catch (err) {
           console.error('❌ Frame login failed:', err)
@@ -87,7 +90,7 @@ export default function FrameLoginProvider({ children }: FrameLoginProviderProps
 
       performAutoLogin()
     }
-  }, [ready, authenticated, isFrameContext, initLoginToFrame, loginToFrame])
+  }, [ready, authenticated, isFrameContext, hasAttemptedAutoLogin, initLoginToFrame, loginToFrame])
 
   // Create embedded wallet for authenticated users without wallets
   useEffect(() => {
@@ -96,8 +99,7 @@ export default function FrameLoginProvider({ children }: FrameLoginProviderProps
       ready &&
       user &&
       user.linkedAccounts.filter(
-        (account) =>
-          account.type === 'wallet' && account.walletClientType === 'privy',
+        (account) => account.type === 'wallet' && account.walletClientType === 'privy'
       ).length === 0
     ) {
       console.log('🔧 Creating embedded wallet for user...')
