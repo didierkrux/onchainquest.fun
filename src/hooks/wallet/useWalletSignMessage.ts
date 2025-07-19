@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { sdk } from '@farcaster/miniapp-sdk'
 import { isPrivyProvider, createWalletError, type HookError } from 'utils/wallet'
 
 export function useWalletSignMessage() {
@@ -9,22 +10,50 @@ export function useWalletSignMessage() {
   const [error, setError] = useState<HookError | null>(null)
 
   const signMessageAsync = async (message: string) => {
-    if (!isPrivyProvider()) {
-      throw new Error('WalletConnect signMessage not implemented in this version')
-    }
-
-    if (!privy.ready) {
-      throw new Error('Privy not ready')
-    }
-
-    if (!privy.authenticated) {
-      throw new Error('User not authenticated. Please connect your wallet first.')
-    }
-
     setIsPending(true)
     setError(null)
 
     try {
+      // Check if we're in a Farcaster Mini App context first
+      const context = await sdk.context
+      if (context) {
+        console.log('🔗 Farcaster Mini App context detected, using Farcaster wallet for signing')
+
+        const ethProvider = await sdk.wallet.getEthereumProvider()
+        if (ethProvider) {
+          // Get the current account from Farcaster
+          const accounts = await ethProvider.request({ method: 'eth_accounts' }) as string[]
+          if (accounts && accounts.length > 0) {
+            const address = accounts[0]
+            console.log('🔗 Signing with Farcaster wallet:', address)
+
+            const signature = await ethProvider.request({
+              method: 'personal_sign',
+              params: [message, address]
+            })
+
+            return signature
+          } else {
+            throw new Error('No Farcaster wallet connected. Please connect your wallet first.')
+          }
+        } else {
+          throw new Error('Farcaster Ethereum provider not available')
+        }
+      }
+
+    // Fall back to Privy for non-Farcaster contexts
+      if (!isPrivyProvider()) {
+        throw new Error('WalletConnect signMessage not implemented in this version')
+      }
+
+      if (!privy.ready) {
+        throw new Error('Privy not ready')
+      }
+
+      if (!privy.authenticated) {
+        throw new Error('User not authenticated. Please connect your wallet first.')
+      }
+
       // Wait for wallets to be ready
       if (!walletsReady) {
         await new Promise(resolve => setTimeout(resolve, 2000))
