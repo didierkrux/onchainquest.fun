@@ -91,6 +91,25 @@ export default function Web3ModalProvider({
           appearance: {
             theme: 'light',
             accentColor: '#C06FDB',
+            // Configure wallet options to ensure external wallets are properly detected
+            walletList: [
+              'detected_ethereum_wallets',
+              'metamask',
+              'coinbase_wallet',
+              'rainbow',
+              'wallet_connect',
+              'zerion',
+              'uniswap',
+              'phantom',
+              'cryptocom',
+              'okx_wallet',
+              'rabby_wallet',
+              'bybit_wallet',
+              'ronin_wallet',
+              'haha_wallet',
+              'safe',
+              'binance',
+            ],
           },
           supportedChains: [base],
           // Create embedded wallets for users who don't have a wallet

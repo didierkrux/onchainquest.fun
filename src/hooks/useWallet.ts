@@ -1,4 +1,4 @@
-import { usePrivy, useSignMessage } from '@privy-io/react-auth'
+import { usePrivy, useSignMessage, useWallets } from '@privy-io/react-auth'
 import { PROJECT_WALLET_TYPE } from 'config'
 
 // Simple wallet hooks that work with Privy
@@ -109,10 +109,22 @@ export function useWalletSendTransaction() {
 
 export function useWalletSignMessage() {
   const privy = usePrivy()
+  const { ready: walletsReady, wallets } = useWallets()
+
+  // Debug wallets hook
+  console.log('🔍 useWalletSignMessage - wallets hook state:', {
+    walletsReady: walletsReady,
+    walletsLength: wallets.length,
+    wallets: wallets,
+    privyReady: privy.ready,
+    privyAuthenticated: privy.authenticated
+  })
   
   if (PROJECT_WALLET_TYPE === 'privy') {
     return {
       signMessageAsync: async (message: string) => {
+        console.log('🔍 signMessageAsync function called with message:', message)
+        
         if (!privy.ready) {
           throw new Error('Privy not ready')
         }
@@ -123,9 +135,17 @@ export function useWalletSignMessage() {
           authenticated: privy.authenticated,
           hasUser: !!privy.user,
           hasWallet: !!privy.user?.wallet,
-          walletAddress: privy.user?.wallet?.address
+          walletAddress: privy.user?.wallet?.address,
+          connectedWallets: wallets.length
         })
         
+        // Wait for wallets to be ready
+        if (!walletsReady) {
+          console.log('🔍 Wallets not ready yet, waiting...')
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          console.log('🔍 After waiting - wallets ready:', walletsReady, 'wallets.length:', wallets.length)
+        }
+
         // If user is authenticated but no wallet, try to create embedded wallet
         if (privy.authenticated && !privy.user?.wallet) {
           console.log('🔍 User authenticated but no wallet - attempting to create embedded wallet')
@@ -160,9 +180,42 @@ export function useWalletSignMessage() {
         console.log('🔍 Attempting to sign message with wallet:', privy.user.wallet.address)
         
         try {
-          // Use Privy's signMessage method directly
+          // Check if we have connected wallets (external EOAs)
+          console.log('🔍 Wallet detection - wallets array:', wallets)
+          console.log('🔍 Wallet detection - wallets.length:', wallets.length)
+          console.log('🔍 Wallet detection - privy.user?.wallet:', privy.user?.wallet)
+
+          // Check if we have connected wallets (external EOAs)
+          if (wallets.length > 0) {
+            console.log('🔍 External wallet detected, using EIP-1193 provider for signing')
+            const wallet = wallets[0] // Use the first connected wallet
+            console.log('🔍 Selected wallet:', wallet)
+
+            // Check if this is an external wallet (not Privy embedded)
+            const isExternalWallet = wallet.walletClientType !== 'privy'
+            console.log('🔍 Wallet client type:', wallet.walletClientType)
+            console.log('🔍 Is external wallet:', isExternalWallet)
+
+            if (isExternalWallet) {
+              const provider = await wallet.getEthereumProvider()
+              const address = wallet.address
+
+              const signature = await provider.request({
+                method: 'personal_sign',
+                params: [message, address],
+              })
+
+              console.log('🔍 Message signed successfully with external wallet:', signature)
+              return signature
+            } else {
+              console.log('🔍 Wallet is embedded, falling back to privy.signMessage')
+            }
+          }
+
+          // Fallback to embedded wallet signing
+          console.log('🔍 Using embedded wallet for signing')
           const signature = await privy.signMessage({ message })
-          console.log('🔍 Message signed successfully:', signature)
+          console.log('🔍 Message signed successfully with embedded wallet:', signature)
           return signature
         } catch (error) {
           console.error('🔍 Error signing message:', error)

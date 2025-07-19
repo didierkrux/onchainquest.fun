@@ -13,8 +13,12 @@ import {
   Link,
   Divider,
 } from '@chakra-ui/react'
-import { useWalletAccount, useWalletDisconnect, useWalletBalance } from 'hooks/useWallet'
-import { usePrivy, useSignMessage, useWallets } from '@privy-io/react-auth'
+import {
+  useWalletAccount,
+  useWalletDisconnect,
+  useWalletBalance,
+  useWalletSignMessage,
+} from 'hooks/useWallet'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { useTranslation } from 'react-i18next'
@@ -62,23 +66,7 @@ export default function ProfilePage() {
   const [isResetting, setIsResetting] = useState(false)
   const toast = useToast()
   const [adminSignature, setAdminSignature] = useLocalStorage('admin-signature', '')
-  const privy = usePrivy()
-  const { wallets } = useWallets()
-  const { signMessage } = useSignMessage({
-    onSuccess: ({ signature }) => {
-      handleSignatureSuccess(signature)
-    },
-    onError: (error) => {
-      toast({
-        title: t('Error'),
-        description: `Failed to sign message: ${error}`,
-        status: 'error',
-        duration: 10000,
-        isClosable: true,
-        position: isMobile ? 'top' : 'bottom-right',
-      })
-    },
-  })
+  const { signMessageAsync } = useWalletSignMessage()
 
   const [isSyncing, setIsSyncing] = useState(false)
   const { onCopy, hasCopied } = useClipboard(profile?.address || '')
@@ -328,57 +316,20 @@ export default function ProfilePage() {
     try {
       if (!address) return
 
-      // Check if we're on the client side
-      if (typeof window === 'undefined') {
-        throw new Error('Cannot sign message on server side')
-      }
+      console.log('🔍 handleAdminSignature called')
 
-      if (!privy.ready) {
-        throw new Error('Privy not ready')
-      }
+      // Get signature using signMessageAsync
+      const signatureResult = await signMessageAsync(adminSignatureMessage)
+      // Handle both string and object signatures
+      const signature =
+        typeof signatureResult === 'string' ? signatureResult : signatureResult.signature
 
-      // If user is authenticated but no wallet, try to create embedded wallet
-      if (privy.authenticated && !privy.user?.wallet) {
-        try {
-          await privy.createWallet()
-          // Wait for wallet to be fully initialized
-          await new Promise((resolve) => setTimeout(resolve, 1000))
-        } catch (error) {
-          console.error('Failed to create embedded wallet:', error)
-          throw new Error('Failed to create embedded wallet. Please try connecting again.')
-        }
-      }
-
-      if (!privy.user?.wallet) {
-        throw new Error('No wallet connected. Please connect your wallet first.')
-      }
-
-      // Check if we have any wallets available
-      if (wallets.length === 0) {
-        await privy.createWallet()
-        // Wait for wallet creation
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-      }
-
-      // Try to use the first available wallet for signing
-      const wallet = wallets[0] || privy.user?.wallet
-      if (!wallet) {
-        throw new Error('No wallet available for signing')
-      }
-
-      // Try to sign directly with the wallet if it has a signMessage method
-      if ('signMessage' in wallet && typeof wallet.signMessage === 'function') {
-        const signature = await wallet.signMessage(adminSignatureMessage)
-        await handleSignatureSuccess(signature)
-      } else {
-        // Use the useSignMessage hook to trigger the signing flow
-        signMessage({ message: adminSignatureMessage })
-      }
+      await handleSignatureSuccess(signature)
     } catch (error) {
-      console.error('Error preparing to sign message:', error)
+      console.error('Error signing message:', error)
       toast({
         title: t('Error'),
-        description: `Failed to prepare signing: ${(error as Error).message}`,
+        description: `Failed to sign message: ${(error as Error).message}`,
         status: 'error',
         duration: 10000,
         isClosable: true,
