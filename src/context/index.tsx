@@ -75,14 +75,7 @@ export default function Web3ModalProvider({
   children: ReactNode
   initialState?: State
 }) {
-  console.log('🔍 Web3ModalProvider Debug:', {
-    PROJECT_WALLET_TYPE,
-    hasPrivyAppId: !!process.env.NEXT_PUBLIC_PRIVY_APP_ID,
-    privyAppId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
-  })
-
   if (PROJECT_WALLET_TYPE === 'privy') {
-    console.log('🔍 Using PrivyProvider')
     return (
       <PrivyProvider
         appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ''}

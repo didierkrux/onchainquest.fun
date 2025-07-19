@@ -9,49 +9,29 @@ export function useWalletAccount() {
   
   // Wait for Privy to be ready
   if (!privy.ready) {
-    console.log('🔍 Privy not ready yet')
     return {
       address: undefined,
       isConnected: false,
       chainId: undefined,
     }
   }
-  
-  console.log('🔍 useWalletAccount Debug:', {
-    PROJECT_WALLET_TYPE,
-    privyReady: privy.ready,
-    privyAuthenticated: privy.authenticated,
-    privyUser: !!privy.user,
-    privyWallet: !!privy.user?.wallet,
-    privyAddress: privy.user?.wallet?.address
-  })
-  
+
   if (PROJECT_WALLET_TYPE === 'privy') {
-    // If user is authenticated but no wallet, try to create embedded wallet
-    if (privy.authenticated && !privy.user?.wallet) {
-      console.log('🔍 User authenticated but no wallet - attempting to create embedded wallet')
-      // Note: We can't call createWallet here as it's a hook, but we can log the state
-      // The actual wallet creation will happen in signMessageAsync or other async operations
-    }
-    
     const result = {
       address: privy.user?.wallet?.address as `0x${string}` | undefined,
       isConnected: privy.authenticated,
       chainId: 1, // Default to mainnet, Privy handles chain switching internally
     }
-    console.log('🔍 useWalletAccount Privy result:', result)
     return result
   }
 
   // For WalletConnect, return default values
   // You should use useAccount from wagmi directly in WalletConnect mode
-  const result = {
+  return {
     address: undefined,
     isConnected: false,
     chainId: undefined,
   }
-  console.log('🔍 useWalletAccount WalletConnect result:', result)
-  return result
 }
 
 export function useWalletBalance(address?: `0x${string}`) {
@@ -109,61 +89,49 @@ export function useWalletSendTransaction() {
 
 export function useWalletSignMessage() {
   const privy = usePrivy()
-  const { ready: walletsReady, wallets } = useWallets()
+  const walletsHook = useWallets()
+  const { ready: walletsReady, wallets } = walletsHook
 
-  // Debug wallets hook
-  console.log('🔍 useWalletSignMessage - wallets hook state:', {
-    walletsReady: walletsReady,
-    walletsLength: wallets.length,
+  // Debug all useWallets information
+  console.log('🔍 useWallets complete debug:', {
+    walletsHook,
+    ready: walletsReady,
     wallets: wallets,
-    privyReady: privy.ready,
-    privyAuthenticated: privy.authenticated
+    walletsLength: wallets.length,
+    walletsDetails: wallets.map(wallet => ({
+      address: wallet.address,
+      walletClientType: wallet.walletClientType,
+      connectedAt: wallet.connectedAt,
+      chainId: wallet.chainId,
+      // Try to get more properties if they exist
+      hasGetEthereumProvider: typeof wallet.getEthereumProvider === 'function',
+    }))
   })
   
   if (PROJECT_WALLET_TYPE === 'privy') {
     return {
       signMessageAsync: async (message: string) => {
-        console.log('🔍 signMessageAsync function called with message:', message)
-        
         if (!privy.ready) {
           throw new Error('Privy not ready')
         }
         
-        console.log('🔍 signMessageAsync called with message:', message)
-        console.log('🔍 Current Privy state:', {
-          ready: privy.ready,
-          authenticated: privy.authenticated,
-          hasUser: !!privy.user,
-          hasWallet: !!privy.user?.wallet,
-          walletAddress: privy.user?.wallet?.address,
-          connectedWallets: wallets.length
-        })
+        if (!privy.authenticated) {
+          throw new Error('User not authenticated. Please connect your wallet first.')
+        }
         
         // Wait for wallets to be ready
         if (!walletsReady) {
-          console.log('🔍 Wallets not ready yet, waiting...')
-          await new Promise(resolve => setTimeout(resolve, 1000))
+          console.log('🔍 Wallets not ready, waiting...')
+          await new Promise(resolve => setTimeout(resolve, 2000))
           console.log('🔍 After waiting - wallets ready:', walletsReady, 'wallets.length:', wallets.length)
         }
 
         // If user is authenticated but no wallet, try to create embedded wallet
         if (privy.authenticated && !privy.user?.wallet) {
-          console.log('🔍 User authenticated but no wallet - attempting to create embedded wallet')
           try {
-            // Try to create an embedded wallet
             await privy.createWallet()
-            console.log('🔍 Embedded wallet created successfully')
-            
-            // Wait a moment for the wallet to be fully initialized
             await new Promise(resolve => setTimeout(resolve, 1000))
-            
-            console.log('🔍 After wallet creation - Privy state:', {
-              hasUser: !!privy.user,
-              hasWallet: !!privy.user?.wallet,
-              walletAddress: privy.user?.wallet?.address
-            })
           } catch (error) {
-            console.error('🔍 Failed to create embedded wallet:', error)
             throw new Error('Failed to create embedded wallet. Please try connecting again.')
           }
         }
@@ -171,54 +139,99 @@ export function useWalletSignMessage() {
         if (!privy.user?.wallet) {
           throw new Error('No wallet connected. Please connect your wallet first.')
         }
-        
-        // Double-check wallet is ready for signing
+
         if (!privy.user.wallet.address) {
           throw new Error('Wallet address not available. Please try again.')
         }
-        
-        console.log('🔍 Attempting to sign message with wallet:', privy.user.wallet.address)
-        
+
         try {
-          // Check if we have connected wallets (external EOAs)
-          console.log('🔍 Wallet detection - wallets array:', wallets)
-          console.log('🔍 Wallet detection - wallets.length:', wallets.length)
-          console.log('🔍 Wallet detection - privy.user?.wallet:', privy.user?.wallet)
+                  console.log('🔍 Wallet detection debug:', {
+                    walletsLength: wallets.length,
+                    wallets: wallets,
+                    walletsReady,
+                    privyUserAddress: privy.user?.wallet?.address,
+                    privyAuthenticated: privy.authenticated
+                  })
 
-          // Check if we have connected wallets (external EOAs)
+                  // Check if we have connected external wallets
           if (wallets.length > 0) {
-            console.log('🔍 External wallet detected, using EIP-1193 provider for signing')
-            const wallet = wallets[0] // Use the first connected wallet
-            console.log('🔍 Selected wallet:', wallet)
+            // Find the wallet that matches the current user's address
+            const currentUserAddress = privy.user?.wallet?.address
+            const matchingWallet = wallets.find(wallet =>
+              wallet.address.toLowerCase() === currentUserAddress?.toLowerCase()
+            )
 
-            // Check if this is an external wallet (not Privy embedded)
-            const isExternalWallet = wallet.walletClientType !== 'privy'
-            console.log('🔍 Wallet client type:', wallet.walletClientType)
-            console.log('🔍 Is external wallet:', isExternalWallet)
+            console.log('🔍 Wallet matching debug:', {
+              currentUserAddress,
+              matchingWallet: matchingWallet ? {
+                walletClientType: matchingWallet.walletClientType,
+                address: matchingWallet.address,
+                meta: matchingWallet.meta
+              } : null,
+              allWallets: wallets.map(w => ({ type: w.walletClientType, address: w.address }))
+            })
 
-            if (isExternalWallet) {
-              const provider = await wallet.getEthereumProvider()
-              const address = wallet.address
+            if (matchingWallet) {
+              // Check if this is an external wallet (not Privy embedded)
+              if (matchingWallet.walletClientType !== 'privy') {
+                console.log('🔍 External wallet found for current user:', {
+                  walletClientType: matchingWallet.walletClientType,
+                  address: matchingWallet.address,
+                  meta: matchingWallet.meta
+                })
 
-              const signature = await provider.request({
-                method: 'personal_sign',
-                params: [message, address],
-              })
+                // Follow the exact Privy documentation pattern
+                const provider = await matchingWallet.getEthereumProvider()
+                const address = matchingWallet.address
 
-              console.log('🔍 Message signed successfully with external wallet:', signature)
-              return signature
-            } else {
-              console.log('🔍 Wallet is embedded, falling back to privy.signMessage')
-            }
+                console.log('🔍 External wallet signing debug:', {
+                  walletClientType: matchingWallet.walletClientType,
+                  walletAddress: address,
+                  message,
+                  messageLength: message.length
+                })
+
+                // Use the exact pattern from Privy docs
+                const signature = await provider.request({
+                  method: 'personal_sign',
+                  params: [message, address]
+                })
+
+                console.log('🔍 External wallet signature result:', signature)
+                return signature
+              } else {
+                console.log('🔍 Current user has embedded wallet, using embedded signing')
+              }
+                    } else {
+                      console.log('🔍 No matching wallet found for current user address')
+                    }
+                  }
+
+                  // If no external wallets detected but user has a wallet, try to check if it's external
+                  if (privy.user?.wallet?.address && wallets.length === 0) {
+                    console.log('🔍 No wallets in array but user has wallet - checking if external')
+
+                    // Check if the current wallet address matches any known external wallet patterns
+                    // This is a fallback for when Privy doesn't immediately detect external wallets
+                    const currentAddress = privy.user.wallet.address.toLowerCase()
+
+                    // If the user has a wallet but it's not in the wallets array, 
+                    // it might be an external wallet that Privy hasn't detected yet
+                    // In this case, we'll use the embedded wallet signing as fallback
+                    console.log('🔍 Using embedded wallet as fallback for external wallet')
           }
 
           // Fallback to embedded wallet signing
-          console.log('🔍 Using embedded wallet for signing')
+                  console.log('🔍 Embedded wallet signing debug:', {
+                    privyUserAddress: privy.user?.wallet?.address,
+                    message,
+                    messageLength: message.length
+                  })
+
           const signature = await privy.signMessage({ message })
-          console.log('🔍 Message signed successfully with embedded wallet:', signature)
+                  console.log('🔍 Embedded wallet signature result:', signature)
           return signature
-        } catch (error) {
-          console.error('🔍 Error signing message:', error)
+                } catch (error) {
           throw new Error(`Failed to sign message: ${error.message}`)
         }
       },
@@ -244,11 +257,7 @@ export function useWalletDisconnect() {
   if (PROJECT_WALLET_TYPE === 'privy') {
     return {
       disconnect: () => {
-        if (!privy.ready) {
-          console.log('🔍 Privy not ready, cannot disconnect')
-          return
-        }
-        console.log('🔍 Disconnecting from Privy')
+        if (!privy.ready) return
         privy.logout()
       },
     }
@@ -301,27 +310,14 @@ export function useWalletModal() {
   if (PROJECT_WALLET_TYPE === 'privy') {
     return {
       open: () => {
-        if (!privy.ready) {
-          console.log('🔍 Privy not ready, cannot open modal')
-          return
-        }
-        
-        console.log('🔍 Privy modal open called, user state:', {
-          ready: privy.ready,
-          authenticated: privy.authenticated,
-          hasWallet: !!privy.user?.wallet
-        })
+        if (!privy.ready) return
         
         // If user is authenticated but no wallet, try to force wallet connection
         if (privy.authenticated && !privy.user?.wallet) {
-          console.log('🔍 User authenticated but no wallet - trying to force wallet connection')
-          // Try to logout and re-login to force wallet connection
           privy.logout().then(() => {
-            console.log('🔍 Logged out, now opening login with wallet requirement')
             privy.login()
           })
         } else {
-          console.log('🔍 Opening standard Privy login')
           privy.login()
         }
       },

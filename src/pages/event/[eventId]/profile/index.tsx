@@ -173,11 +173,21 @@ export default function ProfilePage() {
     try {
       if (!address) return
 
+      console.log('🔍 Signature verification debug:', {
+        address,
+        message: adminSignatureMessage,
+        signature,
+        signatureLength: signature.length,
+        signatureStartsWith0x: signature.startsWith('0x'),
+      })
+
       const isValid = await verifyMessage({
         address,
         message: adminSignatureMessage,
         signature: signature as `0x${string}`,
       })
+
+      console.log('🔍 Signature verification result:', isValid)
 
       if (isValid) {
         setAdminSignature(signature)
@@ -186,6 +196,15 @@ export default function ProfilePage() {
           description: t('Signature verified successfully'),
           status: 'success',
           duration: 5000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+      } else {
+        toast({
+          title: t('Error'),
+          description: 'Signature verification failed',
+          status: 'error',
+          duration: 10000,
           isClosable: true,
           position: isMobile ? 'top' : 'bottom-right',
         })
@@ -315,8 +334,6 @@ export default function ProfilePage() {
   const handleAdminSignature = async () => {
     try {
       if (!address) return
-
-      console.log('🔍 handleAdminSignature called')
 
       // Get signature using signMessageAsync
       const signatureResult = await signMessageAsync(adminSignatureMessage)
