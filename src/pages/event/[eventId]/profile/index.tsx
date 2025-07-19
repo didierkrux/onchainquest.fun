@@ -18,7 +18,8 @@ import {
   useWalletDisconnect,
   useWalletBalance,
   useWalletSignMessage,
-} from 'hooks/useWallet'
+} from 'hooks/wallet'
+import { useFundWallet } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { useTranslation } from 'react-i18next'
@@ -79,6 +80,8 @@ export default function ProfilePage() {
   const [ticketCodeInput, setTicketCodeInput] = useState('')
   const [isProcessingTicket, setIsProcessingTicket] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
+  const { fundWallet } = useFundWallet()
+  const [isFunding, setIsFunding] = useState(false)
 
   const saveProfile = () => {
     if (!eventId) return
@@ -241,14 +244,13 @@ export default function ProfilePage() {
   useEffect(() => {
     if (balanceData) {
       const ethValue = Number(balanceData?.value.toString()) / 10 ** 18
-      fetch(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd`)
-        .then((res) => {
+      const fetchUsdValue = async () => {
+        try {
+          const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd`)
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`)
           }
-          return res.json()
-        })
-        .then((data) => {
+          const data = await res.json()
           if (data && data.ethereum && data.ethereum.usd) {
             const ethToUsd = data.ethereum.usd
             setUsdValue(ethValue * ethToUsd)
@@ -256,11 +258,19 @@ export default function ProfilePage() {
             console.warn('Invalid data format from CoinGecko API')
             setUsdValue(null)
           }
-        })
-        .catch((error) => {
-          console.error('Error fetching USD value:', error)
+        } catch (error) {
+          if (
+            error instanceof Error &&
+            error.message.includes('429')
+          ) {
+            console.error('CoinGecko API rate limit exceeded (429 Too Many Requests). Please try again later.')
+          } else {
+            console.error('Error fetching USD value:', error)
+          }
           setUsdValue(null)
-        })
+        }
+      }
+      fetchUsdValue()
     }
   }, [balanceData])
 
@@ -633,6 +643,35 @@ export default function ProfilePage() {
     }
   }
 
+  const handleFundWallet = async () => {
+    if (!address) return
+
+    setIsFunding(true)
+    try {
+      await fundWallet(address)
+      toast({
+        title: t('Success'),
+        description: t('Wallet funding initiated successfully'),
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    } catch (error) {
+      console.error('Error funding wallet:', error)
+      toast({
+        title: t('Error'),
+        description: (error as Error).message || t('Failed to fund wallet'),
+        status: 'error',
+        duration: 10000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    } finally {
+      setIsFunding(false)
+    }
+  }
+
   // Show loading state while Privy is initializing
   if (!address && isConnected === undefined) {
     console.log('🔍 Privy still initializing, showing loading state')
@@ -760,6 +799,25 @@ export default function ProfilePage() {
                         {(Number(balanceData?.value.toString()) / 10 ** 18).toFixed(8)}{' '}
                         {t('ETH on Base')} {usdValue && `(~$${usdValue.toFixed(2)} USD)`}
                       </Text>
+                    </Box>
+                  )}
+
+                  {/* Fund Wallet Section */}
+                  {address && (
+                    <Box display="flex" flexDirection="column" gap={2} alignItems="center" mt={4}>
+                      <Text fontSize="sm" color="gray.600" textAlign="center">
+                        {t('Need funds for transactions?')}
+                      </Text>
+                      <Button
+                        size="sm"
+                        colorScheme="blue"
+                        onClick={handleFundWallet}
+                        isLoading={isFunding}
+                        loadingText={t('Funding...')}
+                        leftIcon={<ArrowsClockwise />}
+                      >
+                        {t('Fund My Wallet')}
+                      </Button>
                     </Box>
                   )}
                 </CardBody>

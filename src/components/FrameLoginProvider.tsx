@@ -93,19 +93,19 @@ export default function FrameLoginProvider({ children }: FrameLoginProviderProps
   }, [ready, authenticated, isFrameContext, hasAttemptedAutoLogin, initLoginToFrame, loginToFrame])
 
   // Create embedded wallet for authenticated users without wallets
-  useEffect(() => {
-    if (
-      authenticated &&
-      ready &&
-      user &&
-      user.linkedAccounts.filter(
-        (account) => account.type === 'wallet' && account.walletClientType === 'privy'
-      ).length === 0
-    ) {
-      console.log('🔧 Creating embedded wallet for user...')
-      createWallet()
-    }
-  }, [authenticated, ready, user, createWallet])
+  // useEffect(() => {
+  //   if (
+  //     authenticated &&
+  //     ready &&
+  //     user &&
+  //     user.linkedAccounts.filter(
+  //       (account) => account.type === 'wallet' && account.walletClientType === 'privy'
+  //     ).length === 0
+  //   ) {
+  //     console.log('🔧 Creating embedded wallet for user...')
+  //     createWallet()
+  //   }
+  // }, [authenticated, ready, user, createWallet])
 
   // Show loading state during Frame login
   if (isFrameContext && isLoggingIn) {
