@@ -13,17 +13,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     "miniapp": {
       "version": "1",
       "name": process.env.NEXT_PUBLIC_EVENT_NAME || eventName,
-      "iconUrl": process.env.NEXT_PUBLIC_APP_ICON
-        ? `${process.env.NEXT_PUBLIC_APP_ICON}?v=1`
-        : `${DOMAIN_URL}/app-icon.png`,
+      "iconUrl": `https://newtoweb3.io/app-icon.png`,
       "homeUrl": process.env.NEXT_PUBLIC_HOME_URL || DOMAIN_URL,
-      "imageUrl": process.env.NEXT_PUBLIC_SOCIAL_IMAGE
-        ? `${process.env.NEXT_PUBLIC_SOCIAL_IMAGE}?v=1`
-        : `${DOMAIN_URL}/social.jpg`,
+      "imageUrl": `https://newtoweb3.io/social.jpg`,
       "buttonTitle": "Start Quest",
-      "splashImageUrl": process.env.NEXT_PUBLIC_APP_ICON
-        ? `${process.env.NEXT_PUBLIC_APP_ICON}?v=1`
-        : `${DOMAIN_URL}/app-icon.png`,
+      "splashImageUrl": `https://newtoweb3.io/app-icon.png`,
       "splashBackgroundColor": "#fbf5ee",
       "webhookUrl": process.env.NEXT_PUBLIC_WEBHOOK_URL || `${DOMAIN_URL}/api/webhook`,
       "subtitle": process.env.NEXT_PUBLIC_EVENT_SUBTITLE || "Web3 Event Platform",
@@ -33,15 +27,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       ],
       "primaryCategory": "education",
       "tags": ["web3", "crypto", "defi", "blockchain", "learning", "events", "quests"],
-      "heroImageUrl": process.env.NEXT_PUBLIC_SOCIAL_IMAGE
-        ? `${process.env.NEXT_PUBLIC_SOCIAL_IMAGE}?v=1`
-        : `${DOMAIN_URL}/social.jpg`,
+      "heroImageUrl": `https://newtoweb3.io/social.jpg`,
       "tagline": process.env.NEXT_PUBLIC_EVENT_TAGLINE || "Complete Web3 Quests",
       "ogTitle": process.env.NEXT_PUBLIC_EVENT_NAME || eventName,
       "ogDescription": process.env.NEXT_PUBLIC_EVENT_DESCRIPTION || eventDescription,
-      "ogImageUrl": process.env.NEXT_PUBLIC_SOCIAL_IMAGE
-        ? `${process.env.NEXT_PUBLIC_SOCIAL_IMAGE}?v=1`
-        : `${DOMAIN_URL}/social.jpg`,
+      "ogImageUrl": `https://newtoweb3.io/social.jpg`,
       "noindex": false
     }
   }
