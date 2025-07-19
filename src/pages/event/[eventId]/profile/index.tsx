@@ -20,6 +20,8 @@ import {
   useWalletSignMessage,
 } from 'hooks/wallet'
 import { useFundWallet } from '@privy-io/react-auth'
+import { usePrivy } from '@privy-io/react-auth'
+import { useLinkAccount } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { useTranslation } from 'react-i18next'
@@ -37,6 +39,7 @@ import {
   Trash,
   Ticket,
   QrCode,
+  Key,
 } from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
 
@@ -81,7 +84,11 @@ export default function ProfilePage() {
   const [isProcessingTicket, setIsProcessingTicket] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
   const { fundWallet } = useFundWallet()
+  const { exportWallet } = usePrivy()
+  const { linkPasskey } = useLinkAccount()
   const [isFunding, setIsFunding] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+  const [isLinkingPasskey, setIsLinkingPasskey] = useState(false)
 
   const saveProfile = () => {
     if (!eventId) return
@@ -246,7 +253,9 @@ export default function ProfilePage() {
       const ethValue = Number(balanceData?.value.toString()) / 10 ** 18
       const fetchUsdValue = async () => {
         try {
-          const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd`)
+          const res = await fetch(
+            `https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd`
+          )
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`)
           }
@@ -259,11 +268,10 @@ export default function ProfilePage() {
             setUsdValue(null)
           }
         } catch (error) {
-          if (
-            error instanceof Error &&
-            error.message.includes('429')
-          ) {
-            console.error('CoinGecko API rate limit exceeded (429 Too Many Requests). Please try again later.')
+          if (error instanceof Error && error.message.includes('429')) {
+            console.error(
+              'CoinGecko API rate limit exceeded (429 Too Many Requests). Please try again later.'
+            )
           } else {
             console.error('Error fetching USD value:', error)
           }
@@ -672,6 +680,65 @@ export default function ProfilePage() {
     }
   }
 
+  const handleExportWallet = async () => {
+    if (!address) return
+
+    setIsExporting(true)
+    try {
+      const exportedWallet = await exportWallet()
+      toast({
+        title: t('Success'),
+        description: t('Wallet exported successfully'),
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+      console.log('Exported wallet:', exportedWallet)
+    } catch (error) {
+      console.error('Error exporting wallet:', error)
+      toast({
+        title: t('Error'),
+        description: (error as Error).message || t('Failed to export wallet'),
+        status: 'error',
+        duration: 10000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleLinkPasskey = async () => {
+    if (!address) return
+
+    setIsLinkingPasskey(true)
+    try {
+      await linkPasskey()
+      toast({
+        title: t('Success'),
+        description: t('Passkey linked successfully'),
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    } catch (error) {
+      console.error('Error linking passkey:', error)
+      toast({
+        title: t('Error'),
+        description: (error as Error).message || t('Failed to link passkey'),
+        status: 'error',
+        duration: 10000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    } finally {
+      setIsLinkingPasskey(false)
+    }
+  }
+
   // Show loading state while Privy is initializing
   if (!address && isConnected === undefined) {
     console.log('🔍 Privy still initializing, showing loading state')
@@ -817,6 +884,44 @@ export default function ProfilePage() {
                         leftIcon={<ArrowsClockwise />}
                       >
                         {t('Fund My Wallet')}
+                      </Button>
+                    </Box>
+                  )}
+
+                  {/* Export Wallet Section */}
+                  {address && (
+                    <Box display="flex" flexDirection="column" gap={2} alignItems="center" mt={4}>
+                      <Text fontSize="sm" color="gray.600" textAlign="center">
+                        {t('Export your wallet for backup?')}
+                      </Text>
+                      <Button
+                        size="sm"
+                        colorScheme="orange"
+                        onClick={handleExportWallet}
+                        isLoading={isExporting}
+                        loadingText={t('Exporting...')}
+                        leftIcon={<ArrowsLeftRight />}
+                      >
+                        {t('Export Wallet')}
+                      </Button>
+                    </Box>
+                  )}
+
+                  {/* Link Passkey Section */}
+                  {address && (
+                    <Box display="flex" flexDirection="column" gap={2} alignItems="center" mt={4}>
+                      <Text fontSize="sm" color="gray.600" textAlign="center">
+                        {t('Link a passkey for secure access?')}
+                      </Text>
+                      <Button
+                        size="sm"
+                        colorScheme="green"
+                        onClick={handleLinkPasskey}
+                        isLoading={isLinkingPasskey}
+                        loadingText={t('Linking...')}
+                        leftIcon={<Key />}
+                      >
+                        {t('Link Passkey')}
                       </Button>
                     </Box>
                   )}
