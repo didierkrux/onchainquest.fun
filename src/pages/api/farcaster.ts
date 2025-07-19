@@ -14,7 +14,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       "version": "1",
       "name": process.env.NEXT_PUBLIC_EVENT_NAME || eventName,
       "iconUrl": `https://newtoweb3.io/app-icon.png`,
-      "homeUrl": process.env.NEXT_PUBLIC_HOME_URL || DOMAIN_URL,
+      "homeUrl": `https://newtoweb3.io/?pwa=true`,
       "imageUrl": `https://newtoweb3.io/social.jpg`,
       "buttonTitle": "Start Quest",
       "splashImageUrl": `https://newtoweb3.io/app-icon.png`,
