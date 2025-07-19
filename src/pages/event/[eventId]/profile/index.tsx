@@ -33,7 +33,7 @@ import {
   QrCode,
 } from '@phosphor-icons/react'
 import { useRouter } from 'next/router'
-import { DynamicWidget } from '@dynamic-labs/sdk-react-core'
+
 import { QRScanner } from 'components/QRScanner'
 
 import { Profile } from 'entities/profile'
@@ -173,13 +173,24 @@ export default function ProfilePage() {
     if (balanceData) {
       const ethValue = Number(balanceData?.value.toString()) / 10 ** 18
       fetch(`https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd`)
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`)
+          }
+          return res.json()
+        })
         .then((data) => {
-          const ethToUsd = data.ethereum.usd
-          setUsdValue(ethValue * ethToUsd)
+          if (data && data.ethereum && data.ethereum.usd) {
+            const ethToUsd = data.ethereum.usd
+            setUsdValue(ethValue * ethToUsd)
+          } else {
+            console.warn('Invalid data format from CoinGecko API')
+            setUsdValue(null)
+          }
         })
         .catch((error) => {
           console.error('Error fetching USD value:', error)
+          setUsdValue(null)
         })
     }
   }, [balanceData])
@@ -253,16 +264,18 @@ export default function ProfilePage() {
 
   const handleAdminSignature = async () => {
     try {
-      const signature = await signMessageAsync({ message: adminSignatureMessage })
-      if (address) {
-        const isValid = await verifyMessage({
-          address,
-          message: adminSignatureMessage,
-          signature,
-        })
-        if (isValid) {
-          setAdminSignature(signature)
-        }
+      if (!address) return
+      const signature = await signMessageAsync({
+        account: address,
+        message: adminSignatureMessage,
+      })
+      const isValid = await verifyMessage({
+        address,
+        message: adminSignatureMessage,
+        signature,
+      })
+      if (isValid) {
+        setAdminSignature(signature)
       }
     } catch (error) {
       console.error('Error signing message:', error)
@@ -608,17 +621,6 @@ export default function ProfilePage() {
                       </Box>
                     </Box>
                   </Box>
-                  {eventId === '3' ? (
-                    <Box
-                      display="flex"
-                      justifyContent="center"
-                      gap={4}
-                      flexDirection="column"
-                      alignItems="center"
-                    >
-                      <DynamicWidget />
-                    </Box>
-                  ) : null}
                   <Box m={4} display="flex" justifyContent="center">
                     <Avatar src={profileAvatar(profile)} width="40%" />
                     <Image src={qrCodeDataURL} w="40%" h="auto" alt="QR" ml={8} />
@@ -871,7 +873,10 @@ export default function ProfilePage() {
                             w="150px"
                             textAlign="center"
                             onChange={(e) => {
-                              const newValue = e.target.value?.replaceAll(avatarEmoji, '')
+                              const newValue = e.target.value?.replace(
+                                new RegExp(avatarEmoji, 'g'),
+                                ''
+                              )
                               if (newValue !== '') {
                                 handleAvatarChange(newValue)
                               }

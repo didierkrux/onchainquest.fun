@@ -30,7 +30,7 @@ import { Trophy, CheckCircle, Star, Lock, Check, CopySimple } from '@phosphor-ic
 import { useRouter } from 'next/router'
 import { parseEther } from 'viem'
 import { useSignMessage } from 'wagmi'
-import { DynamicWidget } from '@dynamic-labs/sdk-react-core'
+
 import { QRScanner } from 'components/QRScanner'
 import MiniApp from 'components/MiniApp'
 
@@ -887,24 +887,18 @@ export default function Onboarding({ event }: { event: Event }) {
                     </>
                   ) : quest.action === 'connect-wallet' ? (
                     <Box pt="2" display="flex" justifyContent="flex-end" gap={4}>
-                      {eventId === '3' ? (
-                        <Box display="flex" justifyContent="flex-end">
-                          <DynamicWidget />
-                        </Box>
-                      ) : (
-                        <>
-                          <a href="https://link.zerion.io/a11o6IN0jqb" target="_blank">
-                            <Button>{t('Install Wallet')}</Button>
-                          </a>
-                          <Button
-                            onClick={() => {
-                              open({ view: 'Connect' })
-                            }}
-                          >
-                            {t('Connect Wallet')}
-                          </Button>
-                        </>
-                      )}
+                      <>
+                        <a href="https://link.zerion.io/a11o6IN0jqb" target="_blank">
+                          <Button>{t('Install Wallet')}</Button>
+                        </a>
+                        <Button
+                          onClick={() => {
+                            open({ view: 'Connect' })
+                          }}
+                        >
+                          {t('Connect Wallet')}
+                        </Button>
+                      </>
                     </Box>
                   ) : null}
                 </Box>
