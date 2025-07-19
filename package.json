@@ -18,6 +18,7 @@
     "@emotion/styled": "^11.13.0",
     "@ethereum-attestation-service/eas-sdk": "^2.7.0",
     "@farcaster/frame-host": "^0.0.35",
+    "@farcaster/frame-sdk": "^0.1.7",
     "@farcaster/miniapp-sdk": "^0.1.7",
     "@parcnet-js/app-connector": "^1.1.9",
     "@parcnet-js/app-connector-react": "1.0.4",
@@ -35,6 +36,7 @@
     "@twemoji/api": "^15.1.0",
     "@wagmi/core": "^2.17.3",
     "@yudiel/react-qr-scanner": "^2.3.1",
+    "add": "^2.0.6",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.5",
@@ -55,7 +57,8 @@
     "rollup-plugin-node-polyfills": "^0.2.1",
     "usehooks-ts": "^3.1.0",
     "viem": "^2.32.1",
-    "wagmi": "^2.15.7"
+    "wagmi": "^2.15.7",
+    "yarn": "^1.22.22"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

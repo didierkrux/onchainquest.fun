@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import Layout from 'components/Layout'
 import MiniAppSDK from 'components/MiniAppSDK'
+import FrameLoginProvider from 'components/FrameLoginProvider'
 import theme from 'theme'
 import 'utils/translation'
 import NonSSRWrapper from 'components/NonSSRWrapper'
@@ -151,11 +152,13 @@ export default function MyApp({ Component, pageProps }: AppProps) {
                 }
               `}
             />
-            <MiniAppSDK>
-              <Layout>
-                <Component {...pageProps} />
-              </Layout>
-            </MiniAppSDK>
+            <FrameLoginProvider>
+              <MiniAppSDK>
+                <Layout>
+                  <Component {...pageProps} />
+                </Layout>
+              </MiniAppSDK>
+            </FrameLoginProvider>
           </NonSSRWrapper>
         </ChakraProvider>
       </Web3ModalProvider>

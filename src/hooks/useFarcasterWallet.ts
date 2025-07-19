@@ -109,6 +109,14 @@ export function useFarcasterWallet() {
     }
   }, [isConnected, address, state.isMiniApp])
 
+  // Log Frame login integration
+  useEffect(() => {
+    if (state.isMiniApp) {
+      console.log('🔗 Farcaster wallet hook: Mini App context detected')
+      console.log('🔗 Wallet state:', { isConnected: state.isConnected, address: state.address })
+    }
+  }, [state.isMiniApp, state.isConnected, state.address])
+
   const connectWallet = async () => {
     if (state.isMiniApp) {
       try {

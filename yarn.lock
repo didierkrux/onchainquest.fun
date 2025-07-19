@@ -831,6 +831,17 @@
     "@farcaster/frame-core" "0.0.34"
     ox "^0.4.4"
 
+"@farcaster/frame-sdk@^0.1.7":
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/@farcaster/frame-sdk/-/frame-sdk-0.1.7.tgz#85634a86d5cca0ecc23e79e3446978bc08c5afff"
+  integrity sha512-NcHBOn8mERDRDyHfHT8IMwKNOOMI+n/5WpOAYEZGteEDcYp8zRKmZEunmMXVvmHXd9Q7/8aQvwxngQMkSZ7/ww==
+  dependencies:
+    "@farcaster/miniapp-sdk" "0.1.7"
+    "@farcaster/quick-auth" "^0.0.6"
+    comlink "^4.4.2"
+    eventemitter3 "^5.0.1"
+    ox "^0.4.4"
+
 "@farcaster/miniapp-core@0.3.6":
   version "0.3.6"
   resolved "https://registry.yarnpkg.com/@farcaster/miniapp-core/-/miniapp-core-0.3.6.tgz#2f2c460506ef970b151cf95ac18e1384dd10bdd7"
@@ -840,7 +851,7 @@
     ox "^0.4.4"
     zod "^3.25.0"
 
-"@farcaster/miniapp-sdk@^0.1.7":
+"@farcaster/miniapp-sdk@0.1.7", "@farcaster/miniapp-sdk@^0.1.7":
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/@farcaster/miniapp-sdk/-/miniapp-sdk-0.1.7.tgz#9cc667290df57a952ce78242e4d90feb4f85829c"
   integrity sha512-6Ph/mlGCOYLVm1+3ORHW3rIVEceWxvJIHWfHp2NbKAeobna11lAV1zx2fpEXu+HIKJ614fg+UjmlK9JORCRgEw==
@@ -3915,6 +3926,11 @@ acorn@^8.9.0:
   version "8.15.0"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.15.0.tgz#a360898bc415edaac46c8241f6383975b930b816"
   integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
+
+add@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/add/-/add-2.0.6.tgz#248f0a9f6e5a528ef2295dbeec30532130ae2235"
+  integrity sha512-j5QzrmsokwWWp6kUcJQySpbG+xfOBqqKnup3OIk1pz+kB/80SLorZ9V8zHFLO92Lcd+hbvq8bT+zOGoPkmBV0Q==
 
 adm-zip@^0.4.16:
   version "0.4.16"
@@ -10165,6 +10181,11 @@ yargs@^16.2.0:
     string-width "^4.2.0"
     y18n "^5.0.5"
     yargs-parser "^20.2.2"
+
+yarn@^1.22.22:
+  version "1.22.22"
+  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.22.22.tgz#ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+  integrity sha512-prL3kGtyG7o9Z9Sv8IPfBNrWTDmXB4Qbes8A9rEzt6wkJV8mUvoirjU0Mp3GGAU06Y0XQyA3/2/RQFVuK7MTfg==
 
 yocto-queue@^0.1.0:
   version "0.1.0"

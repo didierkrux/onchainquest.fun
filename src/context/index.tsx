@@ -80,7 +80,7 @@ export default function Web3ModalProvider({
       <PrivyProvider
         appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ''}
         config={{
-          loginMethods: ['email', 'wallet'],
+          loginMethods: ['email', 'wallet', 'farcaster'],
           appearance: {
             theme: 'light',
             accentColor: '#C06FDB',
