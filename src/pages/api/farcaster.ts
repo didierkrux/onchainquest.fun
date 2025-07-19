@@ -26,7 +26,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         process.env.NEXT_PUBLIC_SCREENSHOT_1 || `${DOMAIN_URL}/images/screenshot1.jpg`,
       ],
       "primaryCategory": "education",
-      "tags": ["web3", "crypto", "defi", "blockchain", "learning", "events", "quests"],
+      "tags": ["web3", "crypto", "learning", "blockchain", "quests"],
       "heroImageUrl": `https://newtoweb3.io/social.jpg`,
       "tagline": process.env.NEXT_PUBLIC_EVENT_TAGLINE || "Complete Web3 Quests",
       "ogTitle": process.env.NEXT_PUBLIC_EVENT_NAME || eventName,
