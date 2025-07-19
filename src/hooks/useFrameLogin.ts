@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useState } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
 import { useLoginToFrame } from '@privy-io/react-auth/farcaster'
+import { createWalletError, type HookError } from 'utils/wallet'
 
 // Dynamic import for frame-sdk to avoid SSR issues
 let frameSdk = null
@@ -22,7 +23,7 @@ export function useFrameLogin() {
   const { initLoginToFrame, loginToFrame } = useLoginToFrame()
   const [isFrameContext, setIsFrameContext] = useState(false)
   const [isLoggingIn, setIsLoggingIn] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<HookError | null>(null)
 
   // Check if we're in a Frame context
   useEffect(() => {
@@ -34,7 +35,9 @@ export function useFrameLogin() {
           setIsFrameContext(!!context)
         }
       } catch (err) {
-        console.log('Not in Frame context:', err)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Not in Frame context:', err)
+        }
         setIsFrameContext(false)
       }
     }
@@ -54,15 +57,15 @@ export function useFrameLogin() {
             throw new Error('Frame SDK not available')
           }
 
-          console.log('🔄 Starting automatic Frame login...')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('🔄 Starting automatic Frame login...')
+          }
           
           // Initialize login to frame
           const { nonce } = await initLoginToFrame()
-          console.log('✅ Nonce generated for Frame login')
           
           // Sign in with Frame SDK
           const result = await sdk.actions.signIn({ nonce })
-          console.log('✅ Frame sign-in completed')
           
           // Complete login with Privy
           await loginToFrame({
@@ -70,10 +73,16 @@ export function useFrameLogin() {
             signature: result.signature,
           })
           
-          console.log('✅ Frame login completed successfully')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('✅ Frame login completed successfully')
+          }
         } catch (err) {
           console.error('❌ Frame login failed:', err)
-          setError(err instanceof Error ? err.message : 'Frame login failed')
+          setError(createWalletError(
+            err instanceof Error ? err.message : 'Frame login failed',
+            'FRAME_LOGIN_ERROR',
+            err
+          ))
         } finally {
           setIsLoggingIn(false)
         }
@@ -86,7 +95,7 @@ export function useFrameLogin() {
   // Manual login function
   const loginToFrameManually = useCallback(async () => {
     if (!isFrameContext) {
-      setError('Not in Frame context')
+      setError(createWalletError('Not in Frame context', 'FRAME_CONTEXT_ERROR'))
       return
     }
 
@@ -106,10 +115,16 @@ export function useFrameLogin() {
         signature: result.signature,
       })
       
-      console.log('✅ Manual Frame login completed')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Manual Frame login completed')
+      }
     } catch (err) {
       console.error('❌ Manual Frame login failed:', err)
-      setError(err instanceof Error ? err.message : 'Manual Frame login failed')
+      setError(createWalletError(
+        err instanceof Error ? err.message : 'Manual Frame login failed',
+        'MANUAL_FRAME_LOGIN_ERROR',
+        err
+      ))
     } finally {
       setIsLoggingIn(false)
     }

@@ -1,4 +1,5 @@
 import { useAccount, useBalance, useSendTransaction, useSignMessage, useDisconnect, useWalletClient } from 'wagmi'
+import { useAppKit } from '@reown/appkit/react'
 
 // Wagmi/WalletConnect-specific wallet hooks
 export function useWagmiAccount() {
@@ -26,13 +27,11 @@ export function useWagmiWalletClient() {
 }
 
 export function useWagmiModal() {
-  // For WalletConnect, we'll need to import useAppKit
-  // This will be handled in components that need it
+  const { open } = useAppKit()
+
   return {
-    open: () => {
-      console.log('WalletConnect modal not implemented in this version')
-    },
-    isOpen: false,
+    open: () => open({ view: 'Connect' }),
+    isOpen: false, // AppKit doesn't expose isOpen state
     ready: true,
   }
 } 

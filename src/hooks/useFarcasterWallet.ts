@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { sdk } from '@farcaster/miniapp-sdk'
-import { useWalletAccount } from './useWallet'
+import { useWalletAccount } from './wallet/useWalletAccount'
 
 interface FarcasterWalletState {
   isConnected: boolean
@@ -109,9 +109,9 @@ export function useFarcasterWallet() {
     }
   }, [isConnected, address, state.isMiniApp])
 
-  // Log Frame login integration
+  // Log Frame login integration (development only)
   useEffect(() => {
-    if (state.isMiniApp) {
+    if (process.env.NODE_ENV === 'development' && state.isMiniApp) {
       console.log('🔗 Farcaster wallet hook: Mini App context detected')
       console.log('🔗 Wallet state:', { isConnected: state.isConnected, address: state.address })
     }

@@ -80,18 +80,18 @@ export default function Web3ModalProvider({
       <PrivyProvider
         appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ''}
         config={{
-          loginMethods: ['email', 'wallet', 'farcaster'],
+          loginMethods: ['email', 'wallet'],
           appearance: {
             theme: 'light',
             accentColor: '#C06FDB',
             // Configure wallet options to ensure external wallets are properly detected
             walletList: [
               'detected_ethereum_wallets',
-              'metamask',
               'coinbase_wallet',
-              'rainbow',
-              'wallet_connect',
               'zerion',
+              'rainbow',
+              'metamask',
+              'wallet_connect',
               'uniswap',
               'phantom',
               'cryptocom',
