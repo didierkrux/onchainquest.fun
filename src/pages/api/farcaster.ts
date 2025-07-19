@@ -29,7 +29,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       "subtitle": process.env.NEXT_PUBLIC_EVENT_SUBTITLE || "Learn Web3 and Crypto",
       "description": process.env.NEXT_PUBLIC_EVENT_DESCRIPTION || "\"New to Web3? Start Here\" is a day of activities to get you from 0 to 1 in Web3",
       "screenshotUrls": [
-        process.env.NEXT_PUBLIC_SCREENSHOT_1 || "/images/screenshot1.jpg",
+        process.env.NEXT_PUBLIC_SCREENSHOT_1 || "https://newtoweb3.io/images/screenshot1.jpg",
       ],
       "primaryCategory": "education",
       "tags": ["web3", "crypto", "defi", "blockchain", "learning"],
