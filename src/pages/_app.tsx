@@ -50,7 +50,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
       action: {
         type: 'launch_frame',
         name: eventName,
-        url: DOMAIN_URL,
+        url: `${DOMAIN_URL}/?pwa=true`,
         splashImageUrl: appIcon,
         splashBackgroundColor: '#fbf5ee',
       },
