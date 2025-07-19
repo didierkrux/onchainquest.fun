@@ -15,14 +15,14 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { ArrowLeft } from '@phosphor-icons/react'
-import { useAccount } from 'wagmi'
+import { useWalletAccount } from 'hooks/useWallet'
 
 import { BOOTH_DATA, adminWallets } from 'config'
 import { Card as CardComponent } from 'components/Card'
 
 export default function BoothPage() {
   const { t } = useTranslation()
-  const { address } = useAccount()
+  const { address } = useWalletAccount()
   const router = useRouter()
   const { eventId } = router.query
   const [isMobile] = useMediaQuery('(max-width: 768px)')

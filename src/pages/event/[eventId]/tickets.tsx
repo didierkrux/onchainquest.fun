@@ -17,7 +17,7 @@ import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/router'
-import { useAccount } from 'wagmi'
+import { useWalletAccount } from 'hooks/useWallet'
 import { adminWallets } from 'config'
 import { CopySimple, Download, QrCode } from '@phosphor-icons/react'
 
@@ -42,7 +42,7 @@ interface Ticket {
 
 export default function TicketsPage() {
   const { t } = useTranslation()
-  const { address } = useAccount()
+  const { address } = useWalletAccount()
   const router = useRouter()
   const { eventId } = router.query
   const [tickets, setTickets] = useState<Ticket[]>([])

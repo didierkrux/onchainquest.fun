@@ -10,7 +10,7 @@ import {
   Link,
 } from '@chakra-ui/react'
 import NextLink from 'next/link'
-import { useAccount } from 'wagmi'
+
 import {
   CalendarCheck,
   ListChecks,
@@ -26,12 +26,13 @@ import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import styled from '@emotion/styled'
 
-
-import { MENU, eventId } from 'config'
+import { MENU, eventId, PROJECT_WALLET_TYPE } from 'config'
 import { useLocalStorage } from 'usehooks-ts'
 import { profileAvatar } from 'utils'
 import { Profile } from 'entities/profile'
 import { Avatar } from 'components/Avatar'
+import { useWalletAccount, useWalletModal } from 'hooks/useWallet'
+
 type MenuItemProps = {
   label: string
   isActive: boolean
@@ -80,9 +81,19 @@ const MenuItem = ({ label, isActive, children, ...props }: MenuItemProps) => {
 const Menu = () => {
   const { t } = useTranslation()
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
-  const { isConnected } = useAccount()
+
+  // Use the appropriate hooks based on wallet type
+  const { isConnected: privyConnected } = useWalletAccount()
+  const { open: openPrivyModal } = useWalletModal()
+
+  // AppKit hooks for WalletConnect
   const { open } = useAppKit()
   const { open: isOpen } = useAppKitState()
+
+  // For now, only use Privy hooks to avoid conditional hook calls
+  // TODO: Implement proper dual provider support
+  const isConnected = privyConnected
+
   const [pwa] = useLocalStorage<boolean | null>('pwa', null)
   const { pathname, query } = useRouter()
   const currentEventId = (query.eventId as string) || eventId
@@ -118,6 +129,15 @@ const Menu = () => {
   ]
 
   const isProfileActive = pathname?.split('/')[3] === 'profile'
+
+  // Debug logging
+  console.log('🔍 Menu Debug:', {
+    PROJECT_WALLET_TYPE,
+    privyConnected,
+    isConnected,
+    isProfileActive,
+    isOpen,
+  })
 
   useEffect(() => {
     const fetchDeploymentId = async (loadType: string) => {
@@ -163,6 +183,17 @@ const Menu = () => {
   const handleMenuClick = (href: string) => {
     if (pathname === href) {
       window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const handleWalletOpen = () => {
+    console.log('🔍 handleWalletOpen called:', { PROJECT_WALLET_TYPE, isConnected })
+    if (PROJECT_WALLET_TYPE === 'privy') {
+      console.log('🔍 Opening Privy modal')
+      openPrivyModal()
+    } else if (PROJECT_WALLET_TYPE === 'walletconnect') {
+      console.log('🔍 Opening WalletConnect modal')
+      open({ view: 'Connect' })
     }
   }
 
@@ -256,7 +287,7 @@ const Menu = () => {
                               isActive={isProfileActive}
                               onClick={() => {
                                 if (!isConnected) {
-                                  open({ view: 'Connect' })
+                                  handleWalletOpen()
                                 }
                               }}
                             >

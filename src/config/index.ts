@@ -12,6 +12,7 @@ export const eventDescription =
 export const adminWallets = [
   '0xBD19a3F0A9CaCE18513A1e2863d648D13975CB30'.toLowerCase(), // didierkrux.eth
   '0x479FeE75Dab026070c29c3b55bf16B54E1fCd7f1'.toLowerCase(), // didierkrux embedded
+  '0xcaa931B1d91ADD3c26B80f51dEA5dfdaaa00FCba'.toLowerCase(), // didierkrux privy
   '0xb749A586080436e616f097f193Ba9CB6A25E7Ea6'.toLowerCase(), // ornellaweb3.eth
 ]
 
@@ -90,3 +91,4 @@ export const BOOTH_DATA = {
     code: 'h3j6l9',
   },
 }
+export const PROJECT_WALLET_TYPE: 'privy' | 'walletconnect' = 'privy'

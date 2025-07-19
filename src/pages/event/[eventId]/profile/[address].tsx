@@ -35,7 +35,7 @@ import {
   Star,
   Handshake,
 } from '@phosphor-icons/react'
-import { useAccount, useWalletClient } from 'wagmi'
+import { useWalletAccount, useWalletClient } from 'hooks/useWallet'
 import { ethers } from 'ethers'
 import { EAS, SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { useLocalStorage } from 'usehooks-ts'
@@ -67,7 +67,7 @@ export default function PublicProfilePage() {
   const [efpProfile, setEfpProfile] = useState<any>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [isProfileLoading, setIsProfileLoading] = useState(true)
-  const { address: userAddress } = useAccount()
+  const { address: userAddress } = useWalletAccount()
   const { data: walletClient } = useWalletClient()
   const { onCopy, hasCopied } = useClipboard(address && typeof address === 'string' ? address : '')
 

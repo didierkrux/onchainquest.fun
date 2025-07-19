@@ -23,7 +23,7 @@ import { Info } from '@phosphor-icons/react'
 import { isAndroid, isIOS } from 'react-device-detect'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { useAccount } from 'wagmi'
+import { useWalletAccount } from 'hooks/useWallet'
 
 import LanguageSwitch from 'components/LanguageSwitch'
 import { Event } from 'entities/data'
@@ -41,7 +41,7 @@ export default function EventPage({ event }: { event: Event }) {
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const [attendeeCodeInput, setAttendeeCodeInput] = useState('')
   const [isProcessingCode, setIsProcessingCode] = useState(false)
-  const { address } = useAccount()
+  const { address } = useWalletAccount()
 
   const goldSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '1-gold')
   const silverSponsors = event.sponsors?.filter((sponsor) => sponsor.sponsorCategory === '2-silver')

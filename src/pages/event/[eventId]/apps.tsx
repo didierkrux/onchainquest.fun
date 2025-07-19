@@ -20,7 +20,7 @@ import {
   InputRightElement,
   useMediaQuery,
 } from '@chakra-ui/react'
-import { useAccount } from 'wagmi'
+import { useWalletAccount } from 'hooks/useWallet'
 import { useTranslation } from 'react-i18next'
 
 interface MiniApp {
@@ -59,7 +59,7 @@ interface EthereumShowcaseItem {
 
 const MiniApps = (): JSX.Element => {
   const { t } = useTranslation()
-  const { address } = useAccount()
+  const { address } = useWalletAccount()
   const [selectedApp, setSelectedApp] = useState<MiniApp | null>(null)
   const [selectedLesson, setSelectedLesson] = useState<MiniLesson | null>(null)
   const [selectedShowcaseItem, setSelectedShowcaseItem] = useState<EthereumShowcaseItem | null>(

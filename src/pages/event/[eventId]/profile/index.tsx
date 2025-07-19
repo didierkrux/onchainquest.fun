@@ -13,7 +13,8 @@ import {
   Link,
   Divider,
 } from '@chakra-ui/react'
-import { useAccount, useDisconnect, useSignMessage, useBalance } from 'wagmi'
+import { useWalletAccount, useWalletDisconnect, useWalletBalance } from 'hooks/useWallet'
+import { usePrivy, useSignMessage, useWallets } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { useTranslation } from 'react-i18next'
@@ -42,15 +43,16 @@ import { adminSignatureMessage, adminWallets, ENS_DOMAIN, eventId as EVENT_ID } 
 import { Avatar } from 'components/Avatar'
 import SelectTab from 'components/SelectTab'
 import ZupassProof from 'components/ZupassProof'
+import WalletConnectButton from 'components/WalletConnectButton'
 
 export default function ProfilePage() {
   const { t, i18n } = useTranslation()
-  const { address } = useAccount()
-  const { data: balanceData } = useBalance({ address })
+  const { address, isConnected } = useWalletAccount()
+  const { data: balanceData } = useWalletBalance(address)
   const router = useRouter()
   const { eventId } = router.query
   const [profile, setProfile] = useLocalStorage<Profile | null>(`profile-${eventId}`, null)
-  const { disconnect } = useDisconnect()
+  const { disconnect } = useWalletDisconnect()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -60,7 +62,24 @@ export default function ProfilePage() {
   const [isResetting, setIsResetting] = useState(false)
   const toast = useToast()
   const [adminSignature, setAdminSignature] = useLocalStorage('admin-signature', '')
-  const { signMessageAsync } = useSignMessage()
+  const privy = usePrivy()
+  const { wallets } = useWallets()
+  const { signMessage } = useSignMessage({
+    onSuccess: ({ signature }) => {
+      handleSignatureSuccess(signature)
+    },
+    onError: (error) => {
+      toast({
+        title: t('Error'),
+        description: `Failed to sign message: ${error}`,
+        status: 'error',
+        duration: 10000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    },
+  })
+
   const [isSyncing, setIsSyncing] = useState(false)
   const { onCopy, hasCopied } = useClipboard(profile?.address || '')
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
@@ -71,6 +90,7 @@ export default function ProfilePage() {
   const [scannedTicket, setScannedTicket] = useState<string | null>(null)
   const [ticketCodeInput, setTicketCodeInput] = useState('')
   const [isProcessingTicket, setIsProcessingTicket] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
 
   const saveProfile = () => {
     if (!eventId) return
@@ -146,12 +166,54 @@ export default function ProfilePage() {
           }
           setRole(data?.role || 'explorer')
         })
+        .catch((error) => {
+          console.error('Error fetching profile:', error)
+        })
     }
   }
 
   useEffect(() => {
     fetchProfile()
   }, [address, eventId])
+
+  // Handle hydration
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  const handleSignatureSuccess = async (signature: string) => {
+    try {
+      if (!address) return
+
+      const isValid = await verifyMessage({
+        address,
+        message: adminSignatureMessage,
+        signature: signature as `0x${string}`,
+      })
+
+      if (isValid) {
+        setAdminSignature(signature)
+        toast({
+          title: t('Success'),
+          description: t('Signature verified successfully'),
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+          position: isMobile ? 'top' : 'bottom-right',
+        })
+      }
+    } catch (error) {
+      console.error('Error verifying signature:', error)
+      toast({
+        title: t('Error'),
+        description: `Failed to verify signature: ${(error as Error).message}`,
+        status: 'error',
+        duration: 10000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
+    }
+  }
 
   // Handle hash navigation to scroll to specific sections
   useEffect(() => {
@@ -265,20 +327,63 @@ export default function ProfilePage() {
   const handleAdminSignature = async () => {
     try {
       if (!address) return
-      const signature = await signMessageAsync({
-        account: address,
-        message: adminSignatureMessage,
-      })
-      const isValid = await verifyMessage({
-        address,
-        message: adminSignatureMessage,
-        signature,
-      })
-      if (isValid) {
-        setAdminSignature(signature)
+
+      // Check if we're on the client side
+      if (typeof window === 'undefined') {
+        throw new Error('Cannot sign message on server side')
+      }
+
+      if (!privy.ready) {
+        throw new Error('Privy not ready')
+      }
+
+      // If user is authenticated but no wallet, try to create embedded wallet
+      if (privy.authenticated && !privy.user?.wallet) {
+        try {
+          await privy.createWallet()
+          // Wait for wallet to be fully initialized
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+        } catch (error) {
+          console.error('Failed to create embedded wallet:', error)
+          throw new Error('Failed to create embedded wallet. Please try connecting again.')
+        }
+      }
+
+      if (!privy.user?.wallet) {
+        throw new Error('No wallet connected. Please connect your wallet first.')
+      }
+
+      // Check if we have any wallets available
+      if (wallets.length === 0) {
+        await privy.createWallet()
+        // Wait for wallet creation
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+      }
+
+      // Try to use the first available wallet for signing
+      const wallet = wallets[0] || privy.user?.wallet
+      if (!wallet) {
+        throw new Error('No wallet available for signing')
+      }
+
+      // Try to sign directly with the wallet if it has a signMessage method
+      if ('signMessage' in wallet && typeof wallet.signMessage === 'function') {
+        const signature = await wallet.signMessage(adminSignatureMessage)
+        await handleSignatureSuccess(signature)
+      } else {
+        // Use the useSignMessage hook to trigger the signing flow
+        signMessage({ message: adminSignatureMessage })
       }
     } catch (error) {
-      console.error('Error signing message:', error)
+      console.error('Error preparing to sign message:', error)
+      toast({
+        title: t('Error'),
+        description: `Failed to prepare signing: ${(error as Error).message}`,
+        status: 'error',
+        duration: 10000,
+        isClosable: true,
+        position: isMobile ? 'top' : 'bottom-right',
+      })
     }
   }
 
@@ -560,8 +665,63 @@ export default function ProfilePage() {
     }
   }
 
-  if (!address) return <Box display="flex" flexDirection="column" alignItems="center"></Box>
-  else {
+  // Show loading state while Privy is initializing
+  if (!address && isConnected === undefined) {
+    console.log('🔍 Privy still initializing, showing loading state')
+    return (
+      <Box display="flex" flexDirection="column" alignItems="center" p={8}>
+        <Text fontSize="xl" fontWeight="bold" mb={4}>
+          Loading...
+        </Text>
+        <Text fontSize="sm" color="gray.500">
+          Initializing wallet connection
+        </Text>
+      </Box>
+    )
+  }
+
+  if (!address) {
+    console.log('🔍 Rendering empty state - no address')
+    return (
+      <Box display="flex" flexDirection="column" alignItems="center" p={8}>
+        <Text fontSize="xl" fontWeight="bold" mb={4}>
+          No wallet connected
+        </Text>
+        <Text fontSize="sm" color="gray.500" mb={4}>
+          Please connect your wallet to view your profile
+        </Text>
+        <Box display="flex" flexDirection="column" gap={4} alignItems="center">
+          <Text fontSize="sm" color="gray.600" textAlign="center">
+            You are logged in but need to connect a wallet or create an embedded wallet
+          </Text>
+          <Box display="flex" gap={3} flexWrap="wrap" justifyContent="center">
+            <WalletConnectButton variant="solid" size="lg">
+              Connect Wallet to View Profile
+            </WalletConnectButton>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => {
+                console.log('🔍 Manual disconnect clicked')
+                disconnect()
+              }}
+              colorScheme="red"
+            >
+              Disconnect & Start Over
+            </Button>
+          </Box>
+          <Text fontSize="xs" color="gray.400" textAlign="center">
+            Choose &quot;Connect Wallet&quot; to connect an existing wallet or create an embedded
+            wallet, or &quot;Disconnect&quot; to start fresh
+          </Text>
+          <Text fontSize="xs" color="blue.500" textAlign="center">
+            💡 Tip: If you don&apos;t have a wallet, the &quot;Connect Wallet&quot; button will
+            create one for you automatically!
+          </Text>
+        </Box>
+      </Box>
+    )
+  } else {
     return (
       <Box display="flex" flexDirection="column" alignItems="center">
         {profile && profile?.address && (
@@ -962,8 +1122,13 @@ export default function ProfilePage() {
                       </Button>
                     </Box>
                   ) : (
-                    <Button onClick={handleAdminSignature} colorScheme="red" leftIcon={<LockKey />}>
-                      Verify signature
+                    <Button
+                      onClick={handleAdminSignature}
+                      colorScheme="red"
+                      leftIcon={<LockKey />}
+                      isDisabled={!isHydrated}
+                    >
+                      {isHydrated ? 'Verify signature' : 'Loading...'}
                     </Button>
                   )}
                 </Box>

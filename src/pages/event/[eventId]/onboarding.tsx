@@ -20,8 +20,9 @@ import {
   ModalBody,
   Flex,
 } from '@chakra-ui/react'
+import { useWalletAccount, useWalletSendTransaction, useWalletSignMessage, useWalletModal } from 'hooks/useWallet'
+import { PROJECT_WALLET_TYPE } from 'config'
 import { useAppKit } from '@reown/appkit/react'
-import { useAccount, useBalance, useSendTransaction } from 'wagmi'
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState, useRef } from 'react'
 import React from 'react'
@@ -29,7 +30,6 @@ import { useLocalStorage } from 'usehooks-ts'
 import { Trophy, CheckCircle, Star, Lock, Check, CopySimple } from '@phosphor-icons/react/dist/ssr'
 import { useRouter } from 'next/router'
 import { parseEther } from 'viem'
-import { useSignMessage } from 'wagmi'
 
 import { QRScanner } from 'components/QRScanner'
 import MiniApp from 'components/MiniApp'
@@ -42,9 +42,14 @@ import { wagmiAdapter } from 'context'
 
 export default function Onboarding({ event }: { event: Event }) {
   const { t } = useTranslation()
-  const { open } = useAppKit()
-  const { address, isConnected, chainId } = useAccount()
-  const { sendTransaction } = useSendTransaction()
+  const { address, isConnected, chainId } = useWalletAccount()
+  const { sendTransaction } = useWalletSendTransaction()
+  const { signMessageAsync } = useWalletSignMessage()
+  const { open: openPrivyModal } = useWalletModal()
+  
+  // AppKit hook for WalletConnect
+  const { open: openAppKit } = useAppKit()
+  
   const router = useRouter()
   const { eventId } = router.query
   const [profile, setProfile] = useLocalStorage<Profile | null>(`profile-${eventId}`, null)
@@ -53,7 +58,6 @@ export default function Onboarding({ event }: { event: Event }) {
   const toast = useToast()
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
   const [subnameInput, setSubnameInput] = useState('')
-  const { signMessageAsync } = useSignMessage()
   const { onCopy, hasCopied } = useClipboard(profile?.address || '')
   const [isShopOpen, setIsShopOpen] = useState(false)
   const [shopUrl, setShopUrl] = useState('')
@@ -159,10 +163,10 @@ export default function Onboarding({ event }: { event: Event }) {
         const message = `Claim subname ${subnameInput}.${ENS_DOMAIN} for address ${address}`
 
         // Get signature
-        const signature = await signMessageAsync({
-          account: address as `0x${string}`,
-          message,
-        })
+        const signatureResult = await signMessageAsync(message)
+        // Handle both string and object signatures
+        const signature =
+          typeof signatureResult === 'string' ? signatureResult : signatureResult.signature
 
         // Call API with signature
         const response = await fetch(
@@ -506,7 +510,18 @@ export default function Onboarding({ event }: { event: Event }) {
               <>
                 <Button
                   onClick={() => {
-                    open({ view: 'Account' })
+                    if (PROJECT_WALLET_TYPE === 'walletconnect') {
+                      openAppKit({ view: 'Swap' })
+                    } else {
+                      toast({
+                        title: t('Swap Not Available'),
+                        description: t('Swap functionality is only available with WalletConnect'),
+                        status: 'info',
+                        duration: 5000,
+                        isClosable: true,
+                        position: isMobile ? 'top' : 'bottom-right',
+                      })
+                    }
                   }}
                 >
                   {t('Swap')}
@@ -896,7 +911,11 @@ export default function Onboarding({ event }: { event: Event }) {
                         </a>
                         <Button
                           onClick={() => {
-                            open({ view: 'Connect' })
+                            if (PROJECT_WALLET_TYPE === 'privy') {
+                              openPrivyModal()
+                            } else if (PROJECT_WALLET_TYPE === 'walletconnect') {
+                              openAppKit({ view: 'Connect' })
+                            }
                           }}
                         >
                           {t('Connect Wallet')}
