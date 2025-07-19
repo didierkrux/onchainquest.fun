@@ -126,7 +126,7 @@ export default function Onboarding({ event }: { event: Event }) {
 
     // For numeric locks, check if the previous task is completed
     if (typeof quest.lock === 'number') {
-      return !profile.tasks[quest.lock - 1]?.isCompleted ?? false
+      return !(profile.tasks[quest.lock - 1]?.isCompleted ?? false)
     }
 
     return false
@@ -159,7 +159,10 @@ export default function Onboarding({ event }: { event: Event }) {
         const message = `Claim subname ${subnameInput}.${ENS_DOMAIN} for address ${address}`
 
         // Get signature
-        const signature = await signMessageAsync({ message })
+        const signature = await signMessageAsync({
+          account: address as `0x${string}`,
+          message,
+        })
 
         // Call API with signature
         const response = await fetch(

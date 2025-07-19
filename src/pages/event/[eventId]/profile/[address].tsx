@@ -311,7 +311,7 @@ export default function PublicProfilePage() {
 
     setIsFollowLoading(true)
     try {
-      const provider = new ethers.BrowserProvider(walletClient)
+      const provider = new ethers.BrowserProvider(walletClient as any)
       const signer = await provider.getSigner()
 
       // Use the current API follow status to determine the action
@@ -574,7 +574,7 @@ export default function PublicProfilePage() {
 
     setIsAttestingIRL(true)
     try {
-      const provider = new ethers.BrowserProvider(walletClient)
+      const provider = new ethers.BrowserProvider(walletClient as any)
       const signer = await provider.getSigner()
 
       // Initialize EAS

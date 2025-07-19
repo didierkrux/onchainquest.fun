@@ -66,6 +66,7 @@ export function buildBasenameTextRecordContract(
   return {
     abi: L2ResolverAbi,
     address: BASENAME_L2_RESOLVER_ADDRESS,
+    // @ts-ignore Type instantiation is excessively deep and possibly infinite
     args: [namehash(basename), key],
     functionName: 'text',
   }
@@ -75,6 +76,7 @@ export function buildBasenameTextRecordContract(
 export async function getBasenameTextRecord(basename: Basename, key: BasenameTextRecordKeys) {
   try {
     const contractParameters = buildBasenameTextRecordContract(basename, key)
+    // @ts-ignore Type instantiation is excessively deep and possibly infinite
     const textRecord = await baseClient.readContract(contractParameters)
     return textRecord as string
   } catch (error) {}
