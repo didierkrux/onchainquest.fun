@@ -162,7 +162,7 @@ function MyComponent() {
   // Use the hooks with proper error handling
   const handleSign = async () => {
     try {
-      const signature = await signMessageAsync('Hello World')
+      const signature = await signMessageAsync('Hello World', { address })
       console.log('Signature:', signature)
     } catch (error) {
       // Error is now standardized HookError format

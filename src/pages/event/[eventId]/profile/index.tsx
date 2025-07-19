@@ -26,7 +26,6 @@ import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { useTranslation } from 'react-i18next'
 import { useLocalStorage } from 'usehooks-ts'
-import { verifyMessage } from 'viem'
 import twemoji from '@twemoji/api'
 import {
   ArrowsClockwise,
@@ -46,7 +45,7 @@ import { useRouter } from 'next/router'
 import { QRScanner } from 'components/QRScanner'
 
 import { Profile } from 'entities/profile'
-import { profileName, profileAvatar, profileRole } from 'utils/index'
+import { profileName, profileAvatar, profileRole, verifySignature } from 'utils/index'
 import { adminSignatureMessage, adminWallets, ENS_DOMAIN, eventId as EVENT_ID } from 'config'
 import { Avatar } from 'components/Avatar'
 import SelectTab from 'components/SelectTab'
@@ -71,7 +70,6 @@ export default function ProfilePage() {
   const toast = useToast()
   const [adminSignature, setAdminSignature] = useLocalStorage('admin-signature', '')
   const { signMessageAsync } = useWalletSignMessage()
-
   const [isSyncing, setIsSyncing] = useState(false)
   const { onCopy, hasCopied } = useClipboard(profile?.address || '')
   const [isMobile] = useMediaQuery('(max-width: 1024px)')
@@ -191,7 +189,7 @@ export default function ProfilePage() {
         signatureStartsWith0x: signature.startsWith('0x'),
       })
 
-      const isValid = await verifyMessage({
+      const isValid = await verifySignature({
         address,
         message: adminSignatureMessage,
         signature: signature as `0x${string}`,
@@ -354,10 +352,9 @@ export default function ProfilePage() {
       if (!address) return
 
       // Get signature using signMessageAsync
-      const signatureResult = await signMessageAsync(adminSignatureMessage)
-      // Handle both string and object signatures
-      const signature =
-        typeof signatureResult === 'string' ? signatureResult : signatureResult.signature
+      const signature = await signMessageAsync(adminSignatureMessage, {
+        address,
+      })
 
       await handleSignatureSuccess(signature)
     } catch (error) {
@@ -407,7 +404,7 @@ export default function ProfilePage() {
 
     setIsSyncing(true)
     try {
-      const isValid = await verifyMessage({
+      const isValid = await verifySignature({
         address,
         message: adminSignatureMessage,
         signature: adminSignature as `0x${string}`,
@@ -471,7 +468,7 @@ export default function ProfilePage() {
 
     setIsGeneratingTickets(true)
     try {
-      const isValid = await verifyMessage({
+      const isValid = await verifySignature({
         address,
         message: adminSignatureMessage,
         signature: adminSignature as `0x${string}`,

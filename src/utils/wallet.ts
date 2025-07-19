@@ -26,4 +26,6 @@ export function isPrivyProvider() {
 
 export function isWalletConnectProvider() {
   return PROJECT_WALLET_TYPE === 'walletconnect'
-} 
+}
+
+

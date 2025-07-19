@@ -55,7 +55,7 @@ function MyComponent() {
   }
 
   const handleSignMessage = async () => {
-    const signature = await signMessageAsync('Hello World')
+    const signature = await signMessageAsync('Hello World', { address })
   }
 }
 ```

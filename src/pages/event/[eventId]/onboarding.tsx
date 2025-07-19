@@ -166,10 +166,7 @@ export default function Onboarding({ event }: { event: Event }) {
         const message = `Claim subname ${subnameInput}.${ENS_DOMAIN} for address ${address}`
 
         // Get signature
-        const signatureResult = await signMessageAsync(message)
-        // Handle both string and object signatures
-        const signature =
-          typeof signatureResult === 'string' ? signatureResult : signatureResult.signature
+        const signature = await signMessageAsync(message, { address })
 
         // Call API with signature
         const response = await fetch(

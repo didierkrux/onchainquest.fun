@@ -46,7 +46,7 @@ export function usePrivySignMessage() {
   const privy = usePrivy()
   
   return {
-    signMessageAsync: async (message: string) => {
+    signMessageAsync: async (message: string, options?: { address?: string }) => {
       if (!privy.user?.wallet) {
         throw new Error('No wallet connected')
       }

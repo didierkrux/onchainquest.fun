@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { ethers } from 'ethers';
-import { namehash, verifyMessage } from 'viem';
+import { namehash } from 'viem';
 
 import { DOMAIN_URL } from 'config';
 import db from 'utils/db';
-import { calculateScore } from 'utils/index';
+import { calculateScore, verifySignature } from 'utils/index';
 import { eventId as currentEventId, ENS_DOMAIN } from 'config'
 
 const RPC_URL = process.env.ALCHEMY_API_KEY
@@ -44,10 +44,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Verify the signature
     const message = `Claim subname ${subname}.${ENS_DOMAIN} for address ${address}`
-    const isValid = await verifyMessage({
-      address: address as `0x${string}`,
+    const isValid = await verifySignature({
+      address: address as string,
       message,
-      signature: signature as `0x${string}`,
+      signature: signature as string,
     })
 
     if (!isValid) {

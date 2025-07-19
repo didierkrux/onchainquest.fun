@@ -9,7 +9,7 @@ export function useWalletSignMessage() {
   const [isPending, setIsPending] = useState(false)
   const [error, setError] = useState<HookError | null>(null)
 
-  const signMessageAsync = async (message: string) => {
+  const signMessageAsync = async (message: string, options?: { address?: string }) => {
     setIsPending(true)
     setError(null)
 
@@ -24,13 +24,13 @@ export function useWalletSignMessage() {
           // Get the current account from Farcaster
           const accounts = await ethProvider.request({ method: 'eth_accounts' }) as string[]
           if (accounts && accounts.length > 0) {
-            const address = accounts[0]
+            const address = options?.address || accounts[0]
             console.log('🔗 Signing with Farcaster wallet:', address)
 
             const signature = await ethProvider.request({
               method: 'personal_sign',
               params: [message, address]
-            })
+            }) as string
 
             return signature
           } else {
@@ -77,10 +77,12 @@ export function useWalletSignMessage() {
         })))
 
         const currentUserAddress = privy.user?.wallet?.address
+        const targetAddress = options?.address || currentUserAddress
         console.log('🔗 Current user address:', currentUserAddress)
+        console.log('🔗 Target address for signing:', targetAddress)
 
         const matchingWallet = wallets.find(wallet =>
-          wallet.address.toLowerCase() === currentUserAddress?.toLowerCase()
+          wallet.address.toLowerCase() === (options?.address || currentUserAddress)?.toLowerCase()
         )
 
         if (matchingWallet && matchingWallet.walletClientType !== 'privy') {
@@ -104,6 +106,7 @@ export function useWalletSignMessage() {
                 method: 'personal_sign',
                 params: [message, address]
               })
+
               console.log('✅ Coinbase Smart Wallet signature successful')
               return signature
             } catch (coinbaseError) {
@@ -117,6 +120,7 @@ export function useWalletSignMessage() {
                   params: [address, message]
                 })
                 console.log('✅ Coinbase Smart Wallet eth_sign successful')
+
                 return signature
               } catch (fallbackError) {
                 console.error('❌ Coinbase Smart Wallet eth_sign also failed:', fallbackError)
@@ -136,7 +140,11 @@ export function useWalletSignMessage() {
       }
 
       // Fallback to embedded wallet signing
-      const signature = await privy.signMessage({ message })
+      const signatureResult = await privy.signMessage({ message })
+
+      // Privy returns an object with signature property
+      const signature = typeof signatureResult === 'string' ? signatureResult : signatureResult.signature
+
       return signature
 
     } catch (err) {

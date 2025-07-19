@@ -1,4 +1,6 @@
 import OpenAI from 'openai'
+import { createPublicClient, http } from 'viem'
+import { base } from 'viem/chains'
 
 import { Event } from 'entities/data'
 import { Profile, Task, Tasks } from 'entities/profile'
@@ -432,4 +434,26 @@ export async function verifyTokenSend(address: string, targetAddress: string, am
     console.error('Error checking token send:', error instanceof Error ? error.message : 'Unknown error');
     return false;
   }
+}
+
+// Custom signature verification function
+export async function verifySignature({
+  address,
+  message,
+  signature,
+}: {
+  address: string
+  message: string
+  signature: string
+}) {
+  const publicClient = createPublicClient({
+    chain: base,
+    transport: http(`https://base-mainnet.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
+  })
+
+  return publicClient.verifyMessage({
+    message,
+    address: address as `0x${string}`,
+    signature: signature as `0x${string}`,
+  })
 }

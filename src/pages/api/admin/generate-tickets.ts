@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 import { NextApiRequest, NextApiResponse } from 'next'
-import { verifyMessage } from 'viem'
 
 import db from 'utils/db'
+import { verifySignature } from 'utils/index'
 import { adminSignatureMessage, adminWallets } from 'config/index'
 
 export default async function handler(
@@ -26,10 +26,10 @@ export default async function handler(
     }
 
     // Verify the signature
-    const isValid = await verifyMessage({
-      address: address as `0x${string}`,
+    const isValid = await verifySignature({
+      address: address as string,
       message: adminSignatureMessage,
-      signature: signature as `0x${string}`,
+      signature: signature as string,
     })
 
     if (!isValid) {
