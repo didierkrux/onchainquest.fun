@@ -14,7 +14,8 @@ export default function PrivyWalletProvider({ children }: PrivyWalletProviderPro
     <PrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ''}
       config={{
-        loginMethods: ['email', 'wallet'],
+        loginMethods: ['email', 'wallet', 'farcaster'],
+        defaultChain: base,
         appearance: {
           theme: 'light',
           accentColor: '#C06FDB',
