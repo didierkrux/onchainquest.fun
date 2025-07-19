@@ -1178,6 +1178,15 @@ export default function ProfilePage() {
                 >
                   {t('Reset my profile')}
                 </Button>
+                {adminSignature && (
+                  <Button
+                    onClick={() => setAdminSignature('')}
+                    colorScheme="orange"
+                    leftIcon={<SignOut />}
+                  >
+                    Reset Signature
+                  </Button>
+                )}
               </CardBody>
             </Card>
           </Box>
