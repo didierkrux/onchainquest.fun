@@ -2,6 +2,7 @@
   "name": "onchain-quest",
   "version": "1.0.5",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
