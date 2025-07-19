@@ -30,6 +30,9 @@ import { Event } from 'entities/data'
 import { Card as CardComponent } from 'components/Card'
 import { QRScanner } from 'components/QRScanner'
 import { FarcasterMessages } from 'components/FarcasterMessages'
+import AddMiniAppButton from 'components/AddMiniAppButton'
+import MiniAppFeatures from 'components/MiniAppFeatures'
+import MiniAppWalletStatus from 'components/MiniAppWalletStatus'
 
 export default function EventPage({ event }: { event: Event }) {
   const { t } = useTranslation()
@@ -239,7 +242,12 @@ export default function EventPage({ event }: { event: Event }) {
         {event?.config?.eventLanguage && event.config.eventLanguage.length > 1 && (
           <LanguageSwitch eventLanguage={event.config.eventLanguage} />
         )}
+        <AddMiniAppButton />
       </Box>
+
+      <MiniAppFeatures />
+      <MiniAppWalletStatus />
+
       {event.program?.length > 0 && <Heading as="h1">{t('Program')}</Heading>}
       {event.program?.map((item, index) => (
         <CardComponent mt={4} key={index} type={item.highlight ? 'orange' : 'transparent'}>

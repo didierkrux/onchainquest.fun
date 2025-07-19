@@ -7,6 +7,7 @@ import { useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import Layout from 'components/Layout'
+import MiniAppSDK from 'components/MiniAppSDK'
 import theme from 'theme'
 import 'utils/translation'
 import NonSSRWrapper from 'components/NonSSRWrapper'
@@ -40,6 +41,22 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const description = eventDescription
   const canonical = url?.split('?')[0]
 
+  // Mini App embed metadata
+  const miniAppEmbed = {
+    version: '1',
+    imageUrl: socialImage,
+    button: {
+      title: 'Start Quest',
+      action: {
+        type: 'launch_frame',
+        name: eventName,
+        url: DOMAIN_URL,
+        splashImageUrl: appIcon,
+        splashBackgroundColor: '#fbf5ee',
+      },
+    },
+  }
+
   useEffect(() => {
     const handleRouteChange = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -69,6 +86,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
             )}
             <link rel="canonical" href={canonical} />
             <meta name="robots" content={IS_PROD ? 'all' : 'noindex'}></meta>
+
+            {/* Farcaster Mini App Embed */}
+            <meta name="fc:miniapp" content={JSON.stringify(miniAppEmbed)} />
+            <meta name="fc:frame" content={JSON.stringify(miniAppEmbed)} />
+
             {/* Progressive Web App */}
             <link rel="manifest" href="/manifest.json" crossOrigin="use-credentials" />
             <link rel="apple-touch-icon" href={appIcon} />
@@ -129,9 +151,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
                 }
               `}
             />
-            <Layout>
-              <Component {...pageProps} />
-            </Layout>
+            <MiniAppSDK>
+              <Layout>
+                <Component {...pageProps} />
+              </Layout>
+            </MiniAppSDK>
           </NonSSRWrapper>
         </ChakraProvider>
       </Web3ModalProvider>
