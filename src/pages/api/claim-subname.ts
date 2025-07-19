@@ -48,6 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       address: address as string,
       message,
       signature: signature as string,
+      alchemyKey: process.env.ALCHEMY_API_KEY,
     })
 
     if (!isValid) {

@@ -28,6 +28,7 @@ export default async function handler(
       address: address as string,
       message: adminSignatureMessage,
       signature: signature as string,
+      alchemyKey: process.env.ALCHEMY_API_KEY,
     })
 
     if (!isValid) {
