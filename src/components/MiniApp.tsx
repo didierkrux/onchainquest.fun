@@ -7,6 +7,8 @@ import type { FrameHost } from '@farcaster/frame-host'
 import { wagmiConfig } from 'context/index'
 import { useWalletAccount, useWalletClient } from 'hooks/useWallet'
 import { Box, Text, Flex, Spinner } from '@chakra-ui/react'
+import { isPrivyProvider, createPrivyProvider } from 'utils/wallet'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 
 const FRAME_ID = 'bankless-academy-frame'
 const DEBUG = true
@@ -100,6 +102,19 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
   const { data: walletClient } = useWalletClient()
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const { address } = useWalletAccount()
+  const privy = usePrivy()
+  const { wallets, ready: walletsReady } = useWallets()
+
+  // Debug logging
+  console.log('MiniApp wallet state:', {
+    address,
+    hasWalletClient: !!walletClient,
+    isPrivyProvider: isPrivyProvider(),
+    privyReady: privy.ready,
+    privyAuthenticated: privy.authenticated,
+    walletsReady,
+    walletsCount: wallets.length,
+  })
   const frameHostRef = useRef<any>(null)
   const isTransactionInProgressRef = useRef(false)
   const lastTransactionErrorRef = useRef<Error | null>(null)
@@ -141,57 +156,99 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
       let client: any
       let provider: any
       try {
-        if (walletClient) {
-          client = walletClient
-          if (client) {
-            provider = {
-              request: async (args: { method: string; params: any[] }) => {
-                if (!isCurrentFrame) return null
-                // Check if this is a transaction request
-                if (
-                  args.method === 'eth_sendTransaction' ||
-                  args.method === 'eth_signTransaction'
-                ) {
-                  // If we have a previous rejection error, return it immediately
-                  if (lastTransactionErrorRef.current) {
-                    const error = lastTransactionErrorRef.current
-                    lastTransactionErrorRef.current = null
-                    throw error
-                  }
+        // For Privy, ensure we use the correct wallet that matches the user's address
+        if (isPrivyProvider() && privy.user?.wallet) {
+          // Wait for wallets to be ready
+          if (!walletsReady) {
+            throw new Error('Wallets not ready yet')
+          }
 
-                  if (isTransactionInProgressRef.current) {
-                    log('Transaction already in progress, ignoring request')
-                    return null
-                  }
+          // Find the wallet that matches the user's address
+          const userWallet = wallets.find(
+            (wallet) => wallet.address?.toLowerCase() === address?.toLowerCase()
+          )
 
-                  isTransactionInProgressRef.current = true
-                  try {
-                    const result = await client.request({ ...args, params: args.params || [] })
-                    return result
-                  } catch (error: any) {
-                    // Store the error if it's a user rejection
-                    if (error?.code === 4001 || error?.message?.includes('User denied')) {
-                      lastTransactionErrorRef.current = error
-                    }
-                    throw error
-                  } finally {
-                    // Reset the transaction lock after a short delay
-                    setTimeout(() => {
-                      isTransactionInProgressRef.current = false
-                    }, 1000)
-                  }
-                }
-                return client.request({ ...args, params: args.params || [] })
-              },
-              on: (_event: string, _listener: any) => {
-                log('Provider event listener added:', _event)
-                return provider
-              },
-              removeListener: (_event: string, _listener: any) => {
-                log('Provider event listener removed:', _event)
-                return provider
-              },
+          if (userWallet) {
+            console.log(
+              'MiniApp using wallet:',
+              userWallet.walletClientType,
+              'with address:',
+              userWallet.address
+            )
+
+            // For external wallets (injected or WalletConnect), use window.ethereum if available
+            if (
+              userWallet.walletClientType !== 'privy' &&
+              userWallet.walletClientType !== 'embedded'
+            ) {
+              console.log('MiniApp using external wallet for transaction')
+              // For external wallets, use window.ethereum if available
+              if (typeof window !== 'undefined' && (window as any).ethereum) {
+                client = (window as any).ethereum
+              } else {
+                // Fallback to Privy's embedded wallet
+                client = createPrivyProvider(privy)
+              }
+            } else {
+              console.log('MiniApp using Privy embedded wallet for transaction')
+              // Use Privy's embedded wallet
+              client = createPrivyProvider(privy)
             }
+          } else {
+            console.log('MiniApp no matching wallet found, using Privy embedded wallet')
+            // Fallback to Privy's embedded wallet
+            client = createPrivyProvider(privy)
+          }
+        } else if (walletClient) {
+          // For WalletConnect, use the provided walletClient
+          client = walletClient
+        }
+
+        if (client) {
+          provider = {
+            request: async (args: { method: string; params: any[] }) => {
+              if (!isCurrentFrame) return null
+              // Check if this is a transaction request
+              if (args.method === 'eth_sendTransaction' || args.method === 'eth_signTransaction') {
+                // If we have a previous rejection error, return it immediately
+                if (lastTransactionErrorRef.current) {
+                  const error = lastTransactionErrorRef.current
+                  lastTransactionErrorRef.current = null
+                  throw error
+                }
+
+                if (isTransactionInProgressRef.current) {
+                  log('Transaction already in progress, ignoring request')
+                  return null
+                }
+
+                isTransactionInProgressRef.current = true
+                try {
+                  const result = await client.request({ ...args, params: args.params || [] })
+                  return result
+                } catch (error: any) {
+                  // Store the error if it's a user rejection
+                  if (error?.code === 4001 || error?.message?.includes('User denied')) {
+                    lastTransactionErrorRef.current = error
+                  }
+                  throw error
+                } finally {
+                  // Reset the transaction lock after a short delay
+                  setTimeout(() => {
+                    isTransactionInProgressRef.current = false
+                  }, 1000)
+                }
+              }
+              return client.request({ ...args, params: args.params || [] })
+            },
+            on: (_event: string, _listener: any) => {
+              log('Provider event listener added:', _event)
+              return provider
+            },
+            removeListener: (_event: string, _listener: any) => {
+              log('Provider event listener removed:', _event)
+              return provider
+            },
           }
         }
       } catch (err: any) {

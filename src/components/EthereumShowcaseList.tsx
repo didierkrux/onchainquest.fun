@@ -30,7 +30,7 @@ const ethereumShowcaseItems: EthereumShowcaseItem[] = [
   },
   {
     name: 'DeFi',
-    url: 'https://morpho.dtech.vision/',
+    url: 'https://www.coinbase.mini-morpho.com/',
     iconUrl: '/images/mini-apps/icon_3.png',
   },
   {
