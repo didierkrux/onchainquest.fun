@@ -76,6 +76,17 @@ export default function PublicProfilePage() {
   const privy = usePrivy()
   const { wallets, ready: walletsReady } = useWallets()
 
+  // Debug logging
+  console.log('Profile page wallet state:', {
+    userAddress,
+    hasWalletClient: !!walletClient,
+    isPrivyProvider: isPrivyProvider(),
+    privyReady: privy.ready,
+    privyAuthenticated: privy.authenticated,
+    walletsReady,
+    walletsCount: wallets.length,
+  })
+
   // IRL Meeting attestation states
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [isAttestingIRL, setIsAttestingIRL] = useState(false)
@@ -302,7 +313,12 @@ export default function PublicProfilePage() {
   }
 
   const handleFollow = async () => {
-    if (!userAddress || !address || typeof address !== 'string' || !walletClient) {
+    if (
+      !userAddress ||
+      !address ||
+      typeof address !== 'string' ||
+      (!walletClient && !isPrivyProvider())
+    ) {
       toast({
         title: t('Error'),
         description: t('Please connect your wallet to follow'),
@@ -626,7 +642,12 @@ export default function PublicProfilePage() {
   }
 
   const handleIRLMeetingAttestation = async () => {
-    if (!userAddress || !address || typeof address !== 'string' || !walletClient) {
+    if (
+      !userAddress ||
+      !address ||
+      typeof address !== 'string' ||
+      (!walletClient && !isPrivyProvider())
+    ) {
       toast({
         title: t('Error'),
         description: t('Please connect your wallet to create attestation'),

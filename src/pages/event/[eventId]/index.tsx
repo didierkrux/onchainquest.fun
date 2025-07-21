@@ -458,11 +458,11 @@ export default function EventPage({ event }: { event: Event }) {
           </Box>
         )}
 
-        {eventId === '3' && (
+        {/* {eventId === '3' && (
           <Box mt="10">
             <FarcasterMessages eventId={eventId} />
           </Box>
-        )}
+        )} */}
       </Box>
     </Box>
   )

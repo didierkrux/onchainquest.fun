@@ -40,8 +40,9 @@ import MiniApp from 'components/MiniApp'
 import { Event, Quest } from 'entities/data'
 import { Profile } from 'entities/profile'
 import { ENS_DOMAIN, BOOTH_DATA } from 'config'
-import { switchChain } from '@wagmi/core'
 import { wagmiAdapter } from 'context'
+import { isPrivyProvider, switchToBaseNetwork } from 'utils/wallet'
+import { usePrivy } from '@privy-io/react-auth'
 
 export default function Onboarding({ event }: { event: Event }) {
   const { t } = useTranslation()
@@ -49,6 +50,7 @@ export default function Onboarding({ event }: { event: Event }) {
   const { sendTransaction } = useWalletTransaction()
   const { signMessageAsync } = useWalletSignMessage()
   const { open: openPrivyModal } = useWalletModal()
+  const privy = usePrivy()
 
   // AppKit hook for WalletConnect
   const { open: openAppKit } = useAppKit()
@@ -293,7 +295,13 @@ export default function Onboarding({ event }: { event: Event }) {
       console.log('chainId', chainId)
       // change the chain id to base mainnet
       if (chainId !== 8453) {
-        await switchChain(wagmiAdapter.wagmiConfig, { chainId: 8453 })
+        if (isPrivyProvider()) {
+          await switchToBaseNetwork(privy)
+        } else {
+          // For WalletConnect, use the original switchChain
+          const { switchChain } = await import('@wagmi/core')
+          await switchChain(wagmiAdapter.wagmiConfig, { chainId: 8453 })
+        }
       }
       const hash = await sendTransaction({
         to: targetAddress as `0x${string}`,

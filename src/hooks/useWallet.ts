@@ -15,15 +15,24 @@ import { isPrivyProvider, createPrivyProvider } from 'utils/wallet'
 
 export function useWalletClient() {
   const privy = usePrivy()
-  console.log('privy', privy)
+  console.log('useWalletClient - privy state:', {
+    ready: privy.ready,
+    authenticated: privy.authenticated,
+    hasWallet: !!privy.user?.wallet,
+    isPrivyProvider: isPrivyProvider()
+  })
+
   if (isPrivyProvider()) {
+    const provider = privy.user?.wallet ? createPrivyProvider(privy) : undefined
+    console.log('useWalletClient - returning Privy provider:', !!provider)
     return {
-      data: privy.user?.wallet ? createPrivyProvider(privy) : undefined,
+      data: provider,
     }
   }
 
   // For WalletConnect, return a placeholder
   // You should use useWalletClient from wagmi directly in WalletConnect mode
+  console.log('useWalletClient - returning undefined for WalletConnect')
   return {
     data: undefined,
   }

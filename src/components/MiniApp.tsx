@@ -5,8 +5,7 @@
 import { useState, useEffect, useRef } from 'react'
 import type { FrameHost } from '@farcaster/frame-host'
 import { wagmiConfig } from 'context/index'
-import { getWalletClient } from '@wagmi/core'
-import { useWalletAccount } from 'hooks/useWallet'
+import { useWalletAccount, useWalletClient } from 'hooks/useWallet'
 import { Box, Text, Flex, Spinner } from '@chakra-ui/react'
 
 const FRAME_ID = 'bankless-academy-frame'
@@ -98,6 +97,7 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
   const [isLoading, setIsLoading] = useState(true)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const cleanupRef = useRef<(() => void) | null>(null)
+  const { data: walletClient } = useWalletClient()
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const { address } = useWalletAccount()
   const frameHostRef = useRef<any>(null)
@@ -141,8 +141,8 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
       let client: any
       let provider: any
       try {
-        if (wagmiConfig) {
-          client = await getWalletClient(wagmiConfig)
+        if (walletClient) {
+          client = walletClient
           if (client) {
             provider = {
               request: async (args: { method: string; params: any[] }) => {
