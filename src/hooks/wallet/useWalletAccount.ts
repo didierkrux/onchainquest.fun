@@ -17,7 +17,7 @@ export function useWalletAccount() {
     return {
       address: privy.user?.wallet?.address as `0x${string}` | undefined,
       isConnected: privy.authenticated,
-      chainId: 1, // Default to mainnet, Privy handles chain switching internally
+      chainId: 8453, // Base network, since EFP functions require it
     }
   }
 

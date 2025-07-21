@@ -46,9 +46,12 @@ import {
   unfollowAddressOnEFP,
   getFollowerState,
   completeFollowWithMint,
+  ensureBaseNetwork,
 } from 'utils/efp'
 import { Profile } from 'entities/profile'
 import { profileAvatar, profileName, profileRole } from 'utils/index'
+import { createPrivyProvider, isPrivyProvider, switchToBaseNetwork } from 'utils/wallet'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 
 // EAS configuration for IRL meeting attestation
 const easContractAddress = '0x4200000000000000000000000000000000000021'
@@ -70,6 +73,8 @@ export default function PublicProfilePage() {
   const { address: userAddress } = useWalletAccount()
   const { data: walletClient } = useWalletClient()
   const { onCopy, hasCopied } = useClipboard(address && typeof address === 'string' ? address : '')
+  const privy = usePrivy()
+  const { wallets, ready: walletsReady } = useWallets()
 
   // IRL Meeting attestation states
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -311,8 +316,69 @@ export default function PublicProfilePage() {
 
     setIsFollowLoading(true)
     try {
-      const provider = new ethers.BrowserProvider(walletClient as any)
-      const signer = await provider.getSigner()
+      let signer
+      if (isPrivyProvider()) {
+        // For Privy, switch to Base network first using the wallet
+        if (wallets.length > 0) {
+          try {
+            await wallets[0].switchChain(8453) // Base network
+          } catch (error) {
+            console.warn('Failed to switch to Base network:', error)
+            // Continue anyway, the transaction might still work
+          }
+        }
+
+        // Wait for wallets to be ready
+        if (!walletsReady) {
+          throw new Error('Wallets not ready yet')
+        }
+
+        // Find the wallet that matches the user's address
+        const userWallet = wallets.find(
+          (wallet) => wallet.address?.toLowerCase() === userAddress?.toLowerCase()
+        )
+
+        if (userWallet) {
+          console.log(
+            'Using wallet:',
+            userWallet.walletClientType,
+            'with address:',
+            userWallet.address
+          )
+
+          // For external wallets (injected or WalletConnect), use the wallet directly
+          if (
+            userWallet.walletClientType !== 'privy' &&
+            userWallet.walletClientType !== 'embedded'
+          ) {
+            console.log('Using external wallet for transaction')
+            // For external wallets, use window.ethereum if available
+            if (typeof window !== 'undefined' && (window as any).ethereum) {
+              const provider = new ethers.BrowserProvider((window as any).ethereum)
+              signer = await provider.getSigner()
+            } else {
+              // Fallback to Privy's embedded wallet
+              const provider = createPrivyProvider(privy)
+              signer = await provider.getSigner()
+            }
+          } else {
+            console.log('Using Privy embedded wallet for transaction')
+            // Use Privy's embedded wallet
+            const provider = createPrivyProvider(privy)
+            signer = await provider.getSigner()
+          }
+        } else {
+          console.log('No matching wallet found, using Privy embedded wallet')
+          // Fallback to Privy's embedded wallet
+          const provider = createPrivyProvider(privy)
+          signer = await provider.getSigner()
+        }
+      } else {
+        const provider = new ethers.BrowserProvider(walletClient as any)
+        signer = await provider.getSigner()
+        // For WalletConnect, ensure we're on Base network
+        signer = await ensureBaseNetwork(signer)
+      }
 
       // Use the current API follow status to determine the action
       // isFollowing state comes from the API check, so we can trust it for the button action
@@ -574,8 +640,69 @@ export default function PublicProfilePage() {
 
     setIsAttestingIRL(true)
     try {
-      const provider = new ethers.BrowserProvider(walletClient as any)
-      const signer = await provider.getSigner()
+      let signer
+      if (isPrivyProvider()) {
+        // For Privy, switch to Base network first using the wallet
+        if (wallets.length > 0) {
+          try {
+            await wallets[0].switchChain(8453) // Base network
+          } catch (error) {
+            console.warn('Failed to switch to Base network:', error)
+            // Continue anyway, the transaction might still work
+          }
+        }
+
+        // Wait for wallets to be ready
+        if (!walletsReady) {
+          throw new Error('Wallets not ready yet')
+        }
+
+        // Find the wallet that matches the user's address
+        const userWallet = wallets.find(
+          (wallet) => wallet.address?.toLowerCase() === userAddress?.toLowerCase()
+        )
+
+        if (userWallet) {
+          console.log(
+            'Using wallet:',
+            userWallet.walletClientType,
+            'with address:',
+            userWallet.address
+          )
+
+          // For external wallets (injected or WalletConnect), use the wallet directly
+          if (
+            userWallet.walletClientType !== 'privy' &&
+            userWallet.walletClientType !== 'embedded'
+          ) {
+            console.log('Using external wallet for transaction')
+            // For external wallets, use window.ethereum if available
+            if (typeof window !== 'undefined' && (window as any).ethereum) {
+              const provider = new ethers.BrowserProvider((window as any).ethereum)
+              signer = await provider.getSigner()
+            } else {
+              // Fallback to Privy's embedded wallet
+              const provider = createPrivyProvider(privy)
+              signer = await provider.getSigner()
+            }
+          } else {
+            console.log('Using Privy embedded wallet for transaction')
+            // Use Privy's embedded wallet
+            const provider = createPrivyProvider(privy)
+            signer = await provider.getSigner()
+          }
+        } else {
+          console.log('No matching wallet found, using Privy embedded wallet')
+          // Fallback to Privy's embedded wallet
+          const provider = createPrivyProvider(privy)
+          signer = await provider.getSigner()
+        }
+      } else {
+        const provider = new ethers.BrowserProvider(walletClient as any)
+        signer = await provider.getSigner()
+        // For WalletConnect, ensure we're on Base network
+        signer = await ensureBaseNetwork(signer)
+      }
 
       // Initialize EAS
       const eas = new EAS(easContractAddress)

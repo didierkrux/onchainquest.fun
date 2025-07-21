@@ -177,6 +177,12 @@ export async function getSlotFromTokenId(tokenId: string, provider: ethers.Provi
 
     console.log('List Storage Location:', listStorageLocation)
 
+    // Check if the result is empty or invalid
+    if (!listStorageLocation || listStorageLocation === '0x' || listStorageLocation.length < 64) {
+      console.warn(`Empty or invalid listStorageLocation for token ID ${tokenId}:`, listStorageLocation)
+      throw new Error(`No list storage location found for token ID ${tokenId}`)
+    }
+
     // Extract the last 32 bytes (64 hex characters) which contain the slot
     const slotHex = listStorageLocation.slice(-64) // last 32 bytes in hex
     const slotBigInt = BigInt('0x' + slotHex)
@@ -199,9 +205,22 @@ export async function getSlotFromTokenId(tokenId: string, provider: ethers.Provi
  */
 export async function getUserPrimaryListSlot(userAddress: string, provider: ethers.Provider): Promise<bigint> {
   try {
-    // First get the primary list ID from the API
+    // First check if the user has a primary list
+    const hasPrimary = await hasPrimaryList(userAddress)
+    if (!hasPrimary) {
+      console.log(`User ${userAddress} does not have a primary list`)
+      throw new Error(`User ${userAddress} does not have a primary list`)
+    }
+
+    // Get the primary list ID from the API
     const primaryListId = await getUserPrimaryList(userAddress)
     console.log(`Primary list ID for ${userAddress}: ${primaryListId}`)
+
+    // Validate the primary list ID
+    if (!primaryListId || primaryListId === '0' || primaryListId === '') {
+      console.log(`Invalid primary list ID for ${userAddress}: ${primaryListId}`)
+      throw new Error(`Invalid primary list ID for user ${userAddress}`)
+    }
 
     // Then convert the list ID to a slot
     const slot = await getSlotFromTokenId(primaryListId, provider)
@@ -616,6 +635,13 @@ export async function unfollowAddressOnEFP(signer: ethers.Signer, targetAddress:
     // Get the user's address
     const userAddress = await baseSigner.getAddress()
 
+    // Check if user has a primary list
+    const hasPrimary = await hasPrimaryList(userAddress)
+    if (!hasPrimary) {
+      console.log(`User ${userAddress} doesn't have a primary list, cannot unfollow`)
+      throw new Error(`User ${userAddress} doesn't have a primary list to unfollow from`)
+    }
+
     // Get the user's primary list slot
     const primaryListSlot = await getUserPrimaryListSlot(userAddress, baseSigner.provider!)
     console.log(`Using primary list slot ${primaryListSlot.toString()} for unfollow operation`)
@@ -652,6 +678,13 @@ export async function isFollowingOnChain(signer: ethers.Signer, targetAddress: s
     // Get the user's address
     const userAddress = await baseSigner.getAddress()
 
+    // Check if user has a primary list
+    const hasPrimary = await hasPrimaryList(userAddress)
+    if (!hasPrimary) {
+      console.log(`User ${userAddress} doesn't have a primary list, cannot check follow status`)
+      return false
+    }
+
     // Get the user's primary list slot
     const primaryListSlot = await getUserPrimaryListSlot(userAddress, baseSigner.provider!)
 
@@ -666,7 +699,6 @@ export async function isFollowingOnChain(signer: ethers.Signer, targetAddress: s
 
     // Check if the target address is in the following list
     // This is a simplified check - in a real implementation you'd need to decode all ops
-    // For now, we'll fall back to the API check
     console.log(`Found ${allOps.length} ListOps for primary list slot ${primaryListSlot.toString()}`)
 
     // For now, return false and let the API handle the check
