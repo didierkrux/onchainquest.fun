@@ -136,6 +136,10 @@ export function createPrivyProvider(privy: any) {
       switch (args.method) {
         case 'eth_accounts':
           return [privy.user.wallet.address]
+        case 'eth_requestAccounts':
+          // eth_requestAccounts is used to request wallet connection
+          // Since we already have a connected wallet, just return the address
+          return [privy.user.wallet.address]
         case 'eth_chainId':
           // Return Base network chain ID (8453) since EFP functions require it
           return '0x2105' // Base network chain ID in hex
@@ -155,18 +159,60 @@ export function createPrivyProvider(privy: any) {
           return hash
         case 'personal_sign':
         case 'eth_sign':
+          console.log('Privy signature request:', args.method, args.params)
           if (!args.params || args.params.length < 2) {
             throw new Error('Message and address required for signing')
           }
-          const message = args.params[0] as string
-          const signature = await privy.signMessage({ message })
+          
+          // personal_sign expects [message, address], eth_sign expects [address, message]
+          let message: string
+          if (args.method === 'personal_sign') {
+            message = args.params[0] as string
+          } else {
+            // eth_sign - message is the second parameter
+            message = args.params[1] as string
+          }
+          
+          console.log('Signing message:', message)
+          console.log('Message type:', typeof message)
+          console.log('Message length:', message?.length)
+          
+          // Ensure message is properly formatted
+          if (!message || typeof message !== 'string') {
+            throw new Error('Invalid message format for signing')
+          }
+          console.log('Privy user state:', {
+            authenticated: privy.authenticated,
+            hasWallet: !!privy.user?.wallet,
+            walletAddress: privy.user?.wallet?.address
+          })
+          const signatureResult = await privy.signMessage({ message })
+          console.log('Signature result:', signatureResult)
+          console.log('Signature type:', typeof signatureResult)
+          
+          // Privy returns an object with a signature property, but we need just the signature string
+          const signature = typeof signatureResult === 'object' && signatureResult?.signature 
+            ? signatureResult.signature 
+            : signatureResult
+          
+          console.log('Extracted signature:', signature)
           return signature
         case 'eth_signTypedData_v4':
+          console.log('Privy typed data signature request:', args.params)
           if (!args.params || args.params.length < 2) {
             throw new Error('Typed data and address required for signing')
           }
           const typedData = args.params[0] as string
-          const typedSignature = await privy.signMessage({ message: typedData })
+          console.log('Signing typed data:', typedData)
+          const typedSignatureResult = await privy.signMessage({ message: typedData })
+          console.log('Typed signature result:', typedSignatureResult)
+          
+          // Privy returns an object with a signature property, but we need just the signature string
+          const typedSignature = typeof typedSignatureResult === 'object' && typedSignatureResult?.signature 
+            ? typedSignatureResult.signature 
+            : typedSignatureResult
+          
+          console.log('Extracted typed signature:', typedSignature)
           return typedSignature
         case 'wallet_switchEthereumChain':
           // Use Privy's native chain switching
@@ -181,6 +227,92 @@ export function createPrivyProvider(privy: any) {
         case 'wallet_addEthereumChain':
           // Privy handles chain addition internally, so we'll just return success
           return null
+        case 'eth_getBalance':
+          // For balance requests, we can use Privy's methods or return 0
+          return '0x0'
+        case 'eth_blockNumber':
+          // Return current block number
+          try {
+            return await makeRpcCall('eth_blockNumber', [])
+          } catch (error) {
+            console.error('Error getting block number:', error)
+            return '0x0'
+          }
+        case 'eth_gasPrice':
+          // Return current gas price
+          try {
+            return await makeRpcCall('eth_gasPrice', [])
+          } catch (error) {
+            console.error('Error getting gas price:', error)
+            return '0x3b9aca00' // 1 gwei in hex
+          }
+        case 'eth_estimateGas':
+          // Estimate gas for a transaction
+          if (!args.params || !args.params[0]) {
+            throw new Error('Transaction parameters required for gas estimation')
+          }
+          try {
+            return await makeRpcCall('eth_estimateGas', [args.params[0]])
+          } catch (error) {
+            console.error('Error estimating gas:', error)
+            return '0x5208' // 21000 gas (basic transfer) in hex
+          }
+        case 'wallet_getCapabilities':
+          // Return wallet capabilities - what the wallet can do
+          return {
+            'eth_accounts': {
+              required: true,
+              optional: false
+            },
+            'eth_sendTransaction': {
+              required: true,
+              optional: false
+            },
+            'personal_sign': {
+              required: true,
+              optional: false
+            },
+            'eth_sign': {
+              required: true,
+              optional: false
+            },
+            'eth_signTypedData_v4': {
+              required: true,
+              optional: false
+            },
+            'wallet_switchEthereumChain': {
+              required: true,
+              optional: false
+            },
+            'wallet_addEthereumChain': {
+              required: true,
+              optional: false
+            },
+            'eth_requestAccounts': {
+              required: true,
+              optional: false
+            },
+            'eth_chainId': {
+              required: true,
+              optional: false
+            },
+            'eth_getBalance': {
+              required: true,
+              optional: false
+            },
+            'eth_blockNumber': {
+              required: true,
+              optional: false
+            },
+            'eth_gasPrice': {
+              required: true,
+              optional: false
+            },
+            'eth_estimateGas': {
+              required: true,
+              optional: false
+            }
+          }
         default:
           // For other RPC methods, we can either implement them or throw a more specific error
           console.warn(`RPC method ${args.method} not fully implemented for Privy`)

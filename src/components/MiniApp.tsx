@@ -208,6 +208,9 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
           provider = {
             request: async (args: { method: string; params: any[] }) => {
               if (!isCurrentFrame) return null
+
+              log('MiniApp provider request:', args.method, args.params)
+
               // Check if this is a transaction request
               if (args.method === 'eth_sendTransaction' || args.method === 'eth_signTransaction') {
                 // If we have a previous rejection error, return it immediately
@@ -225,6 +228,7 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
                 isTransactionInProgressRef.current = true
                 try {
                   const result = await client.request({ ...args, params: args.params || [] })
+                  log('Transaction result:', result)
                   return result
                 } catch (error: any) {
                   // Store the error if it's a user rejection
@@ -239,7 +243,33 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
                   }, 1000)
                 }
               }
-              return client.request({ ...args, params: args.params || [] })
+
+              // Handle signature requests
+              if (
+                args.method === 'personal_sign' ||
+                args.method === 'eth_sign' ||
+                args.method === 'eth_signTypedData_v4'
+              ) {
+                log('Handling signature request:', args.method)
+                try {
+                  const result = await client.request({ ...args, params: args.params || [] })
+                  log('Signature result:', result)
+                  return result
+                } catch (error: any) {
+                  log('Signature error:', error)
+                  throw error
+                }
+              }
+
+              // Handle all other requests
+              try {
+                const result = await client.request({ ...args, params: args.params || [] })
+                log('Other request result:', result)
+                return result
+              } catch (error: any) {
+                log('Other request error:', error)
+                throw error
+              }
             },
             on: (_event: string, _listener: any) => {
               log('Provider event listener added:', _event)
@@ -303,6 +333,7 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
           },
           ethProviderRequestV2: async (request: any) => {
             if (!isCurrentFrame || !provider) {
+              log('Provider not available for request:', request.value.method)
               return {
                 error: {
                   code: -32603,
@@ -311,8 +342,9 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
               }
             }
 
-            log('ETH request:', request.value.method, request.value)
+            log('ETH request received:', request.value.method, request.value)
             if (!request?.value?.method) {
+              log('Invalid request format:', request)
               return {
                 error: {
                   code: -32602,
@@ -322,21 +354,31 @@ export default function MiniApp({ frameUrl = '', onClose }: FarcasterFrameProps)
             }
 
             try {
+              log('Calling provider.request with:', request.value.method, request.value.params)
               const response = await provider.request({
                 method: request.value.method,
                 params: request.value.params || [],
               })
-              log('ETH response:', response)
-              return { result: response }
+              log('Provider request completed, response:', response)
+              log('Response type:', typeof response)
+              log('Response is promise:', response instanceof Promise)
+
+              // Try both formats - the iframe might expect different response structures
+              const result = { result: response }
+              log('Returning result to iframe:', result)
+              log('Result type:', typeof result)
+              return result
             } catch (error: any) {
-              log('ETH error:', error)
-              return {
+              log('Provider request failed:', error)
+              const errorResult = {
                 error: {
                   code: error?.code || -32603,
                   message: error?.message || 'Internal error',
                   data: error?.data,
                 },
               }
+              log('Returning error to iframe:', errorResult)
+              return errorResult
             }
           },
         } as unknown as FrameHost,
