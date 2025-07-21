@@ -5,6 +5,7 @@ import NextHead from 'next/head'
 import { Global, css } from '@emotion/react'
 import { useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { useLocalStorage } from 'usehooks-ts'
 
 import Layout from 'components/Layout'
 import MiniAppSDK from 'components/MiniAppSDK'
@@ -31,6 +32,7 @@ export const appIcon = `${process.env.NEXT_PUBLIC_APP_ICON || `${DOMAIN_URL}/app
 export default function MyApp({ Component, pageProps }: AppProps) {
   const { t } = useTranslation()
   const router = useRouter()
+  const [privyEnabled] = useLocalStorage<boolean>('privy-enabled', false)
 
   const menuIndex = router.pathname ? MENU.findIndex((item) => item.href === router.pathname) : 0
   const label = MENU[menuIndex]?.label || ''
@@ -149,6 +151,10 @@ export default function MyApp({ Component, pageProps }: AppProps) {
                 @font-face {
                   font-family: 'Inter';
                   src: url(/fonts/Inter-Regular.ttf);
+                }
+                [class^='EmailInputForm'],
+                [class*=' EmailInputForm'] {
+                  ${privyEnabled ? '' : 'display: none !important;'}
                 }
               `}
             />
